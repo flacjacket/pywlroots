@@ -5,4 +5,9 @@
 *.o
 *.c
 
+# build output
+build/
+dist/
+pywlroots.egg-info/
+
 *.swp
