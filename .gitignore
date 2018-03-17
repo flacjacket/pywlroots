@@ -1,0 +1,8 @@
+# Python bytecode
+*.pyc
+# cffi output
+*.so
+*.o
+*.c
+
+*.swp
