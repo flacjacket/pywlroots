@@ -30,19 +30,19 @@ struct wlr_renderer *wlr_backend_get_renderer(struct wlr_backend *backend);
 
 # render.h
 CDEF += """
-void wlr_renderer_begin(struct wlr_renderer *r, struct wlr_output *output);
+void wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
 void wlr_renderer_end(struct wlr_renderer *r);
-//void wlr_renderer_clear(struct wlr_renderer *r, const float (*color)[4]);
-void wlr_renderer_clear(struct wlr_renderer *r, float (*color)[4]);
+void wlr_renderer_clear(struct wlr_renderer *r, const float color[static 4]);
+// void wlr_renderer_clear(struct wlr_renderer *r, float (*color)[4]);
 
-bool wlr_render_with_matrix(
-    struct wlr_renderer *r, struct wlr_texture *texture, float (*matrix)[16], float alpha);
+// bool wlr_render_with_matrix(
+//     struct wlr_renderer *r, struct wlr_texture *texture, float (*matrix)[16], float alpha);
 """
 
 # render/matrix.h
-CDEF += """
-void wlr_matrix_project_box(float (*mat)[16], struct wlr_box *box, enum wl_output_transform transform, float rotation, float (*projection)[16]);
-"""
+# CDEF += """
+# void wlr_matrix_project_box(float (*mat)[16], struct wlr_box *box, enum wl_output_transform transform, float rotation, float (*projection)[16]);
+# """
 
 # types/wlr_box.h
 CDEF += """
@@ -120,8 +120,7 @@ CDEF += """
 
 SOURCE = """
 #include <wlr/backend.h>
-#include <wlr/render.h>
-#include <wlr/render/matrix.h>
+#include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_box.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_gamma_control.h>
@@ -139,6 +138,7 @@ ffi_builder.set_source(
     "wlroots._ffi",
     SOURCE,
     libraries=["wlroots"],
+    define_macros=[("WLR_USE_UNSTABLE", None)],
     include_dirs=["/usr/include/pixman-1"],
 )
 ffi_builder.include(pywayland_ffi)

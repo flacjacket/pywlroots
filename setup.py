@@ -4,6 +4,7 @@ import sys
 
 from setuptools import setup
 
+
 pywlroots_version = "0.0.1"
 
 description = "Python binding to the wlroots library using cffi"
@@ -40,10 +41,10 @@ setup(
     author="Sean Vig",
     author_email="sean.v.775@gmail.com",
     url="https://github.com/flacjacket/pywlroots",
-    description=description,
-    classifiers=classifiers,
-    install_requires=dependencies,
-    setup_requires=dependencies,
-    packages=modules,
     cffi_modules=["wlroots/ffi_build.py:ffi_builder"],
+    classifiers=classifiers,
+    description=description,
+    install_requires=dependencies,
+    packages=modules,
+    setup_requires=dependencies,
 )
