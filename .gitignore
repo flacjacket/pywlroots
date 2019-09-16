@@ -5,6 +5,10 @@
 *.o
 *.c
 
+# Test output
+.coverage
+.cache
+.mypy_cache
 # build output
 build/
 dist/
