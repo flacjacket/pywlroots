@@ -24,7 +24,7 @@ struct wlr_backend
     } events;
 };
 
-typedef int32_t EGLint;
+typedef int EGLint;
 typedef unsigned int EGLenum;
 
 typedef struct wlr_renderer *(*wlr_renderer_create_func_t)(struct wlr_egl *egl, EGLenum platform,
@@ -43,10 +43,41 @@ CDEF += """
 void wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
 void wlr_renderer_end(struct wlr_renderer *r);
 void wlr_renderer_clear(struct wlr_renderer *r, const float color[static 4]);
-// void wlr_renderer_clear(struct wlr_renderer *r, float (*color)[4]);
 
-// bool wlr_render_with_matrix(
-//     struct wlr_renderer *r, struct wlr_texture *texture, float (*matrix)[16], float alpha);
+void wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_display);
+"""
+
+# types/wlr_compositor.h
+CDEF += """
+void wlr_compositor_destroy(struct wlr_compositor *wlr_compositor);
+struct wlr_compositor *wlr_compositor_create(struct wl_display *display,
+    struct wlr_renderer *renderer);
+"""
+
+# types/wlr_data_device.h
+CDEF += """
+struct wlr_data_device_manager *wlr_data_device_manager_create(
+    struct wl_display *display);
+void wlr_data_device_manager_destroy(struct wlr_data_device_manager *manager);
+"""
+
+# types/wlr_linux_dmabuf_v1.h
+CDEF += """
+struct wlr_linux_dmabuf_v1 *wlr_linux_dmabuf_v1_create(struct wl_display *display,
+    struct wlr_renderer *renderer);
+void wlr_linux_dmabuf_v1_destroy(struct wlr_linux_dmabuf_v1 *linux_dmabuf);
+"""
+
+# types/wlr_output_layout
+CDEF += """
+struct wlr_output_layout *wlr_output_layout_create(void);
+void wlr_output_layout_destroy(struct wlr_output_layout *layout);
+
+void wlr_output_layout_output_coords(struct wlr_output_layout *layout,
+    struct wlr_output *reference, double *lx, double *ly);
+
+void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
+    struct wlr_output *output);
 """
 
 # version.h
@@ -59,6 +90,10 @@ CDEF += """
 SOURCE = """
 #include <wlr/backend.h>
 #include <wlr/render/wlr_renderer.h>
+#include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_linux_dmabuf_v1.h>
+#include <wlr/types/wlr_output_layout.h>
 #include <wlr/version.h>
 
 struct wl_listener_container {
