@@ -17,7 +17,7 @@ if "_cffi_backend" in sys.builtin_module_names:
 else:
     requires_cffi = "cffi>=1.0.0"
 
-dependencies = ["pywayland", "six", requires_cffi]
+dependencies = ["pywayland", requires_cffi]
 
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
