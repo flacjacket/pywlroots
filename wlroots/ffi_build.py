@@ -47,6 +47,25 @@ void wlr_renderer_clear(struct wlr_renderer *r, const float color[static 4]);
 void wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_display);
 """
 
+# types/wlr_cursor.h
+CDEF += """
+struct wlr_cursor *wlr_cursor_create(void);
+void wlr_cursor_destroy(struct wlr_cursor *cur);
+
+bool wlr_cursor_warp(struct wlr_cursor *cur, struct wlr_input_device *dev,
+    double lx, double ly);
+void wlr_cursor_warp_absolute(struct wlr_cursor *cur,
+    struct wlr_input_device *dev, double x, double y);
+void wlr_cursor_move(struct wlr_cursor *cur, struct wlr_input_device *dev,
+    double delta_x, double delta_y);
+void wlr_cursor_set_surface(struct wlr_cursor *cur, struct wlr_surface *surface,
+    int32_t hotspot_x, int32_t hotspot_y);
+void wlr_cursor_attach_input_device(struct wlr_cursor *cur,
+    struct wlr_input_device *dev);
+void wlr_cursor_attach_output_layout(struct wlr_cursor *cur,
+    struct wlr_output_layout *l);
+"""
+
 # types/wlr_compositor.h
 CDEF += """
 void wlr_compositor_destroy(struct wlr_compositor *wlr_compositor);
@@ -61,6 +80,15 @@ struct wlr_data_device_manager *wlr_data_device_manager_create(
 void wlr_data_device_manager_destroy(struct wlr_data_device_manager *manager);
 """
 
+# types/wlr_keyboard.h
+CDEF += """
+void wlr_keyboard_set_keymap(struct wlr_keyboard *kb,
+    struct xkb_keymap *keymap);
+void wlr_keyboard_set_repeat_info(struct wlr_keyboard *kb, int32_t rate,
+    int32_t delay);
+uint32_t wlr_keyboard_get_modifiers(struct wlr_keyboard *keyboard);
+"""
+
 # types/wlr_linux_dmabuf_v1.h
 CDEF += """
 struct wlr_linux_dmabuf_v1 *wlr_linux_dmabuf_v1_create(struct wl_display *display,
@@ -68,7 +96,31 @@ struct wlr_linux_dmabuf_v1 *wlr_linux_dmabuf_v1_create(struct wl_display *displa
 void wlr_linux_dmabuf_v1_destroy(struct wlr_linux_dmabuf_v1 *linux_dmabuf);
 """
 
-# types/wlr_output_layout
+# types/wlr_matrix.h
+CDEF += """
+void wlr_matrix_project_box(float mat[static 9], const struct wlr_box *box,
+    enum wl_output_transform transform, float rotation,
+    const float projection[static 9]);
+"""
+
+# types/wlr_output.h
+CDEF += """
+bool wlr_output_enable(struct wlr_output *output, bool enable);
+
+bool wlr_output_attach_render(struct wlr_output *output, int *buffer_age);
+void wlr_output_effective_resolution(struct wlr_output *output,
+    int *width, int *height);
+bool wlr_output_commit(struct wlr_output *output);
+bool wlr_output_set_mode(struct wlr_output *output,
+    struct wlr_output_mode *mode);
+enum wl_output_transform wlr_output_transform_invert(
+    enum wl_output_transform tr);
+
+void wlr_output_create_global(struct wlr_output *output);
+void wlr_output_destroy_global(struct wlr_output *output);
+"""
+
+# types/wlr_output_layout.h
 CDEF += """
 struct wlr_output_layout *wlr_output_layout_create(void);
 void wlr_output_layout_destroy(struct wlr_output_layout *layout);
@@ -78,6 +130,55 @@ void wlr_output_layout_output_coords(struct wlr_output_layout *layout,
 
 void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
     struct wlr_output *output);
+"""
+
+# types/wlr_seat.h
+CDEF += """
+struct wlr_seat *wlr_seat_create(struct wl_display *display, const char *name);
+void wlr_seat_destroy(struct wlr_seat *wlr_seat);
+
+void wlr_seat_set_capabilities(struct wlr_seat *wlr_seat,
+    uint32_t capabilities);
+
+void wlr_seat_pointer_clear_focus(struct wlr_seat *wlr_seat);
+void wlr_seat_pointer_notify_enter(struct wlr_seat *wlr_seat,
+    struct wlr_surface *surface, double sx, double sy);
+void wlr_seat_pointer_notify_motion(struct wlr_seat *wlr_seat,
+    uint32_t time_msec, double sx, double sy);
+uint32_t wlr_seat_pointer_notify_button(struct wlr_seat *wlr_seat,
+    uint32_t time_msec, uint32_t button, enum wlr_button_state state);
+void wlr_seat_pointer_notify_axis(struct wlr_seat *wlr_seat, uint32_t time_msec,
+    enum wlr_axis_orientation orientation, double value,
+    int32_t value_discrete, enum wlr_axis_source source);
+
+void wlr_seat_set_keyboard(struct wlr_seat *seat, struct wlr_input_device *dev);
+struct wlr_keyboard *wlr_seat_get_keyboard(struct wlr_seat *seat);
+
+void wlr_seat_keyboard_notify_key(struct wlr_seat *seat, uint32_t time_msec,
+    uint32_t key, uint32_t state);
+void wlr_seat_keyboard_notify_modifiers(struct wlr_seat *seat,
+    struct wlr_keyboard_modifiers *modifiers);
+void wlr_seat_keyboard_notify_enter(struct wlr_seat *seat,
+    struct wlr_surface *surface, uint32_t keycodes[], size_t num_keycodes,
+    struct wlr_keyboard_modifiers *modifiers);
+"""
+
+# types/wlr_xcursor_manager.h
+CDEF += """
+struct wlr_xcursor_manager *wlr_xcursor_manager_create(const char *name,
+    uint32_t size);
+void wlr_xcursor_manager_destroy(struct wlr_xcursor_manager *manager);
+
+int wlr_xcursor_manager_load(struct wlr_xcursor_manager *manager,
+    float scale);
+void wlr_xcursor_manager_set_cursor_image(struct wlr_xcursor_manager *manager,
+    const char *name, struct wlr_cursor *cursor);
+"""
+
+# types/wlr_xdg_shell.h
+CDEF += """
+struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
+void wlr_xdg_shell_destroy(struct wlr_xdg_shell *xdg_shell);
 """
 
 # version.h
@@ -90,10 +191,17 @@ CDEF += """
 SOURCE = """
 #include <wlr/backend.h>
 #include <wlr/render/wlr_renderer.h>
+#include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_linux_dmabuf_v1.h>
+#include <wlr/types/wlr_matrix.h>
+#include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
+#include <wlr/types/wlr_seat.h>
+#include <wlr/types/wlr_xcursor_manager.h>
+#include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/version.h>
 
 struct wl_listener_container {
@@ -108,7 +216,7 @@ ffi_builder.set_source(
     SOURCE,
     libraries=["wlroots"],
     define_macros=[("WLR_USE_UNSTABLE", None)],
-    include_dirs=["/usr/include/pixman-1"],
+    include_dirs=["/usr/include/pixman-1", "include"],
 )
 ffi_builder.include(pywayland_ffi)
 ffi_builder.cdef(CDEF)
