@@ -181,6 +181,23 @@ struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
 void wlr_xdg_shell_destroy(struct wlr_xdg_shell *xdg_shell);
 """
 
+# util/log.h
+CDEF += """
+enum wlr_log_importance {
+    WLR_SILENT,
+    WLR_ERROR,
+    WLR_INFO,
+    WLR_DEBUG,
+    ...
+};
+
+extern "Python" void log_func_callback(enum wlr_log_importance importance, const char *log_str);
+
+typedef void (*wrapped_log_func_t)(enum wlr_log_importance importance, const char *log_str);
+
+void wrapped_log_init(enum wlr_log_importance verbosity, wrapped_log_func_t callback);
+"""
+
 # version.h
 CDEF += """
 #define WLR_VERSION_MAJOR ...
@@ -202,12 +219,37 @@ SOURCE = """
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/util/log.h>
 #include <wlr/version.h>
 
 struct wl_listener_container {
     void *handle;
     struct wl_listener destroy_listener;
 };
+
+typedef void (*wrapped_log_func_t)(enum wlr_log_importance importance, const char *log_str);
+
+wrapped_log_func_t py_callback = NULL;
+
+void wrapped_log_callback(enum wlr_log_importance importance, const char *fmt, va_list args)
+{
+    char formatted_str[4096];
+    vsnprintf(formatted_str, 4096, fmt, args);
+    py_callback(importance, formatted_str);
+}
+
+void wrapped_log_init(enum wlr_log_importance verbosity, wrapped_log_func_t callback)
+{
+    if (callback == NULL)
+    {
+        wlr_log_init(verbosity, NULL);
+    }
+    else
+    {
+        py_callback = callback;
+        wlr_log_init(verbosity, wrapped_log_callback);
+    }
+}
 """
 
 ffi_builder = FFI()
