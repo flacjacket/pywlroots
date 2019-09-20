@@ -38,7 +38,7 @@ void wlr_backend_destroy(struct wlr_backend *backend);
 struct wlr_renderer *wlr_backend_get_renderer(struct wlr_backend *backend);
 """
 
-# render.h
+# render/wlr_renderer.h
 CDEF += """
 void wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
 void wlr_renderer_end(struct wlr_renderer *r);
