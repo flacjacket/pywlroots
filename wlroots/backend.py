@@ -6,6 +6,13 @@ from pywayland.server import Display, Signal
 
 from . import ffi, lib
 from wlroots.util.log import logger
+from wlroots.types.output import Output
+
+
+def _output_wrapper(output_data):
+    """Create the output from the given data"""
+    output_data = ffi.cast("struct wlr_output *", output_data)
+    return Output(output_data)
 
 
 class Backend:
@@ -25,7 +32,9 @@ class Backend:
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
         self.new_input_event = Signal(ptr=ffi.addressof(self._ptr.events.new_input))
-        self.new_output_event = Signal(ptr=ffi.addressof(self._ptr.events.new_output))
+        self.new_output_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.new_output), data_wrapper=_output_wrapper
+        )
 
     def destroy(self) -> None:
         """Destroy the backend and clean up all of its resources
