@@ -1,13 +1,11 @@
 # Copyright (c) 2019 Sean Vig
 
-import logging
 import weakref
 
 from pywayland.server import Display
 
 from wlroots._ffi import ffi, lib
-
-logger = logging.getLogger("wlroots")
+from wlroots.util.log import logger
 
 
 class Backend:

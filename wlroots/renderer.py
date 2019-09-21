@@ -1,13 +1,9 @@
 # Copyright (c) 2019 Sean Vig
 
-import logging
-
 from pywayland.server import Display
 
 from wlroots._ffi import lib
 from wlroots.backend import Backend
-
-logger = logging.getLogger("wlroots")
 
 
 class Renderer:
