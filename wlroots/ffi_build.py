@@ -9,10 +9,6 @@ from pywayland.ffi_build import ffi_builder as pywayland_ffi
 CDEF = """
 struct wlr_backend_impl;
 
-struct wl_signal {
-    struct wl_list listener_list;
-};
-
 struct wlr_backend
 {
     const struct wlr_backend_impl *impl;
@@ -177,6 +173,22 @@ void wlr_xcursor_manager_set_cursor_image(struct wlr_xcursor_manager *manager,
 
 # types/wlr_xdg_shell.h
 CDEF += """
+struct wlr_xdg_shell {
+    struct wl_global *global;
+    struct wl_list clients;
+    struct wl_list popup_grabs;
+    uint32_t ping_timeout;
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal new_surface;
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+};
+
 struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
 void wlr_xdg_shell_destroy(struct wlr_xdg_shell *xdg_shell);
 """

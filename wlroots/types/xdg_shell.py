@@ -1,6 +1,6 @@
 # Copyright (c) Sean Vig 2019
 
-from pywayland.server import Display
+from pywayland.server import Display, Signal
 
 from wlroots import ffi, lib
 
@@ -14,6 +14,9 @@ class XdgShell:
         """
         ptr = lib.wlr_xdg_shell_create(display._ptr)
         self._ptr = ffi.gc(ptr, lib.wlr_xdg_shell_destroy)
+
+        self.new_surface_event = Signal(ptr=ffi.addressof(self._ptr.events.new_surface))
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     def destroy(self) -> None:
         """Destroy the xdg shell"""

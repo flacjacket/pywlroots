@@ -2,7 +2,7 @@
 
 from pywayland.server import Display
 
-from wlroots._ffi import lib
+from . import lib
 from wlroots.backend import Backend
 
 

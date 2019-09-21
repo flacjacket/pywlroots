@@ -2,9 +2,9 @@
 
 import weakref
 
-from pywayland.server import Display
+from pywayland.server import Display, Signal
 
-from wlroots._ffi import ffi, lib
+from . import ffi, lib
 from wlroots.util.log import logger
 
 
@@ -16,8 +16,16 @@ class Backend:
             The Wayland server display to create the backend against.  If this
             display is destroyed, the backend will be automatically cleaned-up.
         """
+        ptr = lib.wlr_backend_autocreate(display._ptr, ffi.NULL)
+        if ptr == ffi.NULL:
+            raise RuntimeError("Failed to create wlroots backend")
+
+        self._ptr = ffi.gc(ptr, lib.wlr_backend_destroy)
         self._weak_display = weakref.ref(display)
-        self._ptr = None
+
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
+        self.new_input_event = Signal(ptr=ffi.addressof(self._ptr.events.new_input))
+        self.new_output_event = Signal(ptr=ffi.addressof(self._ptr.events.new_output))
 
     def destroy(self) -> None:
         """Destroy the backend and clean up all of its resources
@@ -48,15 +56,6 @@ class Backend:
 
     def __enter__(self) -> "Backend":
         """Context manager to create and clean-up the backend"""
-        maybe_display = self._weak_display()
-        if maybe_display is None or maybe_display._ptr is None:
-            raise RuntimeError("Wayland display destroyed")
-
-        ptr = lib.wlr_backend_autocreate(maybe_display._ptr, ffi.NULL)
-        if ptr == ffi.NULL:
-            raise RuntimeError("Failed to create wlroots backend")
-
-        self._ptr = ffi.gc(ptr, lib.wlr_backend_destroy)
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
