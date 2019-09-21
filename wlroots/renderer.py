@@ -4,8 +4,8 @@ import logging
 
 from pywayland.server import Display
 
+from wlroots._ffi import ffi, lib
 from wlroots.backend import Backend
-from ._ffi import ffi, lib
 
 logger = logging.getLogger("wlroots")
 

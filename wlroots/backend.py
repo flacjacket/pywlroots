@@ -5,7 +5,7 @@ import weakref
 
 from pywayland.server import Display
 
-from ._ffi import ffi, lib
+from wlroots._ffi import ffi, lib
 
 logger = logging.getLogger("wlroots")
 
