@@ -101,6 +101,73 @@ void wlr_matrix_project_box(float mat[static 9], const struct wlr_box *box,
 
 # types/wlr_output.h
 CDEF += """
+struct pixman_region32 {
+    ...;
+};
+
+struct wlr_output_state {
+    ...;
+};
+
+struct wlr_output {
+    const struct wlr_output_impl *impl;
+    struct wlr_backend *backend;
+    struct wl_display *display;
+
+    struct wl_global *global;
+    struct wl_list resources;
+
+    char name[24];
+    char make[56];
+    char model[16];
+    char serial[16];
+    int32_t phys_width, phys_height; // mm
+
+    // Note: some backends may have zero modes
+    struct wl_list modes; // wlr_output_mode::link
+    struct wlr_output_mode *current_mode;
+    int32_t width, height;
+    int32_t refresh; // mHz, may be zero
+
+    bool enabled;
+    float scale;
+    enum wl_output_subpixel subpixel;
+    enum wl_output_transform transform;
+
+    bool needs_frame;
+    struct pixman_region32 damage;
+    bool frame_pending;
+    float transform_matrix[9];
+
+    struct wlr_output_state pending;
+
+    struct {
+        struct wl_signal frame;
+        struct wl_signal needs_frame;
+        struct wl_signal precommit;
+        struct wl_signal commit;
+        struct wl_signal present;
+        struct wl_signal enable;
+        struct wl_signal mode;
+        struct wl_signal scale;
+        struct wl_signal transform;
+        struct wl_signal destroy;
+    } events;
+
+    struct wl_event_source *idle_frame;
+    struct wl_event_source *idle_done;
+
+    int attach_render_locks; // number of locks forcing rendering
+
+    struct wl_list cursors; // wlr_output_cursor::link
+    struct wlr_output_cursor *hardware_cursor;
+    int software_cursor_locks;
+
+    struct wl_listener display_destroy;
+
+    void *data;
+};
+
 bool wlr_output_enable(struct wlr_output *output, bool enable);
 
 bool wlr_output_attach_render(struct wlr_output *output, int *buffer_age);
