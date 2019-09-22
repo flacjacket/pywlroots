@@ -176,6 +176,10 @@ void wlr_output_effective_resolution(struct wlr_output *output,
 bool wlr_output_commit(struct wlr_output *output);
 bool wlr_output_set_mode(struct wlr_output *output,
     struct wlr_output_mode *mode);
+
+void wlr_output_render_software_cursors(struct wlr_output *output,
+    struct pixman_region32 *damage);
+
 enum wl_output_transform wlr_output_transform_invert(
     enum wl_output_transform tr);
 
