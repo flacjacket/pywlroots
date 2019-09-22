@@ -201,6 +201,73 @@ void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
 
 # types/wlr_seat.h
 CDEF += """
+struct timespec { ...; };
+
+struct wlr_seat_pointer_state { ...; };
+struct wlr_seat_keyboard_state { ...; };
+struct wlr_seat_touch_state { ...; };
+
+struct wlr_seat {
+    struct wl_global *global;
+    struct wl_display *display;
+    struct wl_list clients;
+
+    char *name;
+    uint32_t capabilities;
+    struct timespec last_event;
+
+    struct wlr_data_source *selection_source;
+    uint32_t selection_serial;
+    struct wl_list selection_offers; // wlr_data_offer::link
+
+    struct wlr_primary_selection_source *primary_selection_source;
+    uint32_t primary_selection_serial;
+
+    // `drag` goes away before `drag_source`, when the implicit grab ends
+    struct wlr_drag *drag;
+    struct wlr_data_source *drag_source;
+    uint32_t drag_serial;
+    struct wl_list drag_offers; // wlr_data_offer::link
+
+    struct wlr_seat_pointer_state pointer_state;
+    struct wlr_seat_keyboard_state keyboard_state;
+    struct wlr_seat_touch_state touch_state;
+
+    struct wl_listener display_destroy;
+    struct wl_listener selection_source_destroy;
+    struct wl_listener primary_selection_source_destroy;
+    struct wl_listener drag_source_destroy;
+
+    struct {
+        struct wl_signal pointer_grab_begin;
+        struct wl_signal pointer_grab_end;
+
+        struct wl_signal keyboard_grab_begin;
+        struct wl_signal keyboard_grab_end;
+
+        struct wl_signal touch_grab_begin;
+        struct wl_signal touch_grab_end;
+
+        // wlr_seat_pointer_request_set_cursor_event
+        struct wl_signal request_set_cursor;
+
+        // wlr_seat_request_set_selection_event
+        struct wl_signal request_set_selection;
+        struct wl_signal set_selection;
+        // wlr_seat_request_set_primary_selection_event
+        struct wl_signal request_set_primary_selection;
+        struct wl_signal set_primary_selection;
+
+        // wlr_seat_request_start_drag_event
+        struct wl_signal request_start_drag;
+        struct wl_signal start_drag; // wlr_drag
+
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+};
+
 struct wlr_seat *wlr_seat_create(struct wl_display *display, const char *name);
 void wlr_seat_destroy(struct wlr_seat *wlr_seat);
 
