@@ -1,5 +1,7 @@
 # Copyright (c) Sean Vig 2019
 
+from typing import Optional
+
 from pywayland.server import Signal
 
 from wlroots import ffi, lib
@@ -62,6 +64,23 @@ class Cursor:
             ))
 
         lib.wlr_cursor_attach_input_device(self._ptr, input_device._ptr)
+
+    def warp_absolute(self, input_device: Optional[InputDevice], x: float, y: float) -> None:
+        """Warp the cursor to the given x and y in absolute coordinates
+
+        If the given point is out of the layout boundaries or constraints, the
+        closest point will be used. If one coordinate is NAN, it will be
+        ignored.
+
+        The `input_device` may be passed to respect device mapping constraints.
+        If `input_device` is None, device mapping constraints will be ignored.
+        """
+        if input_device is None:
+            input_device_ptr = ffi.NULL
+        else:
+            input_device_ptr = input_device._ptr
+
+        lib.wlr_cursor_warp_absolute(self._ptr, input_device_ptr, x, y)
 
     def __enter__(self) -> "Cursor":
         """Context manager to clean up the cursor"""
