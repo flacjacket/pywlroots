@@ -1,6 +1,7 @@
 # Copyright (c) 2019 Sean Vig
 
 from pywayland.server import Display, Signal
+from pywayland.protocol.wayland import WlSeat
 
 from wlroots import ffi, lib
 
@@ -24,6 +25,16 @@ class Seat:
         if self._ptr is not None:
             ffi.release(self._ptr)
             self._ptr = None
+
+    def set_capabilities(self, capabilities: WlSeat.capability) -> None:
+        """Updates the capabilities available on this seat
+
+        Will automatically send them to all clients.
+
+        :param capabilities:
+            The Wayland seat capabilities to set on the seat.
+        """
+        lib.wlr_seat_set_capabilities(self._ptr, capabilities)
 
     def __enter__(self) -> "Seat":
         """Context manager to clean up the seat"""
