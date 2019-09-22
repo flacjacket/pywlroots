@@ -6,8 +6,8 @@ from pywayland.server import Display, Signal
 
 from . import ffi, lib
 from wlroots.util.log import logger
-from wlroots.types.input_device import InputDevice
-from wlroots.types.output import Output
+from wlroots.wlr_types.input_device import InputDevice
+from wlroots.wlr_types.output import Output
 
 
 def _input_wrapper(input_data):
