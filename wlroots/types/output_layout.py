@@ -2,6 +2,8 @@
 
 from wlroots import ffi, lib
 
+from .output import Output
+
 
 class OutputLayout:
     def __init__(self) -> None:
@@ -14,11 +16,25 @@ class OutputLayout:
         ptr = lib.wlr_output_layout_create()
         self._ptr = ffi.gc(ptr, lib.wlr_output_layout_destroy)
 
-    def destroy(self):
+    def destroy(self) -> None:
         """Destroy the current output layout"""
         if self._ptr is not None:
             ffi.release(self._ptr)
             self._ptr = None
+
+    def add_auto(self, output: Output) -> None:
+        """Add an auto configured output to the layout
+
+        This will place the output in a sensible location in the layout. The
+        coordinates of the output in the layout may adjust dynamically when the
+        layout changes. If the output is already in the layout, it will become
+        auto configured. If the position of the output is set such as with
+        `wlr_output_layout_move()`, the output will become manually configured.
+
+        :param output:
+            The output to configure the layout against.
+        """
+        lib.wlr_output_layout_add_auto(self._ptr, output._ptr)
 
     def __enter__(self) -> "OutputLayout":
         """Use the output layout in a context manager"""
