@@ -6,7 +6,14 @@ from pywayland.server import Display, Signal
 
 from . import ffi, lib
 from wlroots.util.log import logger
+from wlroots.types.input_device import InputDevice
 from wlroots.types.output import Output
+
+
+def _input_wrapper(input_data):
+    """Create an input device from the given data"""
+    input_data = ffi.cast("struct wlr_input_device *", input_data)
+    return InputDevice(input_data)
 
 
 def _output_wrapper(output_data):
@@ -31,7 +38,9 @@ class Backend:
         self._weak_display = weakref.ref(display)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-        self.new_input_event = Signal(ptr=ffi.addressof(self._ptr.events.new_input))
+        self.new_input_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.new_input), data_wrapper=_input_wrapper
+        )
         self.new_output_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_output), data_wrapper=_output_wrapper
         )

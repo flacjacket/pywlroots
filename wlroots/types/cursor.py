@@ -4,6 +4,7 @@ from pywayland.server import Signal
 
 from wlroots import ffi, lib
 from .output_layout import OutputLayout
+from .input_device import InputDevice, InputDeviceType
 
 
 class Cursor:
@@ -33,6 +34,25 @@ class Cursor:
         if self._ptr is not None:
             ffi.release(self._ptr)
             self._ptr = None
+
+    def attach_input_device(self, input_device: InputDevice) -> None:
+        """Attaches this input device to this cursor
+
+        The input device type must be one of:
+            - InputDeviceType.POINTER
+            - InputDeviceType.TOUCH
+            - InputDeviceType.TABLET_TOOL
+
+        :param input_device:
+            The input device to attach to the cursor
+        """
+        allowed_device_types = (InputDeviceType.POINTER, InputDeviceType.TOUCH, InputDeviceType.TABLET_TOOL)
+        if input_device.device_type not in allowed_device_types:
+            raise ValueError("Input device must be one of pointer, touch, or tablet tool, got: {}".format(
+                input_device.device_type
+            ))
+
+        lib.wlr_cursor_attach_input_device(self._ptr, input_device._ptr)
 
     def __enter__(self) -> "Cursor":
         """Context manager to clean up the cursor"""

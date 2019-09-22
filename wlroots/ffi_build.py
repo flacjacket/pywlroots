@@ -76,6 +76,47 @@ struct wlr_data_device_manager *wlr_data_device_manager_create(
 void wlr_data_device_manager_destroy(struct wlr_data_device_manager *manager);
 """
 
+# types/wlr_input_device.h
+CDEF += """
+enum wlr_input_device_type {
+    WLR_INPUT_DEVICE_KEYBOARD,
+    WLR_INPUT_DEVICE_POINTER,
+    WLR_INPUT_DEVICE_TOUCH,
+    WLR_INPUT_DEVICE_TABLET_TOOL,
+    WLR_INPUT_DEVICE_TABLET_PAD,
+    WLR_INPUT_DEVICE_SWITCH,
+};
+
+struct wlr_input_device {
+    const struct wlr_input_device_impl *impl;
+
+    enum wlr_input_device_type type;
+    unsigned int vendor, product;
+    char *name;
+    double width_mm, height_mm;
+    char *output_name;
+
+    /* wlr_input_device.type determines which of these is valid */
+    union {
+        void *_device;
+        struct wlr_keyboard *keyboard;
+        struct wlr_pointer *pointer;
+        struct wlr_switch *switch_device;
+        struct wlr_touch *touch;
+        struct wlr_tablet *tablet;
+        struct wlr_tablet_pad *tablet_pad;
+    };
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+
+    struct wl_list link;
+};
+"""
+
 # types/wlr_keyboard.h
 CDEF += """
 void wlr_keyboard_set_keymap(struct wlr_keyboard *kb,
