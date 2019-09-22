@@ -36,6 +36,15 @@ class Seat:
         """
         lib.wlr_seat_set_capabilities(self._ptr, capabilities)
 
+    def pointer_notify_frame(self) -> None:
+        """Notify the seat of a frame event
+
+        Frame events are sent to end a group of events that logically belong
+        together. Motion, button and axis events should all be followed by a
+        frame event.
+        """
+        lib.wlr_seat_pointer_notify_frame(self._ptr)
+
     def __enter__(self) -> "Seat":
         """Context manager to clean up the seat"""
         return self

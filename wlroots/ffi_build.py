@@ -369,6 +369,7 @@ uint32_t wlr_seat_pointer_notify_button(struct wlr_seat *wlr_seat,
 void wlr_seat_pointer_notify_axis(struct wlr_seat *wlr_seat, uint32_t time_msec,
     enum wlr_axis_orientation orientation, double value,
     int32_t value_discrete, enum wlr_axis_source source);
+void wlr_seat_pointer_notify_frame(struct wlr_seat *wlr_seat);
 
 void wlr_seat_set_keyboard(struct wlr_seat *seat, struct wlr_input_device *dev);
 struct wlr_keyboard *wlr_seat_get_keyboard(struct wlr_seat *seat);
