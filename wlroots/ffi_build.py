@@ -232,6 +232,37 @@ void wlr_seat_keyboard_notify_enter(struct wlr_seat *seat,
 
 # types/wlr_xcursor_manager.h
 CDEF += """
+struct wlr_cursor {
+    struct wlr_cursor_state *state;
+    double x, y;
+
+    struct {
+        struct wl_signal motion;
+        struct wl_signal motion_absolute;
+        struct wl_signal button;
+        struct wl_signal axis;
+        struct wl_signal frame;
+        struct wl_signal swipe_begin;
+        struct wl_signal swipe_update;
+        struct wl_signal swipe_end;
+        struct wl_signal pinch_begin;
+        struct wl_signal pinch_update;
+        struct wl_signal pinch_end;
+
+        struct wl_signal touch_up;
+        struct wl_signal touch_down;
+        struct wl_signal touch_motion;
+        struct wl_signal touch_cancel;
+
+        struct wl_signal tablet_tool_axis;
+        struct wl_signal tablet_tool_proximity;
+        struct wl_signal tablet_tool_tip;
+        struct wl_signal tablet_tool_button;
+    } events;
+
+    void *data;
+};
+
 struct wlr_xcursor_manager *wlr_xcursor_manager_create(const char *name,
     uint32_t size);
 void wlr_xcursor_manager_destroy(struct wlr_xcursor_manager *manager);

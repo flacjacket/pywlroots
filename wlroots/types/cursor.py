@@ -1,5 +1,7 @@
 # Copyright (c) Sean Vig 2019
 
+from pywayland.server import Signal
+
 from wlroots import ffi, lib
 from .output_layout import OutputLayout
 
@@ -19,6 +21,12 @@ class Cursor:
         ptr = lib.wlr_cursor_create()
         self._ptr = ffi.gc(ptr, lib.wlr_cursor_destroy)
         lib.wlr_cursor_attach_output_layout(self._ptr, output_layout._ptr)
+
+        self.motion_event = Signal(ptr=ffi.addressof(self._ptr.events.motion))
+        self.motion_absolute_event = Signal(ptr=ffi.addressof(self._ptr.events.motion_absolute))
+        self.button_event = Signal(ptr=ffi.addressof(self._ptr.events.button))
+        self.axis_event = Signal(ptr=ffi.addressof(self._ptr.events.axis))
+        self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
 
     def destroy(self) -> None:
         """Clean up the cursor"""
