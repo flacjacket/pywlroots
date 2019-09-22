@@ -240,6 +240,50 @@ void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
     struct wlr_output *output);
 """
 
+# types/wlr_pointer.h
+CDEF += """
+struct wlr_event_pointer_motion {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    double delta_x, delta_y;
+    double unaccel_dx, unaccel_dy;
+};
+
+struct wlr_event_pointer_motion_absolute {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    double x, y;
+};
+
+struct wlr_event_pointer_button {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    uint32_t button;
+    enum wlr_button_state state;
+};
+
+enum wlr_axis_source {
+    WLR_AXIS_SOURCE_WHEEL,
+    WLR_AXIS_SOURCE_FINGER,
+    WLR_AXIS_SOURCE_CONTINUOUS,
+    WLR_AXIS_SOURCE_WHEEL_TILT,
+};
+
+enum wlr_axis_orientation {
+    WLR_AXIS_ORIENTATION_VERTICAL,
+    WLR_AXIS_ORIENTATION_HORIZONTAL,
+};
+
+struct wlr_event_pointer_axis {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    enum wlr_axis_source source;
+    enum wlr_axis_orientation orientation;
+    double delta;
+    int32_t delta_discrete;
+};
+"""
+
 # types/wlr_seat.h
 CDEF += """
 struct timespec { ...; };
