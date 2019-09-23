@@ -10,18 +10,6 @@ from wlroots.wlr_types.input_device import InputDevice
 from wlroots.wlr_types.output import Output
 
 
-def _input_wrapper(input_data):
-    """Create an input device from the given data"""
-    input_data = ffi.cast("struct wlr_input_device *", input_data)
-    return InputDevice(input_data)
-
-
-def _output_wrapper(output_data):
-    """Create the output from the given data"""
-    output_data = ffi.cast("struct wlr_output *", output_data)
-    return Output(output_data)
-
-
 class Backend:
     def __init__(self, display: Display) -> None:
         """Create a backend to interact with a Wayland display
@@ -39,10 +27,10 @@ class Backend:
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
         self.new_input_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.new_input), data_wrapper=_input_wrapper
+            ptr=ffi.addressof(self._ptr.events.new_input), data_wrapper=InputDevice
         )
         self.new_output_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.new_output), data_wrapper=_output_wrapper
+            ptr=ffi.addressof(self._ptr.events.new_output), data_wrapper=Output
         )
 
     def destroy(self) -> None:

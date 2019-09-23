@@ -2,7 +2,7 @@
 
 import enum
 
-from wlroots import lib
+from wlroots import ffi, lib
 
 
 @enum.unique
@@ -22,7 +22,7 @@ class InputDevice:
         :param ptr:
             The wlr_input_device for the given input device
         """
-        self._ptr = ptr
+        self._ptr = ffi.cast("struct wlr_input_device *", ptr)
 
     @property
     def device_type(self) -> InputDeviceType:

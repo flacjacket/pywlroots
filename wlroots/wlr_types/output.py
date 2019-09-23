@@ -25,7 +25,7 @@ class Output:
         :param ptr:
             The wlr_output cdata pointer
         """
-        self._ptr = ptr
+        self._ptr = ffi.cast("struct wlr_output *", ptr)
 
         self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
 
