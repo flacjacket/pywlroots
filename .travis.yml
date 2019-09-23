@@ -31,9 +31,9 @@ addons:
     - libxcb-composite0-dev
     - libxcb-icccm4-dev
     - libxcb-image0-dev
-    - libxcb-render0-dev
     - libxcb-xfixes0-dev
     - libxcb-xinput-dev
+    - libxcb-render0-dev
     - libxkbcommon-dev
     - ninja-build
 
