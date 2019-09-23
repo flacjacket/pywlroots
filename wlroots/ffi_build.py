@@ -428,6 +428,55 @@ void wlr_xcursor_manager_set_cursor_image(struct wlr_xcursor_manager *manager,
 
 # types/wlr_xdg_shell.h
 CDEF += """
+enum wlr_xdg_surface_role {
+    WLR_XDG_SURFACE_ROLE_NONE,
+    WLR_XDG_SURFACE_ROLE_TOPLEVEL,
+    WLR_XDG_SURFACE_ROLE_POPUP,
+};
+
+struct wlr_box { ...; };
+
+struct wlr_xdg_surface {
+    struct wlr_xdg_client *client;
+    struct wl_resource *resource;
+    struct wlr_surface *surface;
+    struct wl_list link; // wlr_xdg_client::surfaces
+    enum wlr_xdg_surface_role role;
+
+    union {
+        struct wlr_xdg_toplevel *toplevel;
+        struct wlr_xdg_popup *popup;
+    };
+
+    struct wl_list popups; // wlr_xdg_popup::link
+
+    bool added, configured, mapped;
+    uint32_t configure_serial;
+    struct wl_event_source *configure_idle;
+    uint32_t configure_next_serial;
+    struct wl_list configure_list;
+
+    bool has_next_geometry;
+    struct wlr_box next_geometry;
+    struct wlr_box geometry;
+
+    struct wl_listener surface_destroy;
+    struct wl_listener surface_commit;
+
+    struct {
+        struct wl_signal destroy;
+        struct wl_signal ping_timeout;
+        struct wl_signal new_popup;
+        struct wl_signal map;
+        struct wl_signal unmap;
+
+        struct wl_signal configure; // wlr_xdg_surface_configure
+        struct wl_signal ack_configure; // wlr_xdg_surface_configure
+    } events;
+
+    void *data;
+};
+
 struct wlr_xdg_shell {
     struct wl_global *global;
     struct wl_list clients;
