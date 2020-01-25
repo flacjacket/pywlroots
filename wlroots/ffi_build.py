@@ -64,7 +64,6 @@ void wlr_cursor_attach_output_layout(struct wlr_cursor *cur,
 
 # types/wlr_compositor.h
 CDEF += """
-void wlr_compositor_destroy(struct wlr_compositor *wlr_compositor);
 struct wlr_compositor *wlr_compositor_create(struct wl_display *display,
     struct wlr_renderer *renderer);
 """
@@ -73,7 +72,6 @@ struct wlr_compositor *wlr_compositor_create(struct wl_display *display,
 CDEF += """
 struct wlr_data_device_manager *wlr_data_device_manager_create(
     struct wl_display *display);
-void wlr_data_device_manager_destroy(struct wlr_data_device_manager *manager);
 """
 
 # types/wlr_input_device.h
@@ -130,7 +128,6 @@ uint32_t wlr_keyboard_get_modifiers(struct wlr_keyboard *keyboard);
 CDEF += """
 struct wlr_linux_dmabuf_v1 *wlr_linux_dmabuf_v1_create(struct wl_display *display,
     struct wlr_renderer *renderer);
-void wlr_linux_dmabuf_v1_destroy(struct wlr_linux_dmabuf_v1 *linux_dmabuf);
 """
 
 # types/wlr_matrix.h
@@ -209,13 +206,13 @@ struct wlr_output {
     void *data;
 };
 
-bool wlr_output_enable(struct wlr_output *output, bool enable);
+void wlr_output_enable(struct wlr_output *output, bool enable);
 
 bool wlr_output_attach_render(struct wlr_output *output, int *buffer_age);
 void wlr_output_effective_resolution(struct wlr_output *output,
     int *width, int *height);
 bool wlr_output_commit(struct wlr_output *output);
-bool wlr_output_set_mode(struct wlr_output *output,
+void wlr_output_set_mode(struct wlr_output *output,
     struct wlr_output_mode *mode);
 
 void wlr_output_render_software_cursors(struct wlr_output *output,
@@ -494,7 +491,6 @@ struct wlr_xdg_shell {
 };
 
 struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
-void wlr_xdg_shell_destroy(struct wlr_xdg_shell *xdg_shell);
 """
 
 # util/log.h
