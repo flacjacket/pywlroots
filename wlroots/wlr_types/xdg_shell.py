@@ -20,27 +20,12 @@ class XdgShell:
         :param display:
             The Wayland server display to create the shell on.
         """
-        ptr = lib.wlr_xdg_shell_create(display._ptr)
-        self._ptr = ffi.gc(ptr, lib.wlr_xdg_shell_destroy)
+        self._ptr = lib.wlr_xdg_shell_create(display._ptr)
 
         self.new_surface_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_surface), data_wrapper=XdgSurface
         )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-
-    def destroy(self) -> None:
-        """Destroy the xdg shell"""
-        if self._ptr is not None:
-            ffi.release(self._ptr)
-            self._ptr = None
-
-    def __enter__(self) -> "XdgShell":
-        """Setup the xdg shell in a context manager"""
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
-        """Clean up the xdg shell on context manager exit"""
-        self.destroy()
 
 
 class XdgSurface:
