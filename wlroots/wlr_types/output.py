@@ -28,6 +28,21 @@ class Output:
         self._ptr = ffi.cast("struct wlr_output *", ptr)
 
         self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
+        self.needs_frame_event = Signal(ptr=ffi.addressof(self._ptr.events.needs_frame))
+        self.precommit_event = Signal(ptr=ffi.addressof(self._ptr.events.precommit))
+        self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
+        self.present_event = Signal(ptr=ffi.addressof(self._ptr.events.present))
+        self.enable_event = Signal(ptr=ffi.addressof(self._ptr.events.enable))
+        self.mode_event = Signal(ptr=ffi.addressof(self._ptr.events.mode))
+        self.scale_event = Signal(ptr=ffi.addressof(self._ptr.events.scale))
+        self.transform_event = Signal(ptr=ffi.addressof(self._ptr.events.transform))
+        self.description_event = Signal(ptr=ffi.addressof(self._ptr.events.description))
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
+
+    @property
+    def name(self) -> str:
+        """The name of the output"""
+        return ffi.string(self._ptr.name).decode()
 
     def create_global(self) -> None:
         """Create the global corresponding to the output"""

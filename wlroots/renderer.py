@@ -24,7 +24,7 @@ class Renderer:
         """Begin rendering with the given height and width"""
         lib.wlr_renderer_begin(self._ptr, width, height)
 
-    def clear(self, color):
+    def clear(self, color) -> None:
         """Clear the renderer to the given RGBA color"""
         color_ptr = ffi.new("float[4]", color)
         lib.wlr_renderer_clear(self._ptr, color_ptr)
