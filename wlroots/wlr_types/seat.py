@@ -18,7 +18,9 @@ class Seat:
         ptr = lib.wlr_seat_create(display._ptr, name.encode())
         self._ptr = ffi.gc(ptr, lib.wlr_seat_destroy)
 
-        self.request_set_cursor_event = Signal(ptr=ffi.addressof(self._ptr.events.request_set_cursor))
+        self.request_set_cursor_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_set_cursor)
+        )
 
     def destroy(self) -> None:
         """Clean up the seat"""

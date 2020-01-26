@@ -45,7 +45,9 @@ class Backend:
             if maybe_display is not None and maybe_display._ptr is not None:
                 ffi.release(self._ptr)
             else:
-                logger.warning("The display has already been cleaned up, clearing backend without destroying")
+                logger.warning(
+                    "The display has already been cleaned up, clearing backend without destroying"
+                )
                 self._ptr = ffi.gc(self._ptr, None)
 
             self._ptr = None

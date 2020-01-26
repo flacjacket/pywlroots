@@ -43,15 +43,9 @@ class XdgSurface:
         """
         self._ptr = ffi.cast("struct wlr_xdg_surface *", ptr)
 
-        self.map_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.map)
-        )
-        self.unmap_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.unmap)
-        )
-        self.destroy_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.destroy)
-        )
+        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
+        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
     def role(self) -> XdgSurfaceRole:

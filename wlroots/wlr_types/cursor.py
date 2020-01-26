@@ -7,7 +7,12 @@ from pywayland.server import Signal
 from wlroots import ffi, lib
 from .output_layout import OutputLayout
 from .input_device import InputDevice, InputDeviceType
-from .pointer import PointerEventAxis, PointerEventButton, PointerEventMotion, PointerEventMotionAbsolute
+from .pointer import (
+    PointerEventAxis,
+    PointerEventButton,
+    PointerEventMotion,
+    PointerEventMotionAbsolute,
+)
 
 
 class Cursor:
@@ -30,7 +35,8 @@ class Cursor:
             ptr=ffi.addressof(self._ptr.events.motion), data_wrapper=PointerEventMotion
         )
         self.motion_absolute_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.motion_absolute), data_wrapper=PointerEventMotionAbsolute
+            ptr=ffi.addressof(self._ptr.events.motion_absolute),
+            data_wrapper=PointerEventMotionAbsolute,
         )
         self.button_event = Signal(
             ptr=ffi.addressof(self._ptr.events.button), data_wrapper=PointerEventButton
@@ -57,15 +63,23 @@ class Cursor:
         :param input_device:
             The input device to attach to the cursor
         """
-        allowed_device_types = (InputDeviceType.POINTER, InputDeviceType.TOUCH, InputDeviceType.TABLET_TOOL)
+        allowed_device_types = (
+            InputDeviceType.POINTER,
+            InputDeviceType.TOUCH,
+            InputDeviceType.TABLET_TOOL,
+        )
         if input_device.device_type not in allowed_device_types:
-            raise ValueError("Input device must be one of pointer, touch, or tablet tool, got: {}".format(
-                input_device.device_type
-            ))
+            raise ValueError(
+                "Input device must be one of pointer, touch, or tablet tool, got: {}".format(
+                    input_device.device_type
+                )
+            )
 
         lib.wlr_cursor_attach_input_device(self._ptr, input_device._ptr)
 
-    def warp_absolute(self, input_device: Optional[InputDevice], x: float, y: float) -> None:
+    def warp_absolute(
+        self, input_device: Optional[InputDevice], x: float, y: float
+    ) -> None:
         """Warp the cursor to the given x and y in absolute coordinates
 
         If the given point is out of the layout boundaries or constraints, the
