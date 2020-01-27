@@ -2,7 +2,7 @@
 
 from pywayland.server import Display
 
-from wlroots import ffi, lib
+from wlroots import lib
 
 
 class DataDeviceManager:
@@ -12,4 +12,4 @@ class DataDeviceManager:
         :param display:
             The display to handle the clipboard for
         """
-        ptr = lib.wlr_data_device_manager_create(display._ptr)
+        self._ptr = lib.wlr_data_device_manager_create(display._ptr)

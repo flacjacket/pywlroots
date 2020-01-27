@@ -3,10 +3,10 @@
 from pywayland.server import Display
 from typing import TYPE_CHECKING
 
-from wlroots import ffi, lib
+from wlroots import lib
 
 if TYPE_CHECKING:
-    from wlroots.renderer import Renderer
+    from wlroots.renderer import Renderer  # noqa: F401
 
 
 class Compositor:
