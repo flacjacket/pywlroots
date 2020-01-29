@@ -1,8 +1,12 @@
 # Copyright (c) Sean Vig 2019
 
 import enum
+import weakref
 
+from .keyboard import Keyboard
 from wlroots import ffi, lib
+
+_weakkeydict = weakref.WeakKeyDictionary()
 
 
 @enum.unique
@@ -28,3 +32,18 @@ class InputDevice:
     def device_type(self) -> InputDeviceType:
         """The device type associated with the current device"""
         return InputDeviceType(self._ptr.type)
+
+    @property
+    def keyboard(self) -> Keyboard:
+        """Return the keyboard type associated with the input device
+
+        The device must be a keyboard, otherwise this throws a ValueError.
+        """
+        if self.device_type != InputDeviceType.KEYBOARD:
+            raise ValueError(f"Expected keyborad input device type, got: {self.device_type}")
+
+        keyboard = Keyboard(self._ptr.keyboard)
+
+        _weakkeydict[keyboard] = self._ptr
+
+        return keyboard
