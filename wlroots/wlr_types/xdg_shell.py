@@ -1,10 +1,13 @@
 # Copyright (c) Sean Vig 2019
 
 import enum
+import weakref
 
 from pywayland.server import Display, Signal
 
 from wlroots import ffi, lib
+
+_weakkeydict = weakref.WeakKeyDictionary()
 
 
 class XdgSurfaceRole(enum.IntEnum):
@@ -51,3 +54,40 @@ class XdgSurface:
     def role(self) -> XdgSurfaceRole:
         """The role for the surface"""
         return XdgSurfaceRole(self._ptr.role)
+
+    @property
+    def toplevel(self) -> "XdgTopLevel":
+        """Return the top level xdg object
+
+        This shell must be a top level role
+        """
+        if self.role != XdgSurfaceRole.TOPLEVEL:
+            raise ValueError(f"xdg surface must be top-level, got: {self.role}")
+
+        toplevel = XdgTopLevel(self._ptr.toplevel)
+
+        # the toplevel does not own the ptr data, ensure the underlying cdata
+        # is kept alive
+        _weakkeydict[toplevel] = self._ptr
+
+        return toplevel
+
+
+class XdgTopLevel:
+    def __init__(self, ptr) -> None:
+        """A top level surface object
+
+        :param ptr:
+            The wlr_xdg_toplevel cdata pointer
+        """
+        self._ptr = ptr
+
+        self.request_maximize_event = Signal(ptr=ffi.addressof(self._ptr.events.request_maximize))
+        self.request_fullscreen_event = Signal(ptr=ffi.addressof(self._ptr.events.request_fullscreen))
+        self.request_minimize_event = Signal(ptr=ffi.addressof(self._ptr.events.request_minimize))
+        self.request_move_event = Signal(ptr=ffi.addressof(self._ptr.events.request_move))
+        self.request_resize_event = Signal(ptr=ffi.addressof(self._ptr.events.request_resize))
+        self.request_show_window_menu_event = Signal(ptr=ffi.addressof(self._ptr.events.request_show_window_menu))
+        self.set_parent_event = Signal(ptr=ffi.addressof(self._ptr.events.set_parent))
+        self.set_title_event = Signal(ptr=ffi.addressof(self._ptr.events.set_title))
+        self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
