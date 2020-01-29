@@ -3,6 +3,7 @@
 from cffi import FFI
 
 from pywayland.ffi_build import ffi_builder as pywayland_ffi
+from xkbcommon.ffi_build import ffibuilder as xkb_ffi
 
 
 # backend.h
@@ -122,6 +123,48 @@ void wlr_keyboard_set_keymap(struct wlr_keyboard *kb,
 void wlr_keyboard_set_repeat_info(struct wlr_keyboard *kb, int32_t rate,
     int32_t delay);
 uint32_t wlr_keyboard_get_modifiers(struct wlr_keyboard *keyboard);
+
+struct wlr_keyboard_modifiers {
+    xkb_mod_mask_t depressed;
+    xkb_mod_mask_t latched;
+    xkb_mod_mask_t locked;
+    xkb_mod_mask_t group;
+};
+
+#define WLR_LED_COUNT 3
+#define WLR_MODIFIER_COUNT 8
+#define WLR_KEYBOARD_KEYS_CAP 32
+
+struct wlr_keyboard {
+    const struct wlr_keyboard_impl *impl;
+    struct wlr_keyboard_group *group;
+
+    char *keymap_string;
+    size_t keymap_size;
+    struct xkb_keymap *keymap;
+    struct xkb_state *xkb_state;
+    xkb_led_index_t led_indexes[WLR_LED_COUNT];
+    xkb_mod_index_t mod_indexes[WLR_MODIFIER_COUNT];
+
+    uint32_t keycodes[WLR_KEYBOARD_KEYS_CAP];
+    size_t num_keycodes;
+    struct wlr_keyboard_modifiers modifiers;
+
+    struct {
+        int32_t rate;
+        int32_t delay;
+    } repeat_info;
+
+    struct {
+        struct wl_signal key;
+        struct wl_signal modifiers;
+        struct wl_signal keymap;
+        struct wl_signal repeat_info;
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+};
 """
 
 # types/wlr_linux_dmabuf_v1.h
@@ -535,6 +578,10 @@ SOURCE = """
 #include <wlr/util/log.h>
 #include <wlr/version.h>
 
+#include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-keysyms.h>
+#include <xkbcommon/xkbcommon-compose.h>
+
 struct wl_listener_container {
     void *handle;
     struct wl_listener destroy_listener;
@@ -574,6 +621,7 @@ ffi_builder.set_source(
     include_dirs=["/usr/include/pixman-1", "include"],
 )
 ffi_builder.include(pywayland_ffi)
+ffi_builder.include(xkb_ffi)
 ffi_builder.cdef(CDEF)
 
 if __name__ == "__main__":
