@@ -40,7 +40,9 @@ class InputDevice:
         The device must be a keyboard, otherwise this throws a ValueError.
         """
         if self.device_type != InputDeviceType.KEYBOARD:
-            raise ValueError(f"Expected keyborad input device type, got: {self.device_type}")
+            raise ValueError(
+                f"Expected keyborad input device type, got: {self.device_type}"
+            )
 
         keyboard = Keyboard(self._ptr.keyboard)
 

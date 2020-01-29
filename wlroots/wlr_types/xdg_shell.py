@@ -82,12 +82,24 @@ class XdgTopLevel:
         """
         self._ptr = ptr
 
-        self.request_maximize_event = Signal(ptr=ffi.addressof(self._ptr.events.request_maximize))
-        self.request_fullscreen_event = Signal(ptr=ffi.addressof(self._ptr.events.request_fullscreen))
-        self.request_minimize_event = Signal(ptr=ffi.addressof(self._ptr.events.request_minimize))
-        self.request_move_event = Signal(ptr=ffi.addressof(self._ptr.events.request_move))
-        self.request_resize_event = Signal(ptr=ffi.addressof(self._ptr.events.request_resize))
-        self.request_show_window_menu_event = Signal(ptr=ffi.addressof(self._ptr.events.request_show_window_menu))
+        self.request_maximize_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_maximize)
+        )
+        self.request_fullscreen_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_fullscreen)
+        )
+        self.request_minimize_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_minimize)
+        )
+        self.request_move_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_move)
+        )
+        self.request_resize_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_resize)
+        )
+        self.request_show_window_menu_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_show_window_menu)
+        )
         self.set_parent_event = Signal(ptr=ffi.addressof(self._ptr.events.set_parent))
         self.set_title_event = Signal(ptr=ffi.addressof(self._ptr.events.set_title))
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
