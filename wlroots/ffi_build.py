@@ -469,6 +469,63 @@ void wlr_xcursor_manager_set_cursor_image(struct wlr_xcursor_manager *manager,
 
 # types/wlr_xdg_shell.h
 CDEF += """
+struct wlr_xdg_shell {
+    struct wl_global *global;
+    struct wl_list clients;
+    struct wl_list popup_grabs;
+    uint32_t ping_timeout;
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal new_surface;
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+};
+
+struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
+
+struct wlr_xdg_toplevel_state {
+    bool maximized, fullscreen, resizing, activated;
+    uint32_t tiled;
+    uint32_t width, height;
+    uint32_t max_width, max_height;
+    uint32_t min_width, min_height;
+
+    struct wlr_output *fullscreen_output;
+    struct wl_listener fullscreen_output_destroy;
+};
+
+struct wlr_xdg_toplevel {
+    struct wl_resource *resource;
+    struct wlr_xdg_surface *base;
+    bool added;
+
+    struct wlr_xdg_surface *parent;
+    struct wl_listener parent_unmap;
+
+    struct wlr_xdg_toplevel_state client_pending;
+    struct wlr_xdg_toplevel_state server_pending;
+    struct wlr_xdg_toplevel_state current;
+
+    char *title;
+    char *app_id;
+
+    struct {
+        struct wl_signal request_maximize;
+        struct wl_signal request_fullscreen;
+        struct wl_signal request_minimize;
+        struct wl_signal request_move;
+        struct wl_signal request_resize;
+        struct wl_signal request_show_window_menu;
+        struct wl_signal set_parent;
+        struct wl_signal set_title;
+        struct wl_signal set_app_id;
+    } events;
+};
+
 enum wlr_xdg_surface_role {
     WLR_XDG_SURFACE_ROLE_NONE,
     WLR_XDG_SURFACE_ROLE_TOPLEVEL,
@@ -518,23 +575,49 @@ struct wlr_xdg_surface {
     void *data;
 };
 
-struct wlr_xdg_shell {
-    struct wl_global *global;
-    struct wl_list clients;
-    struct wl_list popup_grabs;
-    uint32_t ping_timeout;
-
-    struct wl_listener display_destroy;
-
-    struct {
-        struct wl_signal new_surface;
-        struct wl_signal destroy;
-    } events;
-
-    void *data;
+struct wlr_xdg_toplevel_move_event {
+    struct wlr_xdg_surface *surface;
+    struct wlr_seat_client *seat;
+    uint32_t serial;
 };
 
-struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
+struct wlr_xdg_toplevel_resize_event {
+    struct wlr_xdg_surface *surface;
+    struct wlr_seat_client *seat;
+    uint32_t serial;
+    uint32_t edges;
+};
+
+struct wlr_xdg_toplevel_set_fullscreen_event {
+    struct wlr_xdg_surface *surface;
+    bool fullscreen;
+    struct wlr_output *output;
+};
+
+struct wlr_xdg_toplevel_show_window_menu_event {
+    struct wlr_xdg_surface *surface;
+    struct wlr_seat_client *seat;
+    uint32_t serial;
+    uint32_t x, y;
+};
+
+void wlr_xdg_surface_ping(struct wlr_xdg_surface *surface);
+
+uint32_t wlr_xdg_toplevel_set_size(struct wlr_xdg_surface *surface,
+    uint32_t width, uint32_t height);
+uint32_t wlr_xdg_toplevel_set_activated(struct wlr_xdg_surface *surface,
+    bool activated);
+uint32_t wlr_xdg_toplevel_set_maximized(struct wlr_xdg_surface *surface,
+    bool maximized);
+uint32_t wlr_xdg_toplevel_set_fullscreen(struct wlr_xdg_surface *surface,
+    bool fullscreen);
+uint32_t wlr_xdg_toplevel_set_resizing(struct wlr_xdg_surface *surface,
+    bool resizing);
+uint32_t wlr_xdg_toplevel_set_tiled(struct wlr_xdg_surface *surface,
+    uint32_t tiled_edges);
+
+void wlr_xdg_toplevel_send_close(struct wlr_xdg_surface *surface);
+void wlr_xdg_popup_destroy(struct wlr_xdg_surface *surface);
 """
 
 # util/log.h
