@@ -4,6 +4,7 @@ from pywayland.server import Display, Signal
 from pywayland.protocol.wayland import WlSeat
 
 from wlroots import ffi, lib
+from .input_device import InputDevice
 
 
 class Seat:
@@ -37,6 +38,14 @@ class Seat:
             The Wayland seat capabilities to set on the seat.
         """
         lib.wlr_seat_set_capabilities(self._ptr, capabilities)
+
+    def set_keyboard(self, input_device: InputDevice) -> None:
+        """Set this keyboard as the active keyboard for the seat
+
+        :param input_device:
+            The input device associated to the keyboard to set
+        """
+        lib.wlr_seat_set_keyboard(self._ptr, input_device._ptr)
 
     def pointer_notify_frame(self) -> None:
         """Notify the seat of a frame event
