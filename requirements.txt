@@ -1,1 +1,2 @@
 pywayland>=0.1.1
+git+git://github.com/flacjacket/python-xkbcommon@master#egg=xkbcommon
