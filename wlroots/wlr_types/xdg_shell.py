@@ -7,7 +7,7 @@ from pywayland.server import Display, Signal
 
 from wlroots import ffi, lib
 
-_weakkeydict = weakref.WeakKeyDictionary()
+_weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 
 
 class XdgSurfaceRole(enum.IntEnum):
