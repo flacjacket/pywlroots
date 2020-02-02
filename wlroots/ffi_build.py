@@ -437,6 +437,24 @@ void wlr_seat_keyboard_notify_enter(struct wlr_seat *seat,
     struct wlr_keyboard_modifiers *modifiers);
 """
 
+# types/wlr_surface.h
+CDEF += """
+struct wlr_surface {
+    struct wl_resource *resource;
+    struct wlr_renderer *renderer;
+    struct wlr_buffer *buffer;
+    int sx, sy;
+    ...;
+};
+
+struct wlr_texture *wlr_surface_get_texture(struct wlr_surface *surface);
+
+typedef void (*wlr_surface_iterator_func_t)(struct wlr_surface *surface,
+    int sx, int sy, void *data);
+
+extern "Python" void surface_iterator_callback(struct wlr_surface *surface, int sx, int sy, void *data);
+"""
+
 # types/wlr_xcursor_manager.h
 CDEF += """
 struct wlr_cursor {
@@ -641,6 +659,9 @@ uint32_t wlr_xdg_toplevel_set_tiled(struct wlr_xdg_surface *surface,
 
 void wlr_xdg_toplevel_send_close(struct wlr_xdg_surface *surface);
 void wlr_xdg_popup_destroy(struct wlr_xdg_surface *surface);
+
+void wlr_xdg_surface_for_each_surface(struct wlr_xdg_surface *surface,
+    wlr_surface_iterator_func_t iterator, void *user_data);
 """
 
 # util/log.h

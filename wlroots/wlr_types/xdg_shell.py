@@ -2,12 +2,25 @@
 
 import enum
 import weakref
+from typing import Callable, Tuple, TypeVar
 
 from pywayland.server import Display, Signal
 
 from wlroots import ffi, lib
+from .surface import Surface
 
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+
+T = TypeVar("T")
+SurfaceCallback = Callable[[Surface, int, int, T], None]
+
+
+@ffi.def_extern()
+def surface_iterator_callback(surface_ptr, sx, sy, data_ptr):
+    """Callback used to invoke the for_each_surface method"""
+    func, py_data = ffi.from_handle(data_ptr)
+    surface = Surface(surface_ptr)
+    func(surface, sx, sy, py_data)
 
 
 class XdgSurfaceRole(enum.IntEnum):
@@ -71,6 +84,24 @@ class XdgSurface:
         _weakkeydict[toplevel] = self._ptr
 
         return toplevel
+
+    def for_each_surface(self, iterator: SurfaceCallback[T], data: T = None) -> None:
+        """Call iterator on each surface and popup in the xdg-surface tree
+
+        Call `iterator` on each surface and popup in the xdg-surface tree, with
+        the surface's position relative to the root xdg-surface. The function
+        is called from root to leaves (in rendering order).
+
+        :param iterator:
+            The method that should be invoked
+        :param data:
+            The data that is passed as the last argument to the iterator method
+        """
+        py_handle = (iterator, data)
+        handle = ffi.new_handle(py_handle)
+        lib.wlr_xdg_surface_for_each_surface(
+            self._ptr, lib.surface_iterator_callback, handle
+        )
 
 
 class XdgTopLevel:
