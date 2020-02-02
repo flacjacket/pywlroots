@@ -372,7 +372,15 @@ struct wlr_event_pointer_axis {
 
 # types/wlr_seat.h
 CDEF += """
-struct timespec { ...; };
+struct timespec {
+    int64_t tv_sec;
+    int64_t tv_nsec;
+    ...;
+};
+typedef int32_t clockid_t;
+int clock_gettime(clockid_t clk_id, struct timespec *tp);
+
+#define CLOCK_MONOTONIC ...
 
 struct wlr_seat_pointer_state { ...; };
 struct wlr_seat_keyboard_state { ...; };
