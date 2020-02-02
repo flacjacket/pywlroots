@@ -533,6 +533,9 @@ struct wlr_surface {
 
 struct wlr_texture *wlr_surface_get_texture(struct wlr_surface *surface);
 
+void wlr_surface_send_frame_done(struct wlr_surface *surface,
+    const struct timespec *when);
+
 typedef void (*wlr_surface_iterator_func_t)(struct wlr_surface *surface,
     int sx, int sy, void *data);
 
