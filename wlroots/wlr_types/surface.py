@@ -2,6 +2,8 @@
 
 from weakref import WeakKeyDictionary
 
+from pywayland.protocol.wayland import WlOutput
+
 from wlroots import ffi, lib
 from .texture import Texture
 
@@ -29,12 +31,14 @@ class Surface:
 
         return Texture(texture_ptr)
 
+    @property
     def current(self) -> "SurfaceState":
         """The current commited surface state"""
         current_ptr = self._ptr.current
         _weakkeydict[current_ptr] = self._ptr
         return SurfaceState(current_ptr)
 
+    @property
     def previous(self) -> "SurfaceState":
         """The state of the previous commit"""
         previous_ptr = self._ptr.previous
@@ -50,3 +54,8 @@ class SurfaceState:
             The cdata of the given surface state.
         """
         self._ptr = ptr
+
+    @property
+    def transform(self) -> WlOutput.transform:
+        """Get the transform for the selected surface"""
+        return WlOutput.transform(self._ptr.transform)

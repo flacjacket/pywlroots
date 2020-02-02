@@ -3,6 +3,7 @@
 from typing import Tuple
 
 from pywayland.server import Signal
+from pywayland.protocol.wayland import WlOutput
 
 from wlroots import ffi, lib
 
@@ -84,3 +85,8 @@ class Output:
     def modes(self):
         if lib.wl_list_empty(ffi.addressof(self._ptr.modes)) == 1:
             return []
+
+    @staticmethod
+    def transform_invert(transform: WlOutput.transform) -> WlOutput.transform:
+        """Returns the transform that, when composed with transform gives transform.normal"""
+        return WlOutput.transform(lib.wlr_output_transform_invert(transform))
