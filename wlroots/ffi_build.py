@@ -45,6 +45,15 @@ void wlr_renderer_clear(struct wlr_renderer *r, const float color[static 4]);
 void wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_display);
 """
 
+# types/wlr_box.h
+CDEF += """
+struct wlr_box {
+    int x, y;
+    int width, height;
+    ...;
+};
+"""
+
 # types/wlr_cursor.h
 CDEF += """
 struct wlr_cursor *wlr_cursor_create(void);
@@ -567,8 +576,6 @@ enum wlr_xdg_surface_role {
     WLR_XDG_SURFACE_ROLE_POPUP,
     ...
 };
-
-struct wlr_box { ...; };
 
 struct wlr_xdg_surface {
     struct wlr_xdg_client *client;
