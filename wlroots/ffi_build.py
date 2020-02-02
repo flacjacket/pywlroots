@@ -448,11 +448,54 @@ void wlr_seat_keyboard_notify_enter(struct wlr_seat *seat,
 
 # types/wlr_surface.h
 CDEF += """
+struct wlr_surface_state {
+    uint32_t committed;
+
+    struct wl_resource *buffer_resource;
+    int32_t dx, dy;
+    struct pixman_region32 surface_damage, buffer_damage;
+    struct pixman_region32 opaque, input;
+    enum wl_output_transform transform;
+    int32_t scale;
+    struct wl_list frame_callback_list;
+
+    int width, height;
+    int buffer_width, buffer_height;
+
+    struct wl_listener buffer_destroy;
+    ...;
+};
+
+struct wlr_surface_role {
+    const char *name;
+    void (*commit)(struct wlr_surface *surface);
+    void (*precommit)(struct wlr_surface *surface);
+};
+
 struct wlr_surface {
     struct wl_resource *resource;
     struct wlr_renderer *renderer;
     struct wlr_buffer *buffer;
     int sx, sy;
+    struct pixman_region32 buffer_damage;
+    struct pixman_region32 opaque_region;
+    struct pixman_region32 input_region;
+    struct wlr_surface_state current, pending, previous;
+
+    const struct wlr_surface_role *role;
+    void *role_data;
+
+    struct {
+        struct wl_signal commit;
+        struct wl_signal new_subsurface;
+        struct wl_signal destroy;
+    } events;
+
+    struct wl_list subsurfaces;
+    struct wl_list subsurface_pending_list;
+    struct wl_listener renderer_destroy;
+
+    void *data;
     ...;
 };
 
