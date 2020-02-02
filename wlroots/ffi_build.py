@@ -42,6 +42,11 @@ void wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
 void wlr_renderer_end(struct wlr_renderer *r);
 void wlr_renderer_clear(struct wlr_renderer *r, const float color[static 4]);
 
+bool wlr_render_texture(struct wlr_renderer *r, struct wlr_texture *texture,
+    const float projection[static 9], int x, int y, float alpha);
+bool wlr_render_texture_with_matrix(struct wlr_renderer *r,
+    struct wlr_texture *texture, const float matrix[static 9], float alpha);
+
 void wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_display);
 """
 

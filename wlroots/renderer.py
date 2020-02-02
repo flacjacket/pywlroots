@@ -2,8 +2,9 @@
 
 from pywayland.server import Display
 
-from . import ffi, lib
+from wlroots import ffi, lib
 from wlroots.backend import Backend
+from wlroots.wlr_types import Matrix, Texture
 
 
 class Renderer:
@@ -24,11 +25,22 @@ class Renderer:
         """Begin rendering with the given height and width"""
         lib.wlr_renderer_begin(self._ptr, width, height)
 
+    def end(self):
+        """Finish rendering"""
+        lib.wlr_renderer_end(self._ptr)
+
     def clear(self, color) -> None:
         """Clear the renderer to the given RGBA color"""
         color_ptr = ffi.new("float[4]", color)
         lib.wlr_renderer_clear(self._ptr, color_ptr)
 
-    def end(self):
-        """Finish rendering"""
-        lib.wlr_renderer_end(self._ptr)
+    def render_texture_with_matrix(
+        self, texture: Texture, matrix: Matrix, alpha: float
+    ) -> None:
+        """Renders the requested texture using the provided matrix"""
+        ret = lib.wlr_render_texture_with_matrix(
+            self._ptr, texture._ptr, matrix._ptr, alpha
+        )
+        if not ret:
+            # TODO: get a better exception type
+            raise Exception("Bad render")
