@@ -2,7 +2,7 @@
 
 import enum
 import weakref
-from typing import Callable, Tuple, TypeVar
+from typing import Callable, TypeVar
 
 from pywayland.server import Display, Signal
 

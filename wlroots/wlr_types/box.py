@@ -10,7 +10,7 @@ class Box:
         self._y = y
         self._width = width
         self._height = height
-        self._ptr = ffi.new("wlr_box *")
+        self._ptr = ffi.new("struct wlr_box *")
         self._ptr.x = x
         self._ptr.y = y
         self._ptr.width = width

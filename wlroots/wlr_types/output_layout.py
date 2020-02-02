@@ -1,7 +1,8 @@
 # Copyright (c) Sean Vig 2019
 
-from wlroots import ffi, lib
+from typing import Tuple
 
+from wlroots import ffi, lib
 from .output import Output
 
 
@@ -35,6 +36,18 @@ class OutputLayout:
             The output to configure the layout against.
         """
         lib.wlr_output_layout_add_auto(self._ptr, output._ptr)
+
+    def output_coords(self, output) -> Tuple[float, float]:
+        """Determine coordinates of the output in the layout
+
+        Given x and y in layout coordinates, adjusts them to local output
+        coordinates relative to the given reference output.
+        """
+        ox = ffi.new("double *")
+        oy = ffi.new("double *")
+        lib.wlr_output_layout_output_coords(self._ptr, output._ptr, ox, oy)
+
+        return ox[0], oy[0]
 
     def __enter__(self) -> "OutputLayout":
         """Use the output layout in a context manager"""
