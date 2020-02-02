@@ -19,6 +19,7 @@ struct wlr_backend
         struct wl_signal new_input;
         struct wl_signal new_output;
     } events;
+    ...;
 };
 
 typedef int EGLint;
@@ -84,6 +85,7 @@ enum wlr_input_device_type {
     WLR_INPUT_DEVICE_TABLET_TOOL,
     WLR_INPUT_DEVICE_TABLET_PAD,
     WLR_INPUT_DEVICE_SWITCH,
+    ...
 };
 
 struct wlr_input_device {
@@ -113,6 +115,7 @@ struct wlr_input_device {
     void *data;
 
     struct wl_list link;
+    ...;
 };
 """
 
@@ -129,6 +132,7 @@ struct wlr_keyboard_modifiers {
     xkb_mod_mask_t latched;
     xkb_mod_mask_t locked;
     xkb_mod_mask_t group;
+    ...;
 };
 
 #define WLR_LED_COUNT 3
@@ -164,6 +168,7 @@ struct wlr_keyboard {
     } events;
 
     void *data;
+    ...;
 };
 """
 
@@ -248,6 +253,7 @@ struct wlr_output {
     struct wl_listener display_destroy;
 
     void *data;
+    ...;
 };
 
 void wlr_output_enable(struct wlr_output *output, bool enable);
@@ -288,12 +294,14 @@ struct wlr_event_pointer_motion {
     uint32_t time_msec;
     double delta_x, delta_y;
     double unaccel_dx, unaccel_dy;
+    ...;
 };
 
 struct wlr_event_pointer_motion_absolute {
     struct wlr_input_device *device;
     uint32_t time_msec;
     double x, y;
+    ...;
 };
 
 struct wlr_event_pointer_button {
@@ -301,6 +309,7 @@ struct wlr_event_pointer_button {
     uint32_t time_msec;
     uint32_t button;
     enum wlr_button_state state;
+    ...;
 };
 
 enum wlr_axis_source {
@@ -308,11 +317,13 @@ enum wlr_axis_source {
     WLR_AXIS_SOURCE_FINGER,
     WLR_AXIS_SOURCE_CONTINUOUS,
     WLR_AXIS_SOURCE_WHEEL_TILT,
+    ...
 };
 
 enum wlr_axis_orientation {
     WLR_AXIS_ORIENTATION_VERTICAL,
     WLR_AXIS_ORIENTATION_HORIZONTAL,
+    ...
 };
 
 struct wlr_event_pointer_axis {
@@ -322,6 +333,7 @@ struct wlr_event_pointer_axis {
     enum wlr_axis_orientation orientation;
     double delta;
     int32_t delta_discrete;
+    ...;
 };
 """
 
@@ -392,6 +404,7 @@ struct wlr_seat {
     } events;
 
     void *data;
+    ...;
 };
 
 struct wlr_seat *wlr_seat_create(struct wl_display *display, const char *name);
@@ -455,6 +468,7 @@ struct wlr_cursor {
     } events;
 
     void *data;
+    ...;
 };
 
 struct wlr_xcursor_manager *wlr_xcursor_manager_create(const char *name,
@@ -483,6 +497,7 @@ struct wlr_xdg_shell {
     } events;
 
     void *data;
+    ...;
 };
 
 struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
@@ -496,6 +511,7 @@ struct wlr_xdg_toplevel_state {
 
     struct wlr_output *fullscreen_output;
     struct wl_listener fullscreen_output_destroy;
+    ...;
 };
 
 struct wlr_xdg_toplevel {
@@ -524,12 +540,14 @@ struct wlr_xdg_toplevel {
         struct wl_signal set_title;
         struct wl_signal set_app_id;
     } events;
+    ...;
 };
 
 enum wlr_xdg_surface_role {
     WLR_XDG_SURFACE_ROLE_NONE,
     WLR_XDG_SURFACE_ROLE_TOPLEVEL,
     WLR_XDG_SURFACE_ROLE_POPUP,
+    ...
 };
 
 struct wlr_box { ...; };
@@ -573,12 +591,14 @@ struct wlr_xdg_surface {
     } events;
 
     void *data;
+    ...;
 };
 
 struct wlr_xdg_toplevel_move_event {
     struct wlr_xdg_surface *surface;
     struct wlr_seat_client *seat;
     uint32_t serial;
+    ...;
 };
 
 struct wlr_xdg_toplevel_resize_event {
@@ -586,12 +606,14 @@ struct wlr_xdg_toplevel_resize_event {
     struct wlr_seat_client *seat;
     uint32_t serial;
     uint32_t edges;
+    ...;
 };
 
 struct wlr_xdg_toplevel_set_fullscreen_event {
     struct wlr_xdg_surface *surface;
     bool fullscreen;
     struct wlr_output *output;
+    ...;
 };
 
 struct wlr_xdg_toplevel_show_window_menu_event {
@@ -599,6 +621,7 @@ struct wlr_xdg_toplevel_show_window_menu_event {
     struct wlr_seat_client *seat;
     uint32_t serial;
     uint32_t x, y;
+    ...;
 };
 
 void wlr_xdg_surface_ping(struct wlr_xdg_surface *surface);
