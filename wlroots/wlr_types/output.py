@@ -6,6 +6,7 @@ from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
 
 from wlroots import ffi, lib
+from .matrix import Matrix
 
 
 class Output:
@@ -44,6 +45,11 @@ class Output:
     def name(self) -> str:
         """The name of the output"""
         return ffi.string(self._ptr.name).decode()
+
+    @property
+    def transform_matrix(self) -> Matrix:
+        """The transform matrix giving the projection of the output"""
+        return Matrix(self._ptr.transform_matrix)
 
     def create_global(self) -> None:
         """Create the global corresponding to the output"""
