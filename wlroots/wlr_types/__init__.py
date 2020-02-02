@@ -6,6 +6,7 @@ from .cursor import Cursor  # noqa: F401
 from .data_device_manager import DataDeviceManager  # noqa: F401
 from .input_device import InputDevice  # noqa: F401
 from .keyboard import Keyboard  # noqa: F401
+from .matrix import Matrix  # noqa: F401
 from .output import Output  # noqa: F401
 from .output_layout import OutputLayout  # noqa: F401
 from .pointer import (  # noqa: F401
