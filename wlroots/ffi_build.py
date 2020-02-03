@@ -184,6 +184,20 @@ struct wlr_keyboard {
     void *data;
     ...;
 };
+
+enum wlr_key_state {
+    WLR_KEY_RELEASED,
+    WLR_KEY_PRESSED,
+    ...
+};
+
+struct wlr_event_keyboard_key {
+    uint32_t time_msec;
+    uint32_t keycode;
+    bool update_state;
+    enum wlr_key_state state;
+    ...;
+};
 """
 
 # types/wlr_linux_dmabuf_v1.h
@@ -383,7 +397,27 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp);
 #define CLOCK_MONOTONIC ...
 
 struct wlr_seat_pointer_state { ...; };
-struct wlr_seat_keyboard_state { ...; };
+struct wlr_seat_keyboard_state {
+    struct wlr_seat *seat;
+    struct wlr_keyboard *keyboard;
+
+    struct wlr_seat_client *focused_client;
+    struct wlr_surface *focused_surface;
+
+    struct wl_listener keyboard_destroy;
+    struct wl_listener keyboard_keymap;
+    struct wl_listener keyboard_repeat_info;
+
+    struct wl_listener surface_destroy;
+
+    struct wlr_seat_keyboard_grab *grab;
+    struct wlr_seat_keyboard_grab *default_grab;
+
+    struct {
+        struct wl_signal focus_change;
+    } events;
+    ...;
+};
 struct wlr_seat_touch_state { ...; };
 
 struct wlr_seat {
@@ -744,6 +778,9 @@ uint32_t wlr_xdg_toplevel_set_tiled(struct wlr_xdg_surface *surface,
 
 void wlr_xdg_toplevel_send_close(struct wlr_xdg_surface *surface);
 void wlr_xdg_popup_destroy(struct wlr_xdg_surface *surface);
+
+struct wlr_xdg_surface *wlr_xdg_surface_from_wlr_surface(
+    struct wlr_surface *surface);
 
 void wlr_xdg_surface_for_each_surface(struct wlr_xdg_surface *surface,
     wlr_surface_iterator_func_t iterator, void *user_data);

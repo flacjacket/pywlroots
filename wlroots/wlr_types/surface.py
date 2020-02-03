@@ -25,6 +25,13 @@ class Surface:
         self.new_subsurface_event = Signal(ptr=ffi.addressof(self._ptr.events.new_subsurface))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
+    def __eq__(self, other: object) -> bool:
+        """Check if the other surface is equal by the cdata pointer"""
+        if not isinstance(other, Surface):
+            return NotImplemented
+
+        return self._ptr == other._ptr
+
     @property
     def sx(self) -> int:
         """Surface local buffer x position"""

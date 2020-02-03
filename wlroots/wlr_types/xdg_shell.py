@@ -63,6 +63,17 @@ class XdgSurface:
         self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
+    @classmethod
+    def from_surface(cls, surface: Surface) -> "XdgSurface":
+        """Get the xdg surface associated with the given surface"""
+        surface_ptr = lib.wlr_xdg_surface_from_wlr_surface(surface._ptr)
+        return XdgSurface(surface_ptr)
+
+    @property
+    def surface(self) -> Surface:
+        """The surface associated with the xdg surface"""
+        return Surface(self._ptr.surface)
+
     @property
     def role(self) -> XdgSurfaceRole:
         """The role for the surface"""
@@ -84,6 +95,12 @@ class XdgSurface:
         _weakkeydict[toplevel] = self._ptr
 
         return toplevel
+
+    def set_activated(self, activated: bool) -> int:
+        if self.role != XdgSurfaceRole.TOPLEVEL:
+            raise ValueError(f"xdg surface must be top-level, got: {self.role}")
+
+        return lib.wlr_xdg_toplevel_set_activated(self._ptr, activated)
 
     def for_each_surface(self, iterator: SurfaceCallback[T], data: T = None) -> None:
         """Call iterator on each surface and popup in the xdg-surface tree
