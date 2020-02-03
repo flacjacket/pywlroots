@@ -1,7 +1,7 @@
 # Copyright (c) 2019 Sean Vig
 
 from pywayland.server import Display
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from wlroots import lib
 
