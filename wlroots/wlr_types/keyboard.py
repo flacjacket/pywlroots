@@ -1,10 +1,13 @@
 # Copyright Sean Vig (c) 2020
 
 import enum
+from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
 
 from wlroots import ffi, lib
+
+_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
 @enum.unique
@@ -44,7 +47,7 @@ class KeyboardKeyEvent:
 
 
 class Keyboard:
-    def __init__(self, ptr):
+    def __init__(self, ptr) -> None:
         """The Keyboard wlroots object
 
         :param ptr:
@@ -57,11 +60,11 @@ class Keyboard:
             ptr=ffi.addressof(self._ptr.events.key), data_wrapper=KeyboardKeyEvent
         )
 
-    def set_keymap(self, keymap):
+    def set_keymap(self, keymap) -> None:
         """Set the keymap associated with the keyboard"""
         lib.wlr_keyboard_set_keymap(self._ptr, keymap._keymap)
 
-    def set_repeat_info(self, rate, delay):
+    def set_repeat_info(self, rate, delay) -> None:
         """Sets the keyboard repeat info
 
         :param rate:
@@ -82,6 +85,14 @@ class Keyboard:
         return self._ptr.num_keycodes
 
     @property
-    def modifiers(self):
+    def modifiers(self) -> "KeyboardModifiers":
         """The modifiers associated with the keyboard"""
-        return self._ptr.modifiers
+        modifiers_ptr = ffi.addressof(self._ptr.modifiers)
+        _weakkeydict[modifiers_ptr] = self._ptr
+        return KeyboardModifiers(modifiers_ptr)
+
+
+class KeyboardModifiers:
+    def __init__(self, ptr) -> None:
+        """Modifiers of a given keyboard"""
+        self._ptr = ptr

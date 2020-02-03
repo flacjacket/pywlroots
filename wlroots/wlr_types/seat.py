@@ -8,7 +8,7 @@ from pywayland.protocol.wayland import WlSeat
 
 from wlroots import ffi, lib
 from .input_device import InputDevice
-from .keyboard import Keyboard, KeyboardKeyEvent
+from .keyboard import Keyboard, KeyboardModifiers, KeyboardKeyEvent
 from .surface import Surface
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
@@ -76,15 +76,6 @@ class Seat:
         """
         lib.wlr_seat_pointer_notify_frame(self._ptr)
 
-    def keyboard_notify_key(self, key_event: KeyboardKeyEvent) -> None:
-        """Notify the seat that a key has been pressed on the keyboard
-
-        Defers to any keyboard grabs.
-        """
-        lib.wlr_seat_keyboard_notify_key(
-            self._ptr, key_event.time_msec, key_event.keycode, key_event.state
-        )
-
     def keyboard_notify_enter(self, surface: Surface, keyboard: Keyboard) -> None:
         """Notify the seat that the keyboard focus has changed
 
@@ -97,8 +88,24 @@ class Seat:
             surface._ptr,
             keyboard.keycodes,
             keyboard.num_keycodes,
-            ffi.addressof(keyboard.modifiers),
+            keyboard.modifiers._ptr,
         )
+
+    def keyboard_notify_key(self, key_event: KeyboardKeyEvent) -> None:
+        """Notify the seat that a key has been pressed on the keyboard
+
+        Defers to any keyboard grabs.
+        """
+        lib.wlr_seat_keyboard_notify_key(
+            self._ptr, key_event.time_msec, key_event.keycode, key_event.state
+        )
+
+    def keyboard_notify_modifiers(self, modifiers: KeyboardModifiers) -> None:
+        """Notify the seat that the modifiers for the keyboard have changed
+
+        Defers to any keyboard grabs.
+        """
+        lib.wlr_seat_keyboard_notify_modifiers(self._ptr, modifiers._ptr)
 
     def __enter__(self) -> "Seat":
         """Context manager to clean up the seat"""
