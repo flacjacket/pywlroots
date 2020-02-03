@@ -1,7 +1,7 @@
 # Copyright (c) 2019 Sean Vig
 
 from pywayland.server import Display
-from typing import TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from wlroots import lib
 
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Compositor:
-    def __init__(self, display: Display, renderer: "Renderer"):
+    def __init__(self, display: Display, renderer: "Renderer") -> None:
         """A compositor for clients to be able to allocate surfaces
 
         :param display:
