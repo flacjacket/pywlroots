@@ -87,6 +87,21 @@ class Cursor:
 
         lib.wlr_cursor_attach_input_device(self._ptr, input_device._ptr)
 
+    def move(self, input_device: Optional[InputDevice], delta_x: float, delta_y: float) -> None:
+        """Move the cursor in the direction of the given x and y layout coordinates
+
+        If one coordinate is NAN, it will be ignored.
+
+        The `input_device` may be passed to respect device mapping constraints.
+        If `input_device` is None, device mapping constraints will be ignored.
+        """
+        if input_device is None:
+            input_device_ptr = ffi.NULL
+        else:
+            input_device_ptr = input_device._ptr
+
+        lib.wlr_cursor_move(self._ptr, input_device_ptr, delta_x, delta_y)
+
     def warp_absolute(
         self, input_device: Optional[InputDevice], x: float, y: float
     ) -> None:

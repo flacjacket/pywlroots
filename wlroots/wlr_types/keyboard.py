@@ -112,8 +112,9 @@ class Keyboard:
 
     @property
     def modifier(self) -> KeyboardModifier:
-        """The enum of the modifier that is currently active"""
-        return lib.wlr_keyboard_get_modifiers(self._ptr)
+        """The enum representing the currently active modifier keys"""
+        modifiers = lib.wlr_keyboard_get_modifiers(self._ptr)
+        return KeyboardModifier(modifiers)
 
 
 class KeyboardModifiers:
