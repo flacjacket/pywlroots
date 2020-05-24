@@ -1,7 +1,8 @@
 # Copyright (c) 2018 Sean Vig
 
-from cffi import FFI
+from pathlib import Path
 
+from cffi import FFI
 from pywayland.ffi_build import ffi_builder as pywayland_ffi
 from xkbcommon.ffi_build import ffibuilder as xkb_ffi
 
@@ -910,13 +911,16 @@ void wrapped_log_init(enum wlr_log_importance verbosity, wrapped_log_func_t call
 }
 """
 
+include_dir = (Path(__file__).parent.parent / "include").resolve()
+assert include_dir.is_dir(), f"missing {include_dir}"
+
 ffi_builder = FFI()
 ffi_builder.set_source(
     "wlroots._ffi",
     SOURCE,
     libraries=["wlroots"],
     define_macros=[("WLR_USE_UNSTABLE", None)],
-    include_dirs=["/usr/include/pixman-1", "include"],
+    include_dirs=["/usr/include/pixman-1", include_dir],
 )
 ffi_builder.include(pywayland_ffi)
 ffi_builder.include(xkb_ffi)
