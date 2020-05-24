@@ -87,7 +87,9 @@ class Cursor:
 
         lib.wlr_cursor_attach_input_device(self._ptr, input_device._ptr)
 
-    def move(self, input_device: Optional[InputDevice], delta_x: float, delta_y: float) -> None:
+    def move(
+        self, input_device: Optional[InputDevice], delta_x: float, delta_y: float
+    ) -> None:
         """Move the cursor in the direction of the given x and y layout coordinates
 
         If one coordinate is NAN, it will be ignored.

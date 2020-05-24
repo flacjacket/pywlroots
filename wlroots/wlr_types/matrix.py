@@ -73,7 +73,9 @@ class Matrix:
     def __str__(self) -> str:
         """String representation showing the matrix"""
         matrix_values = list(self._ptr)
-        return f"Matrix([{matrix_values[:3]}, {matrix_values[3:6]}, {matrix_values[6:]}])"
+        return (
+            f"Matrix([{matrix_values[:3]}, {matrix_values[3:6]}, {matrix_values[6:]}])"
+        )
 
     @staticmethod
     def _build_matrix_ptr():
