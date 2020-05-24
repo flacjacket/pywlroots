@@ -10,6 +10,12 @@ _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 
 
 @enum.unique
+class ButtonState(enum.IntEnum):
+    RELEASED = lib.WLR_BUTTON_RELEASED
+    PRESSED = lib.WLR_BUTTON_PRESSED
+
+
+@enum.unique
 class InputDeviceType(enum.IntEnum):
     KEYBOARD = lib.WLR_INPUT_DEVICE_KEYBOARD
     POINTER = lib.WLR_INPUT_DEVICE_POINTER

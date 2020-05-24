@@ -7,8 +7,9 @@ from pywayland.server import Display, Signal
 from pywayland.protocol.wayland import WlSeat
 
 from wlroots import ffi, lib
-from .input_device import InputDevice
+from .input_device import ButtonState, InputDevice
 from .keyboard import Keyboard, KeyboardModifiers, KeyboardKeyEvent
+from .pointer import AxisSource, AxisOrientation
 from .surface import Surface
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
@@ -26,9 +27,37 @@ class Seat:
         ptr = lib.wlr_seat_create(display._ptr, name.encode())
         self._ptr = ffi.gc(ptr, lib.wlr_seat_destroy)
 
+        self.pointer_grab_begin_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.pointer_grab_begin)
+        )
+        self.pointer_grab_end_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.pointer_grab_end)
+        )
+
+        self.keyboard_grab_begin_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.keyboard_grab_begin)
+        )
+        self.keyboard_grab_end_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.keyboard_grab_end)
+        )
+
         self.request_set_cursor_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_set_cursor)
         )
+
+        self.request_set_selection_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_set_selection)
+        )
+        self.set_selection_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.set_selection)
+        )
+
+    @property
+    def pointer_state(self) -> "SeatPointerState":
+        """The pointer state associated with the seat"""
+        pointer_state_ptr = ffi.addressof(self._ptr.pointer_state)
+        _weakkeydict[pointer_state_ptr] = self._ptr
+        return SeatPointerState(pointer_state_ptr)
 
     @property
     def keyboard_state(self) -> "SeatKeyboardState":
@@ -59,13 +88,51 @@ class Seat:
         """
         lib.wlr_seat_set_capabilities(self._ptr, capabilities)
 
-    def set_keyboard(self, input_device: InputDevice) -> None:
-        """Set this keyboard as the active keyboard for the seat
+    def set_name(self, name: str) -> None:
+        """Updates the name of this seat
 
-        :param input_device:
-            The input device associated to the keyboard to set
+        Will automatically send it to all clients.
         """
-        lib.wlr_seat_set_keyboard(self._ptr, input_device._ptr)
+        lib.wlr_seat_set_name(self._ptr, name.encode())
+
+    def pointer_surface_has_focus(self, surface: Surface) -> bool:
+        """Whether or not the surface has pointer focus"""
+        return lib.wlr_seat_pointer_surface_has_focus(self._ptr, surface._ptr)
+
+    def pointer_clear_focus(self) -> None:
+        """Clear the focused surface for the pointer and leave all entered surfaces"""
+        return lib.wlr_seat_pointer_clear_focus(self._ptr)
+
+    # todo: wlr_seat_pointer_start_grab
+    # todo: wlr_seat_pointer_end_grab
+
+    def pointer_notify_enter(self, surface: Surface, surface_x: float, surface_y: float) -> None:
+        """Notify the seat of a pointer enter event to the given surface
+
+        Notify the seat of a pointer enter event to the given surface and
+        request it to be the focused surface for the pointer. Pass
+        surface-local coordinates where the enter occurred.
+        """
+        lib.wlr_seat_pointer_notify_enter(self._ptr, surface._ptr, surface_x, surface_y)
+
+    def pointer_notify_motion(self, time_msec: int, surface_x: float, surface_y: float) -> None:
+        """Notify the seat of motion over the given surface
+
+        Pass surface-local coordinates where the pointer motion occurred.
+        """
+        lib.wlr_seat_pointer_notify_motion(self._ptr, time_msec, surface_x, surface_y)
+
+    def pointer_notify_button(self, time_msec: int, button: int, button_state: ButtonState) -> int:
+        """Notify the seat that a button has been pressed
+
+        Returns the serial of the button press or zero if no button press was
+        sent.
+        """
+        return lib.wlr_seat_pointer_notify_button(self._ptr, time_msec, button, button_state.value)
+
+    def pointer_notify_axis(self, time_msec: int, orientation: AxisOrientation, value: float, value_discrete: int, source: AxisSource) -> None:
+        """Notify the seat of an axis event"""
+        lib.wlr_seat_pointer_notify_axis(self._ptr, time_msec, orientation.value, value, value_discrete, source.value)
 
     def pointer_notify_frame(self) -> None:
         """Notify the seat of a frame event
@@ -76,20 +143,20 @@ class Seat:
         """
         lib.wlr_seat_pointer_notify_frame(self._ptr)
 
-    def keyboard_notify_enter(self, surface: Surface, keyboard: Keyboard) -> None:
-        """Notify the seat that the keyboard focus has changed
+    def pointer_has_grab(self):
+        """Whether or not the pointer has a grab other than the default grab"""
+        lib.wlr_seat_pointer_has_grab(self._ptr)
 
-        Notify the seat that the keyboard focus has changed and request it to
-        be the focused surface for this keyboard. Defers to any current grab of
-        the seat's keyboard.
+    def set_keyboard(self, input_device: InputDevice) -> None:
+        """Set this keyboard as the active keyboard for the seat
+
+        :param input_device:
+            The input device associated to the keyboard to set
         """
-        lib.wlr_seat_keyboard_notify_enter(
-            self._ptr,
-            surface._ptr,
-            keyboard.keycodes,
-            keyboard.num_keycodes,
-            keyboard.modifiers._ptr,
-        )
+        lib.wlr_seat_set_keyboard(self._ptr, input_device._ptr)
+
+    # todo: wlr_seat_keyboard_start_grab
+    # todo: wlr_seat_keyboard_end_grab
 
     def keyboard_notify_key(self, key_event: KeyboardKeyEvent) -> None:
         """Notify the seat that a key has been pressed on the keyboard
@@ -107,6 +174,29 @@ class Seat:
         """
         lib.wlr_seat_keyboard_notify_modifiers(self._ptr, modifiers._ptr)
 
+    def keyboard_notify_enter(self, surface: Surface, keyboard: Keyboard) -> None:
+        """Notify the seat that the keyboard focus has changed
+
+        Notify the seat that the keyboard focus has changed and request it to
+        be the focused surface for this keyboard. Defers to any current grab of
+        the seat's keyboard.
+        """
+        lib.wlr_seat_keyboard_notify_enter(
+            self._ptr,
+            surface._ptr,
+            keyboard.keycodes,
+            keyboard.num_keycodes,
+            keyboard.modifiers._ptr,
+        )
+
+    def keyboard_clear_focus(self) -> None:
+        """Clear the focused surface for the keyboard and leave all entered surfaces"""
+        lib.wlr_seat_keyboard_clear_focus(self._ptr)
+
+    def keyboard_has_grab(self) -> bool:
+        """Whether or not the keyboard has a grab other than the default grab"""
+        return lib.wlr_seat_keyboard_has_grab(self._ptr)
+
     def __enter__(self) -> "Seat":
         """Context manager to clean up the seat"""
         return self
@@ -114,6 +204,19 @@ class Seat:
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         """Clean up the seat when exiting the context"""
         self.destroy()
+
+
+class SeatPointerState:
+    def __init__(self, ptr) -> None:
+        """The current state of the pointer on the seat"""
+        self._ptr = ptr
+
+    def focused_surface(self) -> Optional[Surface]:
+        """The surface that currently has keyboard focus"""
+        focused_surface = self._ptr.focused_surface
+        if focused_surface == ffi.NULL:
+            return None
+        return Surface(focused_surface)
 
 
 class SeatKeyboardState:

@@ -92,6 +92,12 @@ struct wlr_data_device_manager *wlr_data_device_manager_create(
 
 # types/wlr_input_device.h
 CDEF += """
+enum wlr_button_state {
+    WLR_BUTTON_RELEASED,
+    WLR_BUTTON_PRESSED,
+    ...
+};
+
 enum wlr_input_device_type {
     WLR_INPUT_DEVICE_KEYBOARD,
     WLR_INPUT_DEVICE_POINTER,
@@ -135,11 +141,28 @@ struct wlr_input_device {
 
 # types/wlr_keyboard.h
 CDEF += """
-void wlr_keyboard_set_keymap(struct wlr_keyboard *kb,
-    struct xkb_keymap *keymap);
-void wlr_keyboard_set_repeat_info(struct wlr_keyboard *kb, int32_t rate,
-    int32_t delay);
-uint32_t wlr_keyboard_get_modifiers(struct wlr_keyboard *keyboard);
+#define WLR_LED_COUNT 3
+#define WLR_MODIFIER_COUNT 8
+#define WLR_KEYBOARD_KEYS_CAP 32
+
+enum wlr_keyboard_led {
+    WLR_LED_NUM_LOCK = ...,
+    WLR_LED_CAPS_LOCK = ...,
+    WLR_LED_SCROLL_LOCK = ...,
+    ...
+};
+
+enum wlr_keyboard_modifier {
+    WLR_MODIFIER_SHIFT = ...,
+    WLR_MODIFIER_CAPS = ...,
+    WLR_MODIFIER_CTRL = ...,
+    WLR_MODIFIER_ALT = ...,
+    WLR_MODIFIER_MOD2 = ...,
+    WLR_MODIFIER_MOD3 = ...,
+    WLR_MODIFIER_LOGO = ...,
+    WLR_MODIFIER_MOD5 = ...,
+    ...
+};
 
 struct wlr_keyboard_modifiers {
     xkb_mod_mask_t depressed;
@@ -148,10 +171,6 @@ struct wlr_keyboard_modifiers {
     xkb_mod_mask_t group;
     ...;
 };
-
-#define WLR_LED_COUNT 3
-#define WLR_MODIFIER_COUNT 8
-#define WLR_KEYBOARD_KEYS_CAP 32
 
 struct wlr_keyboard {
     const struct wlr_keyboard_impl *impl;
@@ -198,6 +217,12 @@ struct wlr_event_keyboard_key {
     enum wlr_key_state state;
     ...;
 };
+
+void wlr_keyboard_set_keymap(struct wlr_keyboard *kb,
+    struct xkb_keymap *keymap);
+void wlr_keyboard_set_repeat_info(struct wlr_keyboard *kb, int32_t rate,
+    int32_t delay);
+uint32_t wlr_keyboard_get_modifiers(struct wlr_keyboard *keyboard);
 """
 
 # types/wlr_linux_dmabuf_v1.h
@@ -488,7 +513,14 @@ void wlr_seat_destroy(struct wlr_seat *wlr_seat);
 void wlr_seat_set_capabilities(struct wlr_seat *wlr_seat,
     uint32_t capabilities);
 
+void wlr_seat_set_name(struct wlr_seat *wlr_seat, const char *name);
+
+bool wlr_seat_pointer_surface_has_focus(struct wlr_seat *wlr_seat,
+    struct wlr_surface *surface);
 void wlr_seat_pointer_clear_focus(struct wlr_seat *wlr_seat);
+void wlr_seat_pointer_start_grab(struct wlr_seat *wlr_seat,
+    struct wlr_seat_pointer_grab *grab);
+void wlr_seat_pointer_end_grab(struct wlr_seat *wlr_seat);
 void wlr_seat_pointer_notify_enter(struct wlr_seat *wlr_seat,
     struct wlr_surface *surface, double sx, double sy);
 void wlr_seat_pointer_notify_motion(struct wlr_seat *wlr_seat,
@@ -499,10 +531,14 @@ void wlr_seat_pointer_notify_axis(struct wlr_seat *wlr_seat, uint32_t time_msec,
     enum wlr_axis_orientation orientation, double value,
     int32_t value_discrete, enum wlr_axis_source source);
 void wlr_seat_pointer_notify_frame(struct wlr_seat *wlr_seat);
+bool wlr_seat_pointer_has_grab(struct wlr_seat *seat);
 
 void wlr_seat_set_keyboard(struct wlr_seat *seat, struct wlr_input_device *dev);
 struct wlr_keyboard *wlr_seat_get_keyboard(struct wlr_seat *seat);
 
+void wlr_seat_keyboard_start_grab(struct wlr_seat *wlr_seat,
+    struct wlr_seat_keyboard_grab *grab);
+void wlr_seat_keyboard_end_grab(struct wlr_seat *wlr_seat);
 void wlr_seat_keyboard_notify_key(struct wlr_seat *seat, uint32_t time_msec,
     uint32_t key, uint32_t state);
 void wlr_seat_keyboard_notify_modifiers(struct wlr_seat *seat,
@@ -510,6 +546,8 @@ void wlr_seat_keyboard_notify_modifiers(struct wlr_seat *seat,
 void wlr_seat_keyboard_notify_enter(struct wlr_seat *seat,
     struct wlr_surface *surface, uint32_t keycodes[], size_t num_keycodes,
     struct wlr_keyboard_modifiers *modifiers);
+void wlr_seat_keyboard_clear_focus(struct wlr_seat *wlr_seat);
+bool wlr_seat_keyboard_has_grab(struct wlr_seat *seat);
 """
 
 # types/wlr_surface.h
@@ -779,10 +817,21 @@ uint32_t wlr_xdg_toplevel_set_tiled(struct wlr_xdg_surface *surface,
 void wlr_xdg_toplevel_send_close(struct wlr_xdg_surface *surface);
 void wlr_xdg_popup_destroy(struct wlr_xdg_surface *surface);
 
+struct wlr_surface *wlr_xdg_surface_surface_at(
+    struct wlr_xdg_surface *surface, double sx, double sy,
+    double *sub_x, double *sub_y);
+bool wlr_surface_is_xdg_surface(struct wlr_surface *surface);
+
 struct wlr_xdg_surface *wlr_xdg_surface_from_wlr_surface(
     struct wlr_surface *surface);
 
+void wlr_xdg_surface_get_geometry(struct wlr_xdg_surface *surface,
+    struct wlr_box *box);
+
 void wlr_xdg_surface_for_each_surface(struct wlr_xdg_surface *surface,
+    wlr_surface_iterator_func_t iterator, void *user_data);
+
+void wlr_xdg_surface_for_each_popup(struct wlr_xdg_surface *surface,
     wlr_surface_iterator_func_t iterator, void *user_data);
 """
 

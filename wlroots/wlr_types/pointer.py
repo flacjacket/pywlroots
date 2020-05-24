@@ -1,41 +1,27 @@
 # Copyright (c) Sean Vig 2019
 
-from wlroots import ffi
-from .input_device import InputDevice
+import enum
+
+from wlroots import ffi, lib
+from .input_device import ButtonState, InputDevice
 
 
-class PointerEventAxis:
-    def __init__(self, ptr):
-        """A pointer axis event
-
-        Emitted by the cursor axis event.
-        """
-        ptr = ffi.cast("struct wlr_event_pointer_axis *", ptr)
-        self._ptr = ptr
-
-    @property
-    def device(self):
-        """Input device associated with the event"""
-        return InputDevice(self._ptr.device)
+@enum.unique
+class AxisSource(enum.IntEnum):
+    WHEEL = lib.WLR_AXIS_SOURCE_WHEEL
+    FINGER = lib.WLR_AXIS_SOURCE_FINGER
+    CONTINUOUS = lib.WLR_AXIS_SOURCE_CONTINUOUS
+    WHEEL_TILT = lib.WLR_AXIS_SOURCE_WHEEL_TILT
 
 
-class PointerEventButton:
-    def __init__(self, ptr):
-        """A pointer button event
-
-        Emitted by the cursor button event.
-        """
-        ptr = ffi.cast("struct wlr_event_pointer_button *", ptr)
-        self._ptr = ptr
-
-    @property
-    def device(self):
-        """Input device associated with the event"""
-        return InputDevice(self._ptr.device)
+@enum.unique
+class AxisOrientation(enum.IntEnum):
+    VERTICAL = lib.WLR_AXIS_ORIENTATION_VERTICAL
+    HORIZONTAL = lib.WLR_AXIS_ORIENTATION_HORIZONTAL
 
 
 class PointerEventMotion:
-    def __init__(self, ptr):
+    def __init__(self, ptr) -> None:
         """A relative motion pointer event
 
         Emitted by the cursor motion event.
@@ -44,9 +30,29 @@ class PointerEventMotion:
         self._ptr = ptr
 
     @property
-    def device(self):
+    def device(self) -> InputDevice:
         """Input device associated with the event"""
         return InputDevice(self._ptr.device)
+
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def delta_x(self) -> float:
+        return self._ptr.delta_x
+
+    @property
+    def delta_y(self) -> float:
+        return self._ptr.delta_y
+
+    @property
+    def unaccel_delta_x(self) -> float:
+        return self._ptr.unaccel_dx
+
+    @property
+    def unaccel_delta_y(self) -> float:
+        return self._ptr.unaccel_dy
 
 
 class PointerEventMotionAbsolute:
@@ -64,6 +70,10 @@ class PointerEventMotionAbsolute:
         return InputDevice(self._ptr.device)
 
     @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
     def x(self) -> float:
         """The x position of the motion"""
         return self._ptr.x
@@ -72,3 +82,45 @@ class PointerEventMotionAbsolute:
     def y(self) -> float:
         """The y position of the motion"""
         return self._ptr.y
+
+
+class PointerEventButton:
+    def __init__(self, ptr) -> None:
+        """A pointer button event
+
+        Emitted by the cursor button event.
+        """
+        ptr = ffi.cast("struct wlr_event_pointer_button *", ptr)
+        self._ptr = ptr
+
+    @property
+    def device(self) -> InputDevice:
+        """Input device associated with the event"""
+        return InputDevice(self._ptr.device)
+
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def button(self) -> int:
+        return self._ptr.button
+
+    @property
+    def button_state(self) -> ButtonState:
+        return ButtonState(self._ptr.state)
+
+
+class PointerEventAxis:
+    def __init__(self, ptr) -> None:
+        """A pointer axis event
+
+        Emitted by the cursor axis event.
+        """
+        ptr = ffi.cast("struct wlr_event_pointer_axis *", ptr)
+        self._ptr = ptr
+
+    @property
+    def device(self) -> InputDevice:
+        """Input device associated with the event"""
+        return InputDevice(self._ptr.device)

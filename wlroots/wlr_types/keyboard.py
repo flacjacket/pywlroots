@@ -11,6 +11,25 @@ _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
 @enum.unique
+class KeyboardLed(enum.IntFlag):
+    NUM_LOCK = lib.WLR_LED_NUM_LOCK
+    CAPS_LOCK = lib.WLR_LED_CAPS_LOCK
+    SCROLL_LOCK = lib.WLR_LED_SCROLL_LOCK
+
+
+@enum.unique
+class KeyboardModifier(enum.IntFlag):
+    SHIFT = lib.WLR_MODIFIER_SHIFT
+    CAPS = lib.WLR_MODIFIER_CAPS
+    CTRL = lib.WLR_MODIFIER_CTRL
+    ALT = lib.WLR_MODIFIER_ALT
+    MOD2 = lib.WLR_MODIFIER_MOD2
+    MOD3 = lib.WLR_MODIFIER_MOD3
+    LOGO = lib.WLR_MODIFIER_LOGO
+    MOD5 = lib.WLR_MODIFIER_MOD5
+
+
+@enum.unique
 class KeyState(enum.IntEnum):
     KEY_RELEASED = lib.WLR_KEY_RELEASED
     KEY_PRESSED = lib.WLR_KEY_PRESSED
@@ -91,8 +110,37 @@ class Keyboard:
         _weakkeydict[modifiers_ptr] = self._ptr
         return KeyboardModifiers(modifiers_ptr)
 
+    @property
+    def modifier(self) -> KeyboardModifier:
+        """The enum of the modifier that is currently active"""
+        return lib.wlr_keyboard_get_modifiers(self._ptr)
+
 
 class KeyboardModifiers:
     def __init__(self, ptr) -> None:
-        """Modifiers of a given keyboard"""
+        """Modifiers of a given keyboard
+
+        :param ptr:
+            The wlr_keyboard_modifiers cdata struct.
+        """
         self._ptr = ptr
+
+    @property
+    def depressed(self) -> int:
+        """Depressed modifiers"""
+        return self._ptr.depressed
+
+    @property
+    def latched(self) -> int:
+        """Latched modifiers"""
+        return self._ptr.latched
+
+    @property
+    def locked(self) -> int:
+        """The locked keyboard modifiers"""
+        return self._ptr.locked
+
+    @property
+    def group(self) -> int:
+        """The modifier group"""
+        return self._ptr.group

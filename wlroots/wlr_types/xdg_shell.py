@@ -2,7 +2,7 @@
 
 import enum
 import weakref
-from typing import Callable, TypeVar
+from typing import Callable, Optional, Tuple, TypeVar
 
 from pywayland.server import Display, Signal
 
@@ -101,6 +101,20 @@ class XdgSurface:
             raise ValueError(f"xdg surface must be top-level, got: {self.role}")
 
         return lib.wlr_xdg_toplevel_set_activated(self._ptr, activated)
+
+    def surface_at(self, surface_x: float, surface_y: float) -> Tuple[Optional[Surface], float, float]:
+        """Find a surface within this xdg-surface tree at the given surface-local coordinates
+
+        Returns the surface and coordinates in the leaf surface coordinate
+        system or None if no surface is found at that location.
+        """
+        sub_x_data = ffi.new("double*")
+        sub_y_data = ffi.new("double*")
+        surface_ptr = lib.wlr_xdg_surface_surface_at(self._ptr, surface_x, surface_y, sub_x_data, sub_y_data)
+        if surface_ptr == ffi.NULL:
+            return None, 0., 0.
+
+        return Surface(surface_ptr), sub_x_data[0], sub_y_data[0]
 
     def for_each_surface(self, iterator: SurfaceCallback[T], data: T = None) -> None:
         """Call iterator on each surface and popup in the xdg-surface tree

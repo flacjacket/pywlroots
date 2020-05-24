@@ -46,6 +46,16 @@ class Cursor:
         )
         self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
 
+    @property
+    def x(self) -> float:
+        """The x position of the cursor"""
+        return self._ptr.x
+
+    @property
+    def y(self) -> float:
+        """The y position of the cursor"""
+        return self._ptr.y
+
     def destroy(self) -> None:
         """Clean up the cursor"""
         if self._ptr is not None:
