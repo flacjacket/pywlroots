@@ -1,6 +1,6 @@
 # Copyright (c) 2019 Sean Vig
 
-from typing import Optional
+from typing import Optional, Tuple
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Display, Signal
@@ -42,7 +42,8 @@ class Seat:
         )
 
         self.request_set_cursor_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_set_cursor)
+            ptr=ffi.addressof(self._ptr.events.request_set_cursor),
+            data_wrapper=PointerRequestSetCursorEvent
         )
 
         self.request_set_selection_event = Signal(
@@ -223,11 +224,32 @@ class Seat:
         self.destroy()
 
 
+class PointerRequestSetCursorEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_seat_pointer_request_set_cursor_event *", ptr)
+
+    # TODO: seat client
+
+    @property
+    def surface(self) -> Surface:
+        # TODO: setup weakref
+        return Surface(self._ptr.surface)
+
+    @property
+    def serial(self) -> int:
+        return self._ptr.serial
+
+    @property
+    def hotspot(self) -> Tuple[int, int]:
+        return self._ptr.hotspot_x, self._ptr.hotspot_y
+
+
 class SeatPointerState:
     def __init__(self, ptr) -> None:
         """The current state of the pointer on the seat"""
         self._ptr = ptr
 
+    @property
     def focused_surface(self) -> Optional[Surface]:
         """The surface that currently has keyboard focus"""
         focused_surface = self._ptr.focused_surface

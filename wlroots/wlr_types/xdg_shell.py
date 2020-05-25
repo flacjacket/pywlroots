@@ -7,6 +7,7 @@ from typing import Callable, Optional, Tuple, TypeVar
 from pywayland.server import Display, Signal
 
 from wlroots import ffi, lib
+from .output import Output
 from .surface import Surface
 
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
@@ -152,20 +153,102 @@ class XdgTopLevel:
             ptr=ffi.addressof(self._ptr.events.request_maximize)
         )
         self.request_fullscreen_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_fullscreen)
+            ptr=ffi.addressof(self._ptr.events.request_fullscreen),
+            data_wrapper=XdgTopLevelSetFullscreenEvent,
         )
         self.request_minimize_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_minimize)
         )
         self.request_move_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_move)
+            ptr=ffi.addressof(self._ptr.events.request_move),
+            data_wrapper=XdgTopLevelMoveEvent,
         )
         self.request_resize_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_resize)
+            ptr=ffi.addressof(self._ptr.events.request_resize),
+            data_wrapper=XdgTopLevelResizeEvent,
         )
         self.request_show_window_menu_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_show_window_menu)
+            ptr=ffi.addressof(self._ptr.events.request_show_window_menu),
+            data_wrapper=XdgTopLevelShowWindowMenuEvent,
         )
         self.set_parent_event = Signal(ptr=ffi.addressof(self._ptr.events.set_parent))
         self.set_title_event = Signal(ptr=ffi.addressof(self._ptr.events.set_title))
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
+
+
+class XdgTopLevelMoveEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_xdg_toplevel_move_event *", ptr)
+
+    @property
+    def surface(self) -> Surface:
+        # TODO: keep weakref
+        return Surface(self._ptr.surface)
+
+    # TODO: seat client
+
+    @property
+    def serial(self) -> int:
+        return self._ptr.serial
+
+
+class XdgTopLevelResizeEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_xdg_toplevel_resize_event *", ptr)
+
+    @property
+    def surface(self) -> Surface:
+        # TODO: keep weakref
+        return Surface(self._ptr.surface)
+
+    # TODO: seat client
+
+    @property
+    def serial(self) -> int:
+        return self._ptr.serial
+
+    @property
+    def edges(self) -> int:
+        return self._ptr.edges
+
+
+class XdgTopLevelSetFullscreenEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_xdg_toplevel_set_fullscreen_event *", ptr)
+
+    @property
+    def surface(self) -> Surface:
+        # TODO: keep weakref
+        return Surface(self._ptr.surface)
+
+    @property
+    def fullscreen(self) -> bool:
+        return self._ptr.fullscreen
+
+    @property
+    def output(self) -> Output:
+        return Output(self._ptr.output)
+
+
+class XdgTopLevelShowWindowMenuEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_xdg_toplevel_show_window_menu_event *", ptr)
+
+    @property
+    def surface(self) -> Surface:
+        # TODO: keep weakref
+        return Surface(self._ptr.surface)
+
+    # TODO: seat client
+
+    @property
+    def serial(self) -> int:
+        return self._ptr.serial
+
+    @property
+    def x(self) -> int:
+        return self._ptr.x
+
+    @property
+    def y(self) -> int:
+        return self._ptr.y

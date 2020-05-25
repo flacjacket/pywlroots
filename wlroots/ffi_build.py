@@ -62,6 +62,38 @@ struct wlr_box {
 
 # types/wlr_cursor.h
 CDEF += """
+struct wlr_cursor {
+    struct wlr_cursor_state *state;
+    double x, y;
+
+    struct {
+        struct wl_signal motion;
+        struct wl_signal motion_absolute;
+        struct wl_signal button;
+        struct wl_signal axis;
+        struct wl_signal frame;
+        struct wl_signal swipe_begin;
+        struct wl_signal swipe_update;
+        struct wl_signal swipe_end;
+        struct wl_signal pinch_begin;
+        struct wl_signal pinch_update;
+        struct wl_signal pinch_end;
+
+        struct wl_signal touch_up;
+        struct wl_signal touch_down;
+        struct wl_signal touch_motion;
+        struct wl_signal touch_cancel;
+
+        struct wl_signal tablet_tool_axis;
+        struct wl_signal tablet_tool_proximity;
+        struct wl_signal tablet_tool_tip;
+        struct wl_signal tablet_tool_button;
+    } events;
+
+    void *data;
+    ...;
+};
+
 struct wlr_cursor *wlr_cursor_create(void);
 void wlr_cursor_destroy(struct wlr_cursor *cur);
 
@@ -422,7 +454,30 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp);
 
 #define CLOCK_MONOTONIC ...
 
-struct wlr_seat_pointer_state { ...; };
+#define WLR_POINTER_BUTTONS_CAP 16
+
+struct wlr_seat_pointer_state {
+    struct wlr_seat *seat;
+    struct wlr_seat_client *focused_client;
+    struct wlr_surface *focused_surface;
+    double sx, sy;
+
+    struct wlr_seat_pointer_grab *grab;
+    struct wlr_seat_pointer_grab *default_grab;
+
+    uint32_t buttons[WLR_POINTER_BUTTONS_CAP];
+    size_t button_count;
+    uint32_t grab_button;
+    uint32_t grab_serial;
+    uint32_t grab_time;
+
+    struct wl_listener surface_destroy;
+
+    struct {
+        struct wl_signal focus_change;
+    } events;
+    ...;
+};
 struct wlr_seat_keyboard_state {
     struct wlr_seat *seat;
     struct wlr_keyboard *keyboard;
@@ -506,6 +561,35 @@ struct wlr_seat {
 
     void *data;
     ...;
+};
+
+struct wlr_seat_pointer_request_set_cursor_event {
+    struct wlr_seat_client *seat_client;
+    struct wlr_surface *surface;
+    uint32_t serial;
+    int32_t hotspot_x, hotspot_y;
+};
+
+struct wlr_seat_request_set_selection_event {
+    struct wlr_data_source *source;
+    uint32_t serial;
+};
+
+struct wlr_seat_request_start_drag_event {
+    struct wlr_drag *drag;
+    struct wlr_surface *origin;
+    uint32_t serial;
+};
+
+struct wlr_seat_pointer_focus_change_event {
+    struct wlr_seat *seat;
+    struct wlr_surface *old_surface, *new_surface;
+    double sx, sy;
+};
+
+struct wlr_seat_keyboard_focus_change_event {
+    struct wlr_seat *seat;
+    struct wlr_surface *old_surface, *new_surface;
 };
 
 struct wlr_seat *wlr_seat_create(struct wl_display *display, const char *name);
@@ -617,38 +701,6 @@ extern "Python" void surface_iterator_callback(struct wlr_surface *surface, int 
 
 # types/wlr_xcursor_manager.h
 CDEF += """
-struct wlr_cursor {
-    struct wlr_cursor_state *state;
-    double x, y;
-
-    struct {
-        struct wl_signal motion;
-        struct wl_signal motion_absolute;
-        struct wl_signal button;
-        struct wl_signal axis;
-        struct wl_signal frame;
-        struct wl_signal swipe_begin;
-        struct wl_signal swipe_update;
-        struct wl_signal swipe_end;
-        struct wl_signal pinch_begin;
-        struct wl_signal pinch_update;
-        struct wl_signal pinch_end;
-
-        struct wl_signal touch_up;
-        struct wl_signal touch_down;
-        struct wl_signal touch_motion;
-        struct wl_signal touch_cancel;
-
-        struct wl_signal tablet_tool_axis;
-        struct wl_signal tablet_tool_proximity;
-        struct wl_signal tablet_tool_tip;
-        struct wl_signal tablet_tool_button;
-    } events;
-
-    void *data;
-    ...;
-};
-
 struct wlr_xcursor_manager *wlr_xcursor_manager_create(const char *name,
     uint32_t size);
 void wlr_xcursor_manager_destroy(struct wlr_xcursor_manager *manager);

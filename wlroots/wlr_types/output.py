@@ -1,6 +1,6 @@
 # Copyright (c) Sean Vig 2019
 
-from typing import Tuple
+from typing import Tuple, Optional
 
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
@@ -47,6 +47,43 @@ class Output:
         return ffi.string(self._ptr.name).decode()
 
     @property
+    def description(self) -> Optional[str]:
+        """The description of the output"""
+        if self._ptr.description == ffi.NULL:
+            return None
+        return ffi.string(self._ptr.description).decode()
+
+    @property
+    def make(self) -> str:
+        return ffi.string(self._ptr.make).decode()
+
+    @property
+    def model(self) -> str:
+        return ffi.string(self._ptr.model).decode()
+
+    @property
+    def serial(self) -> str:
+        return ffi.string(self._ptr.serial).decode()
+
+    @property
+    def physical_size_mm(self) -> Tuple[int, int]:
+        """Returns the width and height of the output, in millimeters"""
+        return self._ptr.phys_width, self._ptr.phys_height
+
+    @property
+    def modes(self):
+        if lib.wl_list_empty(ffi.addressof(self._ptr.modes)) == 1:
+            return []
+
+    @property
+    def enabled(self) -> bool:
+        return self._ptr.enabled
+
+    @property
+    def scale(self) -> float:
+        return self._ptr.scale
+
+    @property
     def transform_matrix(self) -> Matrix:
         """The transform matrix giving the projection of the output"""
         return Matrix(self._ptr.transform_matrix)
@@ -86,11 +123,6 @@ class Output:
         This is a utility function that can be called when compositors render.
         """
         lib.wlr_output_render_software_cursors(self._ptr, ffi.NULL)
-
-    @property
-    def modes(self):
-        if lib.wl_list_empty(ffi.addressof(self._ptr.modes)) == 1:
-            return []
 
     @staticmethod
     def transform_invert(transform: WlOutput.transform) -> WlOutput.transform:

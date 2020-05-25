@@ -1,18 +1,19 @@
 # Copyright (c) Sean Vig 2019
 
-from typing import Optional
+from typing import Optional, Tuple
 
 from pywayland.server import Signal
 
 from wlroots import ffi, lib
-from .output_layout import OutputLayout
 from .input_device import InputDevice, InputDeviceType
+from .output_layout import OutputLayout
 from .pointer import (
     PointerEventAxis,
     PointerEventButton,
     PointerEventMotion,
     PointerEventMotionAbsolute,
 )
+from .surface import Surface
 
 
 class Cursor:
@@ -122,6 +123,20 @@ class Cursor:
             input_device_ptr = input_device._ptr
 
         lib.wlr_cursor_warp_absolute(self._ptr, input_device_ptr, x, y)
+
+    def set_surface(self, surface: Surface, hotspot: Tuple[int, int]) -> None:
+        """Set the cursor surface
+
+        The surface can be committed to update the cursor image. The surface
+        position is subtracted from the hotspot. A None surface commit hides
+        the cursor.
+        """
+        if surface is None:
+            surface_ptr = ffi.NULL
+        else:
+            surface_ptr = surface._ptr
+
+        lib.wlr_cursor_set_surface(self._ptr, surface_ptr, hotspot[0], hotspot[1])
 
     def __enter__(self) -> "Cursor":
         """Context manager to clean up the cursor"""
