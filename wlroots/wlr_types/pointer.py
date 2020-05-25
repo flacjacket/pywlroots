@@ -124,3 +124,23 @@ class PointerEventAxis:
     def device(self) -> InputDevice:
         """Input device associated with the event"""
         return InputDevice(self._ptr.device)
+
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def source(self) -> AxisSource:
+        return AxisSource(self._ptr.source)
+
+    @property
+    def orientation(self) -> AxisOrientation:
+        return AxisOrientation(self._ptr.orientation)
+
+    @property
+    def delta(self) -> float:
+        return self._ptr.delta
+
+    @property
+    def delta_discrete(self) -> int:
+        return self._ptr.delta_discrete

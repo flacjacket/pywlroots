@@ -43,7 +43,7 @@ class Seat:
 
         self.request_set_cursor_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_set_cursor),
-            data_wrapper=PointerRequestSetCursorEvent
+            data_wrapper=PointerRequestSetCursorEvent,
         )
 
         self.request_set_selection_event = Signal(

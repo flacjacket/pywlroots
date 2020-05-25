@@ -362,22 +362,24 @@ struct wlr_output {
 };
 
 void wlr_output_enable(struct wlr_output *output, bool enable);
+void wlr_output_create_global(struct wlr_output *output);
+void wlr_output_destroy_global(struct wlr_output *output);
+
+struct wlr_output_mode *wlr_output_preferred_mode(struct wlr_output *output);
+
+void wlr_output_set_mode(struct wlr_output *output,
+    struct wlr_output_mode *mode);
 
 bool wlr_output_attach_render(struct wlr_output *output, int *buffer_age);
 void wlr_output_effective_resolution(struct wlr_output *output,
     int *width, int *height);
 bool wlr_output_commit(struct wlr_output *output);
-void wlr_output_set_mode(struct wlr_output *output,
-    struct wlr_output_mode *mode);
 
 void wlr_output_render_software_cursors(struct wlr_output *output,
     struct pixman_region32 *damage);
 
 enum wl_output_transform wlr_output_transform_invert(
     enum wl_output_transform tr);
-
-void wlr_output_create_global(struct wlr_output *output);
-void wlr_output_destroy_global(struct wlr_output *output);
 """
 
 # types/wlr_output_layout.h

@@ -88,6 +88,31 @@ class Output:
         """The transform matrix giving the projection of the output"""
         return Matrix(self._ptr.transform_matrix)
 
+    def enable(self, *, enable: bool = True) -> None:
+        """Enables or disables the output
+
+         A disabled output is turned off and doesn't emit `frame` events.
+         """
+        lib.wlr_output_enable(self._ptr, enable)
+
+    def preferred_mode(self) -> Optional["OutputMode"]:
+        """Returns the preferred mode for this output
+
+        If the output doesn't support modes, returns None.
+        """
+        output_mode_ptr = lib.wlr_output_preferred_mode(self._ptr)
+        if output_mode_ptr == ffi.NULL:
+            return None
+
+        return OutputMode(output_mode_ptr)
+
+    def set_mode(self, mode: "OutputMode") -> None:
+        """Sets the output mode
+
+        The output needs to be enabled.
+        """
+        lib.wlr_output_set_mode(self._ptr, mode._ptr)
+
     def create_global(self) -> None:
         """Create the global corresponding to the output"""
         lib.wlr_output_create_global(self._ptr)
@@ -128,3 +153,24 @@ class Output:
     def transform_invert(transform: WlOutput.transform) -> WlOutput.transform:
         """Returns the transform that, when composed with transform gives transform.normal"""
         return WlOutput.transform(lib.wlr_output_transform_invert(transform))
+
+
+class OutputMode:
+    def __init__(self, ptr) -> None:
+        self._ptr = ptr
+
+    @property
+    def width(self) -> int:
+        return self._ptr.width
+
+    @property
+    def height(self) -> int:
+        return self._ptr.height
+
+    @property
+    def refresh_mhz(self) -> int:
+        return self._ptr.refresh
+
+    @property
+    def preferred(self) -> int:
+        return self._ptr.preferred
