@@ -152,9 +152,7 @@ class XdgSurface:
         """
         py_handle = (iterator, data)
         handle = ffi.new_handle(py_handle)
-        lib.wlr_xdg_surface_for_each_surface(
-            self._ptr, lib.surface_iterator_callback, handle
-        )
+        lib.wlr_xdg_surface_for_each_surface(self._ptr, lib.surface_iterator_callback, handle)
 
 
 class XdgTopLevel:
@@ -166,23 +164,17 @@ class XdgTopLevel:
         """
         self._ptr = ptr
 
-        self.request_maximize_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_maximize)
-        )
+        self.request_maximize_event = Signal(ptr=ffi.addressof(self._ptr.events.request_maximize))
         self.request_fullscreen_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_fullscreen),
             data_wrapper=XdgTopLevelSetFullscreenEvent,
         )
-        self.request_minimize_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_minimize)
-        )
+        self.request_minimize_event = Signal(ptr=ffi.addressof(self._ptr.events.request_minimize))
         self.request_move_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_move),
-            data_wrapper=XdgTopLevelMoveEvent,
+            ptr=ffi.addressof(self._ptr.events.request_move), data_wrapper=XdgTopLevelMoveEvent,
         )
         self.request_resize_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_resize),
-            data_wrapper=XdgTopLevelResizeEvent,
+            ptr=ffi.addressof(self._ptr.events.request_resize), data_wrapper=XdgTopLevelResizeEvent,
         )
         self.request_show_window_menu_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_show_window_menu),

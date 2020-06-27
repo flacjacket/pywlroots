@@ -85,9 +85,10 @@ install:
 
 script:
   - if [[ $TESTENV == "pep8" ]]; then
-      flake8 wlroots;
+      flake8 wlroots tiny;
     elif [[ $TESTENV == "mypy" ]]; then
       mypy -p wlroots;
+      mypy -p tiny;
     else
       pytest -Wall;
     fi

@@ -22,9 +22,7 @@ class Surface:
         self._ptr = ptr
 
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
-        self.new_subsurface_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.new_subsurface)
-        )
+        self.new_subsurface_event = Signal(ptr=ffi.addressof(self._ptr.events.new_subsurface))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     def __eq__(self, other: object) -> bool:

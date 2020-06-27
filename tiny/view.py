@@ -86,7 +86,9 @@ class View:
 
             self.tinywl_server.grab_x = self.tinywl_server._cursor.x - border_x
             self.tinywl_server.grab_y = self.tinywl_server._cursor.y - border_y
-            self.tinywl_server.grab_geobox = Box(box.x + int(self.x), box.y + int(self.y), box.width, box.height)
+            self.tinywl_server.grab_geobox = Box(
+                box.x + int(self.x), box.y + int(self.y), box.width, box.height
+            )
             self.tinywl_server.resize_edges = edges
 
     def view_at(self, layout_x: int, layout_y: int) -> Tuple[Optional[Surface], float, float]:
