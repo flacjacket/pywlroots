@@ -121,6 +121,9 @@ struct wlr_compositor *wlr_compositor_create(struct wl_display *display,
 CDEF += """
 struct wlr_data_device_manager *wlr_data_device_manager_create(
     struct wl_display *display);
+
+void wlr_seat_set_selection(struct wlr_seat *seat,
+    struct wlr_data_source *source, uint32_t serial);
 """
 
 # types/wlr_input_device.h

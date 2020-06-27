@@ -46,12 +46,31 @@ class Seat:
             data_wrapper=PointerRequestSetCursorEvent,
         )
 
+        # Called when an application _wants_ to set the selection
         self.request_set_selection_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_set_selection)
+            ptr=ffi.addressof(self._ptr.events.request_set_selection),
+            data_wrapper=RequestSetSelectionEvent,
         )
+        # Called after the data source is set for the selection
         self.set_selection_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.set_selection)
+            ptr=ffi.addressof(self._ptr.events.set_selection),
+            data_wrapper=RequestSetPrimarySelectionEvent,
         )
+
+        # Called when an application _wants_ to set the primary selection (user selects some data)
+        self.request_set_primary_selection_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_set_primary_selection)
+        )
+        # Called after the primary selection source object is set
+        self.set_primary_selection_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.set_primary_selection)
+        )
+
+        self.request_start_drag_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_start_drag),
+            data_wrapper=RequestStartDragEvent,
+        )
+        self.start_drag_event = Signal(ptr=ffi.addressof(self._ptr.events.start_drag))
 
     @property
     def pointer_state(self) -> "SeatPointerState":
@@ -215,6 +234,19 @@ class Seat:
         """Whether or not the keyboard has a grab other than the default grab"""
         return lib.wlr_seat_keyboard_has_grab(self._ptr)
 
+    def set_selection(self, source, serial: int) -> None:
+        """Sets the current selection for the seat
+
+        None can be provided to clear it.  This removes the previous one if
+        there was any. In case the selection doesn't come from a client,
+        Display.next_serial() can be used to generate a serial.
+        """
+        if source is None:
+            lib.wlr_seat_set_selection(self._ptr, ffi.NULL, serial)
+        else:
+            # TODO: wrap source in a data source
+            lib.wlr_seat_set_selection(self._ptr, source, serial)
+
     def __enter__(self) -> "Seat":
         """Context manager to clean up the seat"""
         return self
@@ -244,10 +276,58 @@ class PointerRequestSetCursorEvent:
         return self._ptr.hotspot_x, self._ptr.hotspot_y
 
 
+class RequestSetSelectionEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_seat_request_set_selection_event *", ptr)
+
+    # TODO: source
+
+    @property
+    def serial(self) -> int:
+        return self._ptr.serial
+
+
+class RequestSetPrimarySelectionEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_seat_request_set_selection_event *", ptr)
+
+    # TODO: source
+
+    @property
+    def serial(self) -> int:
+        return self._ptr.serial
+
+
+class RequestStartDragEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_seat_request_start_drag_event *", ptr)
+
+    # TODO
+
+
+class PointerFocusChangeEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_seat_pointer_focus_change_event *", ptr)
+
+    # TODO
+
+
+class KeyboardFocusChangeEvent:
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_seat_keyboard_focus_change_event *", ptr)
+
+    # TODO
+
+
 class SeatPointerState:
     def __init__(self, ptr) -> None:
         """The current state of the pointer on the seat"""
         self._ptr = ptr
+
+        self.focus_change_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.focus_change),
+            data_wrapper=PointerFocusChangeEvent,
+        )
 
     @property
     def focused_surface(self) -> Optional[Surface]:
@@ -262,6 +342,11 @@ class SeatKeyboardState:
     def __init__(self, ptr) -> None:
         """The current state of the keyboard on the seat"""
         self._ptr = ptr
+
+        self.focus_change_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.focus_change),
+            data_wrapper=KeyboardFocusChangeEvent,
+        )
 
     @property
     def focused_surface(self) -> Optional[Surface]:
