@@ -8,6 +8,7 @@ from pywayland.server import Display, Signal
 
 from wlroots import ffi, lib
 from wlroots.util.edges import Edges
+from .box import Box
 from .output import Output
 from .surface import Surface
 
@@ -97,6 +98,21 @@ class XdgSurface:
         _weakkeydict[toplevel] = self._ptr
 
         return toplevel
+
+    def get_geometry(self) -> Box:
+        """Get the surface geometry
+
+        This is either the geometry as set by the client, or defaulted to the
+        bounds of the surface + the subsurfaces (as specified by the protocol).
+
+        The x and y value can be <0
+        """
+        box_ptr = ffi.new("struct wlr_box *")
+        lib.wlr_xdg_surface_get_geometry(self._ptr, box_ptr)
+        return Box(box_ptr.x, box_ptr.y, box_ptr.width, box_ptr.height)
+
+    def set_size(self, width: int, height: int) -> int:
+        return lib.wlr_xdg_toplevel_set_size(self._ptr, width, height)
 
     def set_activated(self, activated: bool) -> int:
         if self.role != XdgSurfaceRole.TOPLEVEL:
