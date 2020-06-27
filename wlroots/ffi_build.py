@@ -890,6 +890,18 @@ void wlr_xdg_surface_for_each_popup(struct wlr_xdg_surface *surface,
     wlr_surface_iterator_func_t iterator, void *user_data);
 """
 
+# util/edges.h
+CDEF += """
+enum wlr_edges {
+    WLR_EDGE_NONE = ...,
+    WLR_EDGE_TOP = ...,
+    WLR_EDGE_BOTTOM = ...,
+    WLR_EDGE_LEFT = ...,
+    WLR_EDGE_RIGHT = ...,
+    ...
+};
+"""
+
 # util/log.h
 CDEF += """
 enum wlr_log_importance {

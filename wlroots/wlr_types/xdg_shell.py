@@ -7,6 +7,7 @@ from typing import Callable, Optional, Tuple, TypeVar
 from pywayland.server import Display, Signal
 
 from wlroots import ffi, lib
+from wlroots.util.edges import Edges
 from .output import Output
 from .surface import Surface
 
@@ -208,7 +209,7 @@ class XdgTopLevelResizeEvent:
         return self._ptr.serial
 
     @property
-    def edges(self) -> int:
+    def edges(self) -> Edges:
         return self._ptr.edges
 
 
