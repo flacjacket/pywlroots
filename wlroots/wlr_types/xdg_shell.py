@@ -138,7 +138,7 @@ class XdgSurface:
 
         return Surface(surface_ptr), sub_x_data[0], sub_y_data[0]
 
-    def for_each_surface(self, iterator: SurfaceCallback[T], data: T = None) -> None:
+    def for_each_surface(self, iterator: SurfaceCallback[T], data: Optional[T] = None) -> None:
         """Call iterator on each surface and popup in the xdg-surface tree
 
         Call `iterator` on each surface and popup in the xdg-surface tree, with
