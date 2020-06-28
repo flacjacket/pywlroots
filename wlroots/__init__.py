@@ -9,4 +9,4 @@ else:
         lib.WLR_VERSION_MAJOR, lib.WLR_VERSION_MICRO, lib.WLR_VERSION_MINOR,
     )
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
