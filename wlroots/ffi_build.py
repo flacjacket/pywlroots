@@ -329,7 +329,6 @@ struct wlr_output {
     enum wl_output_transform transform;
 
     bool needs_frame;
-    struct pixman_region32 damage;
     bool frame_pending;
     float transform_matrix[9];
 
@@ -337,6 +336,7 @@ struct wlr_output {
 
     struct {
         struct wl_signal frame;
+        struct wl_signal damage;
         struct wl_signal needs_frame;
         struct wl_signal precommit;
         struct wl_signal commit;
@@ -669,7 +669,7 @@ struct wlr_surface_role {
 struct wlr_surface {
     struct wl_resource *resource;
     struct wlr_renderer *renderer;
-    struct wlr_buffer *buffer;
+    struct wlr_client_buffer *buffer;
     int sx, sy;
     struct pixman_region32 buffer_damage;
     struct pixman_region32 opaque_region;

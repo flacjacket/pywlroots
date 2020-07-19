@@ -30,6 +30,7 @@ class Output:
         self._ptr = ffi.cast("struct wlr_output *", ptr)
 
         self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
+        self.damage_event = Signal(ptr=ffi.addressof(self._ptr.events.damage))
         self.needs_frame_event = Signal(ptr=ffi.addressof(self._ptr.events.needs_frame))
         self.precommit_event = Signal(ptr=ffi.addressof(self._ptr.events.precommit))
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
