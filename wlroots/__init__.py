@@ -6,4 +6,4 @@ __wlroots_version__ = "{}.{}.{}".format(
     lib.WLR_VERSION_MAJOR, lib.WLR_VERSION_MICRO, lib.WLR_VERSION_MINOR,
 )
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
