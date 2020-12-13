@@ -1,5 +1,6 @@
 # Copyright (c) Sean Vig 2019
 
+import enum
 from typing import Optional, Tuple
 
 from pywayland.server import Signal
@@ -177,12 +178,12 @@ class Cursor:
         else:
             input_device_ptr = input_device._ptr
 
-        if mode == WarpMode.Layout:
+        if warp_mode == WarpMode.Layout:
             return lib.wlr_cursor_warp(self._ptr, input_device_ptr, x, y)
-        elif mode == WarpMode.LayoutClosest:
+        elif warp_mode == WarpMode.LayoutClosest:
             lib.wlr_cursor_warp_closest(self._ptr, input_device_ptr, x, y)
             return True
-        elif mode == WarpMode.AbsoluteClosest:
+        elif warp_mode == WarpMode.AbsoluteClosest:
             lib.wlr_cursor_warp_absolute(self._ptr, input_device_ptr, x, y)
             return True
         else:

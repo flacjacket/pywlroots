@@ -389,7 +389,7 @@ class TinywlServer:
         logging.debug("cursor motion")
         # self._cursor.move(event_motion_absolute.device
         self._cursor.move(
-            event_motion.device, event_motion.delta_x, event_motion.delta_y
+            event_motion.delta_x, event_motion.delta_y, input_device=event_motion.device
         )
         self.process_cursor_motion(event_motion.time_msec)
 
