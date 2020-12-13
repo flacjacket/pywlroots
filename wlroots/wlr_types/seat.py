@@ -15,6 +15,22 @@ from .surface import Surface
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
+class KeyboardGrab:
+    def __init__(self, seat: "Seat") -> None:
+        """Setup the keyboard grab"""
+        self._ptr = ffi.new("struct wlr_seat_keyboard_grab *")
+        self._seat = seat
+
+    def __enter__(self) -> "KeyboardGrab":
+        """State the keyboard grab"""
+        lib.wlr_seat_keyboard_start_grab(self._seat._ptr, self._ptr)
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
+        """End the grab of the keyboard of this seat"""
+        lib.wlr_seat_keyboard_end_grab(self._seat)
+
+
 class Seat:
     def __init__(self, display: Display, name: str) -> None:
         """Allocates a new seat and adds a seat global to the display
@@ -119,9 +135,6 @@ class Seat:
         """Clear the focused surface for the pointer and leave all entered surfaces"""
         return lib.wlr_seat_pointer_clear_focus(self._ptr)
 
-    # todo: wlr_seat_pointer_start_grab
-    # todo: wlr_seat_pointer_end_grab
-
     def pointer_notify_enter(self, surface: Surface, surface_x: float, surface_y: float) -> None:
         """Notify the seat of a pointer enter event to the given surface
 
@@ -180,8 +193,14 @@ class Seat:
         """
         lib.wlr_seat_set_keyboard(self._ptr, input_device._ptr)
 
-    # todo: wlr_seat_keyboard_start_grab
-    # todo: wlr_seat_keyboard_end_grab
+    def grab(self) -> KeyboardGrab:
+        """Start a grab of the keyboard of this seat"""
+        return KeyboardGrab(self)
+
+    @property
+    def has_grab(self) -> bool:
+        """Whether or not the keyboard has a grab other than the default grab"""
+        return lib.wlr_seat_keyboard_has_grab(self._ptr)
 
     def keyboard_notify_key(self, key_event: KeyboardKeyEvent) -> None:
         """Notify the seat that a key has been pressed on the keyboard

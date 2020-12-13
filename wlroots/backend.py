@@ -60,10 +60,12 @@ class Backend:
         """
         ret = lib.wlr_backend_start(self._ptr)
         if not ret:
+            self.destroy()
             raise RuntimeError("Unable to start backend")
 
     def __enter__(self) -> "Backend":
         """Context manager to create and clean-up the backend"""
+        self.start()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:

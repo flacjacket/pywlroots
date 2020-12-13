@@ -12,7 +12,10 @@ if TYPE_CHECKING:
 
 class KeyboardHandler:
     def __init__(
-        self, keyboard: Keyboard, input_device: InputDevice, tinywl_server: TinywlServer,
+        self,
+        keyboard: Keyboard,
+        input_device: InputDevice,
+        tinywl_server: TinywlServer,
     ) -> None:
         self.keyboard = keyboard
         self.input_device = input_device
@@ -25,7 +28,9 @@ class KeyboardHandler:
         """Activates the keyboard and sends the modifiers event to the active surface"""
         self.tinywl_server.send_modifiers(self.keyboard.modifiers, self.input_device)
 
-    def keyboard_handle_key(self, listener: Listener, key_event: KeyboardKeyEvent) -> None:
+    def keyboard_handle_key(
+        self, listener: Listener, key_event: KeyboardKeyEvent
+    ) -> None:
         """Activates the keyboard and sends the key event to the active surface
 
         Gives the display manager the first right of refusal

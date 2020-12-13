@@ -35,6 +35,7 @@ struct wlr_backend *wlr_backend_autocreate(struct wl_display *display,
 bool wlr_backend_start(struct wlr_backend *backend);
 void wlr_backend_destroy(struct wlr_backend *backend);
 struct wlr_renderer *wlr_backend_get_renderer(struct wlr_backend *backend);
+struct wlr_session *wlr_backend_get_session(struct wlr_backend *backend);
 """
 
 # render/wlr_renderer.h
@@ -48,7 +49,11 @@ bool wlr_render_texture(struct wlr_renderer *r, struct wlr_texture *texture,
 bool wlr_render_texture_with_matrix(struct wlr_renderer *r,
     struct wlr_texture *texture, const float matrix[static 9], float alpha);
 
+const enum wl_shm_format *wlr_renderer_get_formats(struct wlr_renderer *r,
+    size_t *len);
+
 void wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_display);
+void wlr_renderer_destroy(struct wlr_renderer *renderer);
 """
 
 # types/wlr_box.h
@@ -58,6 +63,27 @@ struct wlr_box {
     int width, height;
     ...;
 };
+
+struct wlr_fbox {
+    double x, y;
+    double width, height;
+    ...;
+};
+
+void wlr_box_closest_point(const struct wlr_box *box, double x, double y,
+    double *dest_x, double *dest_y);
+
+bool wlr_box_intersection(struct wlr_box *dest, const struct wlr_box *box_a,
+    const struct wlr_box *box_b);
+
+bool wlr_box_contains_point(const struct wlr_box *box, double x, double y);
+
+bool wlr_box_empty(const struct wlr_box *box);
+
+void wlr_box_transform(struct wlr_box *dest, const struct wlr_box *box,
+    enum wl_output_transform transform, int width, int height);
+
+void wlr_box_rotated_bounds(struct wlr_box *dest, const struct wlr_box *box, float rotation);
 """
 
 # types/wlr_cursor.h
@@ -399,6 +425,28 @@ void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
 
 # types/wlr_pointer.h
 CDEF += """
+struct wlr_pointer {
+    const struct wlr_pointer_impl *impl;
+
+    struct {
+        struct wl_signal motion;
+        struct wl_signal motion_absolute;
+        struct wl_signal button;
+        struct wl_signal axis;
+        struct wl_signal frame;
+        struct wl_signal swipe_begin;
+        struct wl_signal swipe_update;
+        struct wl_signal swipe_end;
+        struct wl_signal pinch_begin;
+        struct wl_signal pinch_update;
+        struct wl_signal pinch_end;
+    } events;
+
+    void *data;
+
+    ...;
+};
+
 struct wlr_event_pointer_motion {
     struct wlr_input_device *device;
     uint32_t time_msec;
@@ -443,6 +491,52 @@ struct wlr_event_pointer_axis {
     enum wlr_axis_orientation orientation;
     double delta;
     int32_t delta_discrete;
+    ...;
+};
+
+struct wlr_event_pointer_swipe_begin {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    uint32_t fingers;
+    ...;
+};
+
+struct wlr_event_pointer_swipe_update {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    uint32_t fingers;
+    double dx, dy;
+    ...;
+};
+
+struct wlr_event_pointer_swipe_end {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    bool cancelled;
+    ...;
+};
+
+struct wlr_event_pointer_pinch_begin {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    uint32_t fingers;
+    ...;
+};
+
+struct wlr_event_pointer_pinch_update {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    uint32_t fingers;
+    double dx, dy;
+    double scale;
+    double rotation;
+    ...;
+};
+
+struct wlr_event_pointer_pinch_end {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    bool cancelled;
     ...;
 };
 """

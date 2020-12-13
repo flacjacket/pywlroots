@@ -22,6 +22,7 @@ from wlroots.wlr_types import (
     XCursorManager,
     XdgShell,
 )
+from wlroots.wlr_types.cursor import WarpMode
 from wlroots.wlr_types.input_device import ButtonState, InputDeviceType
 from wlroots.wlr_types.keyboard import KeyState, KeyboardModifier
 from wlroots.wlr_types.pointer import (
@@ -108,7 +109,9 @@ class TinywlServer:
 
         backend.new_input_event.add(Listener(self.server_new_input))
 
-    def view_at(self, layout_x, layout_y) -> Tuple[Optional[View], Optional[Surface], float, float]:
+    def view_at(
+        self, layout_x, layout_y
+    ) -> Tuple[Optional[View], Optional[Surface], float, float]:
         for view in self.views[::-1]:
             surface, x, y = view.view_at(layout_x, layout_y)
             if surface is not None:
@@ -176,7 +179,9 @@ class TinywlServer:
                     # notify on motion if the focus did not change
                     self._seat.pointer_notify_motion(time, sx, sy)
 
-    def send_modifiers(self, modifiers: KeyboardModifiers, input_device: InputDevice) -> None:
+    def send_modifiers(
+        self, modifiers: KeyboardModifiers, input_device: InputDevice
+    ) -> None:
         self._seat.set_keyboard(input_device)
         self._seat.keyboard_notify_modifiers(modifiers)
 
@@ -187,7 +192,10 @@ class TinywlServer:
         handled = False
         # If alt is held down and this button was _pressed_, we attempt to
         # process it as a compositor keybinding
-        if keyboard_modifier == KeyboardModifier.ALT and key_event.state == KeyState.KEY_PRESSED:
+        if (
+            keyboard_modifier == KeyboardModifier.ALT
+            and key_event.state == KeyState.KEY_PRESSED
+        ):
             # translate libinput keycode -> xkbcommon
             keycode = key_event.keycode + 8
             keysyms = get_keysyms(keyboard._ptr.xkb_state, keycode)
@@ -380,21 +388,28 @@ class TinywlServer:
     def server_cursor_motion(self, listener, event_motion: PointerEventMotion) -> None:
         logging.debug("cursor motion")
         # self._cursor.move(event_motion_absolute.device
-        self._cursor.move(event_motion.device, event_motion.delta_x, event_motion.delta_y)
+        self._cursor.move(
+            event_motion.device, event_motion.delta_x, event_motion.delta_y
+        )
         self.process_cursor_motion(event_motion.time_msec)
 
     def server_cursor_motion_absolute(
         self, listener, event_motion_absolute: PointerEventMotionAbsolute
     ) -> None:
         logging.debug("cursor abs motion")
-        self._cursor.warp_absolute(
-            event_motion_absolute.device, event_motion_absolute.x, event_motion_absolute.y,
+        self._cursor.warp(
+            WarpMode.AbsoluteClosest,
+            event_motion_absolute.x,
+            event_motion_absolute.y,
+            input_device=event_motion_absolute.device,
         )
         self.process_cursor_motion(event_motion_absolute.time_msec)
 
     def server_cursor_button(self, listener, event: PointerEventButton) -> None:
         logging.info(f"Got button click event {event.button_state}")
-        self._seat.pointer_notify_button(event.time_msec, event.button, event.button_state)
+        self._seat.pointer_notify_button(
+            event.time_msec, event.button, event.button_state
+        )
 
         view, surface, _, _ = self.view_at(self._cursor.x, self._cursor.y)
         if event.button_state == ButtonState.RELEASED:
@@ -405,7 +420,11 @@ class TinywlServer:
 
     def server_cursor_axis(self, listener, event) -> None:
         self._seat.pointer_notify_axis(
-            event.time_msec, event.orientation, event.delta, event.delta_discrete, event.source,
+            event.time_msec,
+            event.orientation,
+            event.delta,
+            event.delta_discrete,
+            event.source,
         )
 
     def server_cursor_frame(self, listener, data) -> None:
@@ -419,6 +438,8 @@ class TinywlServer:
         # TODO: check that seat client is correct
         self._cursor.set_surface(event.surface, event.hotspot)
 
-    def seat_request_set_selection(self, listener, event: RequestSetSelectionEvent) -> None:
+    def seat_request_set_selection(
+        self, listener, event: RequestSetSelectionEvent
+    ) -> None:
         print("request set selection")
         self._seat.set_selection(event._ptr.source, event.serial)

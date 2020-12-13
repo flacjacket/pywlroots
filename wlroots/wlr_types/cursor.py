@@ -12,8 +12,20 @@ from .pointer import (
     PointerEventButton,
     PointerEventMotion,
     PointerEventMotionAbsolute,
+    PointerEventPinchBegin,
+    PointerEventPinchEnd,
+    PointerEventPinchUpdate,
+    PointerEventSwipeBegin,
+    PointerEventSwipeEnd,
+    PointerEventSwipeUpdate,
 )
 from .surface import Surface
+
+
+class WarpMode(enum.Enum):
+    Layout = enum.auto()
+    LayoutClosest = enum.auto()
+    AbsoluteClosest = enum.auto()
 
 
 class Cursor:
@@ -46,6 +58,30 @@ class Cursor:
             ptr=ffi.addressof(self._ptr.events.axis), data_wrapper=PointerEventAxis
         )
         self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
+        self.swipe_begin = Signal(
+            ptr=ffi.addressof(self._ptr.events.swipe_begin),
+            data_wrapper=PointerEventSwipeBegin,
+        )
+        self.swipe_update = Signal(
+            ptr=ffi.addressof(self._ptr.events.swipe_update),
+            data_wrapper=PointerEventSwipeUpdate,
+        )
+        self.swipe_end = Signal(
+            ptr=ffi.addressof(self._ptr.events.swipe_end),
+            data_wrapper=PointerEventSwipeEnd,
+        )
+        self.pinch_begin = Signal(
+            ptr=ffi.addressof(self._ptr.events.pinch_begin),
+            data_wrapper=PointerEventPinchBegin,
+        )
+        self.pinch_update = Signal(
+            ptr=ffi.addressof(self._ptr.events.pinch_update),
+            data_wrapper=PointerEventPinchUpdate,
+        )
+        self.pinch_end = Signal(
+            ptr=ffi.addressof(self._ptr.events.pinch_end),
+            data_wrapper=PointerEventPinchEnd,
+        )
 
     @property
     def x(self) -> float:
@@ -81,14 +117,18 @@ class Cursor:
         )
         if input_device.device_type not in allowed_device_types:
             raise ValueError(
-                "Input device must be one of pointer, touch, or tablet tool, got: {}".format(
-                    input_device.device_type
-                )
+                f"Input device must be one of pointer, touch, or tablet tool, got: {input_device.device_type}"
             )
 
         lib.wlr_cursor_attach_input_device(self._ptr, input_device._ptr)
 
-    def move(self, input_device: Optional[InputDevice], delta_x: float, delta_y: float) -> None:
+    def move(
+        self,
+        delta_x: float,
+        delta_y: float,
+        *,
+        input_device: Optional[InputDevice] = None,
+    ) -> None:
         """Move the cursor in the direction of the given x and y layout coordinates
 
         If one coordinate is NAN, it will be ignored.
@@ -103,22 +143,71 @@ class Cursor:
 
         lib.wlr_cursor_move(self._ptr, input_device_ptr, delta_x, delta_y)
 
-    def warp_absolute(self, input_device: Optional[InputDevice], x: float, y: float) -> None:
-        """Warp the cursor to the given x and y in absolute coordinates
+    def warp(
+        self,
+        warp_mode: WarpMode,
+        x: Optional[float],
+        y: Optional[float],
+        *,
+        input_device: Optional[InputDevice] = None,
+    ) -> bool:
+        """Warp the cursor to the given x and y in location
 
-        If the given point is out of the layout boundaries or constraints, the
-        closest point will be used. If one coordinate is NAN, it will be
-        ignored.
+        In Layout and LayoutClosest modes, warp the cursor to the given x and y
+        in layout coordinates.  In AbsoluteClosest mode, warp the cursor to the
+        given x and y in absolute 0..1 coordinates.
+
+        For Layout mode, if x and y are out of the layout boundaries or
+        constraints, no warp will happen.  For LayoutClosest and
+        AbsoluteClosest modes, if the given point is out of the layout
+        boundaries or constraints, the closest point will be used.
+
+        If one coordinate is None, it will be ignored.
 
         The `input_device` may be passed to respect device mapping constraints.
         If `input_device` is None, device mapping constraints will be ignored.
+        """
+        if x is None:
+            x = float("NaN")
+        if y is None:
+            y = float("NaN")
+
+        if input_device is None:
+            input_device_ptr = ffi.NULL
+        else:
+            input_device_ptr = input_device._ptr
+
+        if mode == WarpMode.Layout:
+            return lib.wlr_cursor_warp(self._ptr, input_device_ptr, x, y)
+        elif mode == WarpMode.LayoutClosest:
+            lib.wlr_cursor_warp_closest(self._ptr, input_device_ptr, x, y)
+            return True
+        elif mode == WarpMode.AbsoluteClosest:
+            lib.wlr_cursor_warp_absolute(self._ptr, input_device_ptr, x, y)
+            return True
+        else:
+            raise ValueError("Invalid warp mode")
+
+    def absolute_to_layout_coords(
+        self, input_device: InputDevice, x: float, y: float
+    ) -> Tuple[float, float]:
+        """Convert absolute 0..1 coordinates to layout coordinates
+
+        The `input_device` may be passed to respect device mapping constraints.
+        If `input_device` is `None`, device mapping constraints will be
+        ignored.
         """
         if input_device is None:
             input_device_ptr = ffi.NULL
         else:
             input_device_ptr = input_device._ptr
 
-        lib.wlr_cursor_warp_absolute(self._ptr, input_device_ptr, x, y)
+        xy_ptr = ffi.new("double[2]")
+        lib.wlr_cursor_absolute_to_layout_coords(
+            self._ptr, input_device_ptr, x, y, xy_ptr, xy_ptr + 1
+        )
+
+        return xy_ptr[0], xy_ptr[1]
 
     def set_surface(self, surface: Surface, hotspot: Tuple[int, int]) -> None:
         """Set the cursor surface

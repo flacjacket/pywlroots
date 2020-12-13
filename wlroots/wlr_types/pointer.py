@@ -144,3 +144,39 @@ class PointerEventAxis:
     @property
     def delta_discrete(self) -> int:
         return self._ptr.delta_discrete
+
+
+class PointerEventSwipeBegin:
+    def __init__(self, ptr) -> None:
+        ptr = ffi.cast("struct wlr_event_pointer_swipe_begin *", ptr)
+        self._ptr = ptr
+
+
+class PointerEventSwipeUpdate:
+    def __init__(self, ptr) -> None:
+        ptr = ffi.cast("struct wlr_event_pointer_swipe_update *", ptr)
+        self._ptr = ptr
+
+
+class PointerEventSwipeEnd:
+    def __init__(self, ptr) -> None:
+        ptr = ffi.cast("struct wlr_event_pointer_swipe_end *", ptr)
+        self._ptr = ptr
+
+
+class PointerEventPinchBegin:
+    def __init__(self, ptr) -> None:
+        ptr = ffi.cast("struct wlr_event_pointer_pinch_begin *", ptr)
+        self._ptr = ptr
+
+
+class PointerEventPinchUpdate:
+    def __init__(self, ptr) -> None:
+        ptr = ffi.cast("struct wlr_event_pointer_pinch_update *", ptr)
+        self._ptr = ptr
+
+
+class PointerEventPinchEnd:
+    def __init__(self, ptr) -> None:
+        ptr = ffi.cast("struct wlr_event_pointer_pinch_end *", ptr)
+        self._ptr = ptr

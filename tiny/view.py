@@ -91,7 +91,9 @@ class View:
             )
             self.tinywl_server.resize_edges = edges
 
-    def view_at(self, layout_x: int, layout_y: int) -> Tuple[Optional[Surface], float, float]:
+    def view_at(
+        self, layout_x: int, layout_y: int
+    ) -> Tuple[Optional[Surface], float, float]:
         view_x = layout_x - self.x
         view_y = layout_y - self.y
         return self.xdg_surface.surface_at(view_x, view_y)

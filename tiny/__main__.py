@@ -32,28 +32,30 @@ def main(argv):
     with Display() as display:
         signal.signal(signal.SIGINT, partial(sig_cb, display))
 
-        with Backend(display) as backend:
-            renderer = Renderer(backend, display)
-            compositor = Compositor(display, renderer)  # noqa: F841
-            device_manager = DataDeviceManager(display)  # noqa: F841
-            xdg_shell = XdgShell(display)
-            with OutputLayout() as output_layout, Cursor(output_layout) as cursor, XCursorManager(
-                24
-            ) as xcursor_manager, Seat(display, "seat0") as seat:
-                tinywl_server = TinywlServer(  # noqa: F841
-                    display=display,
-                    backend=backend,
-                    renderer=renderer,
-                    xdg_shell=xdg_shell,
-                    cursor=cursor,
-                    cursor_manager=xcursor_manager,
-                    seat=seat,
-                    output_layout=output_layout,
-                )
+        backend = Backend(display)
+        renderer = Renderer(backend, display)
+        compositor = Compositor(display, renderer)  # noqa: F841
+        device_manager = DataDeviceManager(display)  # noqa: F841
+        xdg_shell = XdgShell(display)
+        with OutputLayout() as output_layout, Cursor(
+            output_layout
+        ) as cursor, XCursorManager(24) as xcursor_manager, Seat(
+            display, "seat0"
+        ) as seat:
+            tinywl_server = TinywlServer(  # noqa: F841
+                display=display,
+                backend=backend,
+                renderer=renderer,
+                xdg_shell=xdg_shell,
+                cursor=cursor,
+                cursor_manager=xcursor_manager,
+                seat=seat,
+                output_layout=output_layout,
+            )
 
-                socket = display.add_socket()
-                print("socket:", socket.decode())
-                backend.start()
+            socket = display.add_socket()
+            print("socket:", socket.decode())
+            with backend:
                 display.run()
 
 
