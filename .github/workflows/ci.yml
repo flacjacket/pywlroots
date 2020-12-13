@@ -1,0 +1,234 @@
+name: ci
+on:
+  pull_request:
+  push:
+
+jobs:
+  build-wayland:
+    name: Build Wayland libraries
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        wayland-version: [1.18.0]
+        wayland-protocols-version: ["1.20"]
+        wlroots-version: [0.11.0]
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install -y --no-install-recommends \
+            libdrm-dev \
+            libegl1-mesa-dev \
+            libgbm-dev \
+            libgles2-mesa-dev \
+            libinput-dev \
+            libxcb-composite0-dev \
+            libxcb-icccm4-dev \
+            libxcb-image0-dev \
+            libxcb-render0-dev \
+            libxcb-xfixes0-dev \
+            libxcb-xinput-dev \
+            libxcb1-dev \
+            libxkbcommon-dev \
+            ninja-build
+      - name: Set environment variables
+        run: |
+          echo "CPATH=${HOME}/wayland/include" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
+          echo "LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${HOME}/wayland/share/pkgconfig:${HOME}/wayland/lib/pkgconfig" >> $GITHUB_ENV
+      - name: Download and unpack Wayland source
+        run: |
+          wget --no-check-certificate $WAYLAND_URL
+          wget --no-check-certificate $WAYLAND_PROTOCOLS_URL
+          wget --no-check-certificate -O wlroots.tar.gz $WLROOTS_URL
+          tar -xJf wayland-${{ matrix.wayland-version }}.tar.xz
+          tar -xJf wayland-protocols-${{ matrix.wayland-protocols-version }}.tar.xz
+          tar -xzf wlroots.tar.gz
+        env:
+          WAYLAND_URL: https://wayland.freedesktop.org/releases/wayland-${{ matrix.wayland-version }}.tar.xz
+          WAYLAND_PROTOCOLS_URL: https://wayland.freedesktop.org/releases/wayland-protocols-${{ matrix.wayland-protocols-version }}.tar.xz
+          WLROOTS_URL: https://github.com/swaywm/wlroots/archive/${{ matrix.wlroots-version }}.tar.gz
+      - name: Build wayland
+        working-directory: wayland-${{ matrix.wayland-version }}
+        run: |
+          ./configure --disable-documentation --prefix=${HOME}/wayland
+          make
+          make install
+      - name: Build wayland-protocols
+        working-directory: wayland-protocols-${{ matrix.wayland-protocols-version }}
+        run: |
+          ./configure --prefix=${HOME}/wayland
+          make
+          make install
+      - name: Build wlroots
+        working-directory: wlroots-${{ matrix.wlroots-version }}
+        run: |
+          sudo pip install meson
+          meson build --prefix=${HOME}/wayland  --libdir=lib
+          ninja -C build
+          ninja -C build install
+      - name: Upload built libraries
+        uses: actions/upload-artifact@v2
+        with:
+          name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
+          path: ~/wayland/
+          if-no-files-found: error
+  unit-test:
+    name: Python ${{ matrix.python-version}} unit tests
+    runs-on: ubuntu-20.04
+    needs: build-wayland
+    strategy:
+      matrix:
+        python-version: [pypy3, "3.6", "3.7", "3.8", "3.9"]
+        wayland-version: [1.18.0]
+        wayland-protocols-version: ["1.20"]
+        wlroots-version: [0.11.0]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download wayland libraries
+        uses: actions/download-artifact@v2
+        with:
+          path: ~/wayland/
+          name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install -y --no-install-recommends \
+            libdrm-dev \
+            libegl1-mesa-dev \
+            libgbm-dev \
+            libgles2-mesa-dev \
+            libinput-dev \
+            libxcb-composite0-dev \
+            libxcb-icccm4-dev \
+            libxcb-image0-dev \
+            libxcb-render0-dev \
+            libxcb-xfixes0-dev \
+            libxcb-xinput-dev \
+            libxcb1-dev \
+            libxkbcommon-dev
+      - name: Set environment variables
+        run: |
+          echo "CPATH=${HOME}/wayland/include" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
+          echo "LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${HOME}/wayland/share/pkgconfig:${HOME}/wayland/lib/pkgconfig" >> $GITHUB_ENV
+          echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+          python wlroots/ffi_build.py
+      - name: Run unit tests
+        run: pytest -Wall
+  flake8-test:
+    name: Python ${{ matrix.python-version}} flake8 tests
+    runs-on: ubuntu-20.04
+    needs: build-wayland
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+        wayland-version: [1.18.0]
+        wayland-protocols-version: ["1.20"]
+        wlroots-version: [0.11.0]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download wayland libraries
+        uses: actions/download-artifact@v2
+        with:
+          path: ~/wayland/
+          name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install -y --no-install-recommends \
+            libdrm-dev \
+            libegl1-mesa-dev \
+            libgbm-dev \
+            libgles2-mesa-dev \
+            libinput-dev \
+            libxcb-composite0-dev \
+            libxcb-icccm4-dev \
+            libxcb-image0-dev \
+            libxcb-render0-dev \
+            libxcb-xfixes0-dev \
+            libxcb-xinput-dev \
+            libxcb1-dev \
+            libxkbcommon-dev
+      - name: Set environment variables
+        run: |
+          echo "CPATH=${HOME}/wayland/include" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
+          echo "LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${HOME}/wayland/share/pkgconfig:${HOME}/wayland/lib/pkgconfig" >> $GITHUB_ENV
+          echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install flake8
+          python wlroots/ffi_build.py
+      - name: Run flake8 test
+        run: flake8 wlroots tiny
+  mypy-test:
+    name: Python ${{ matrix.python-version}} mypy tests
+    runs-on: ubuntu-20.04
+    needs: build-wayland
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+        wayland-version: [1.18.0]
+        wayland-protocols-version: ["1.20"]
+        wlroots-version: [0.11.0]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download wayland libraries
+        uses: actions/download-artifact@v2
+        with:
+          path: ~/wayland/
+          name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install -y --no-install-recommends \
+            libdrm-dev \
+            libegl1-mesa-dev \
+            libgbm-dev \
+            libgles2-mesa-dev \
+            libinput-dev \
+            libxcb-composite0-dev \
+            libxcb-icccm4-dev \
+            libxcb-image0-dev \
+            libxcb-render0-dev \
+            libxcb-xfixes0-dev \
+            libxcb-xinput-dev \
+            libxcb1-dev \
+            libxkbcommon-dev
+      - name: Set environment variables
+        run: |
+          echo "CPATH=${HOME}/wayland/include" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
+          echo "LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${HOME}/wayland/share/pkgconfig:${HOME}/wayland/lib/pkgconfig" >> $GITHUB_ENV
+          echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install mypy
+          python wlroots/ffi_build.py
+      - name: Run mypy test
+        run: |
+          mypy -p wlroots
+          mypy -p tiny
