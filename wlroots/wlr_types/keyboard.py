@@ -78,6 +78,7 @@ class Keyboard:
         self.key_event = Signal(
             ptr=ffi.addressof(self._ptr.events.key), data_wrapper=KeyboardKeyEvent
         )
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     def set_keymap(self, keymap) -> None:
         """Set the keymap associated with the keyboard"""
