@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        wayland-version: [1.18.0]
+        wayland-version: [1.19.0]
         wayland-protocols-version: ["1.20"]
-        wlroots-version: [0.12.0]
+        wlroots-version: [0.13.0]
     steps:
       - name: Install dependencies
         run: |
@@ -81,9 +81,9 @@ jobs:
     strategy:
       matrix:
         python-version: [pypy3, "3.6", "3.7", "3.8", "3.9"]
-        wayland-version: [1.18.0]
+        wayland-version: [1.19.0]
         wayland-protocols-version: ["1.20"]
-        wlroots-version: [0.12.0]
+        wlroots-version: [0.13.0]
     steps:
       - uses: actions/checkout@v2
       - name: Download wayland libraries
@@ -133,9 +133,9 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9"]
-        wayland-version: [1.18.0]
+        wayland-version: [1.19.0]
         wayland-protocols-version: ["1.20"]
-        wlroots-version: [0.12.0]
+        wlroots-version: [0.13.0]
     steps:
       - uses: actions/checkout@v2
       - name: Download wayland libraries
@@ -185,9 +185,9 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9"]
-        wayland-version: [1.18.0]
+        wayland-version: [1.19.0]
         wayland-protocols-version: ["1.20"]
-        wlroots-version: [0.12.0]
+        wlroots-version: [0.13.0]
     steps:
       - uses: actions/checkout@v2
       - name: Download wayland libraries
