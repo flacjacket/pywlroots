@@ -19,7 +19,9 @@ class Matrix:
         return Matrix(mat_ptr)
 
     @classmethod
-    def projection(cls, width: int, height: int, transform: WlOutput.transform) -> "Matrix":
+    def projection(
+        cls, width: int, height: int, transform: WlOutput.transform
+    ) -> "Matrix":
         """A 2d orthographic projection matrix of (width, height) with specified transform"""
         mat_ptr = cls._build_matrix_ptr()
         lib.wlr_matrix_projection(mat_ptr, width, height, transform)
@@ -27,11 +29,17 @@ class Matrix:
 
     @classmethod
     def project_box(
-        cls, box: Box, transform: WlOutput.transform, rotation: float, projection: "Matrix",
+        cls,
+        box: Box,
+        transform: WlOutput.transform,
+        rotation: float,
+        projection: "Matrix",
     ) -> "Matrix":
         """Project the specified box onto a orthographic projection with a rotation"""
         mat_ptr = cls._build_matrix_ptr()
-        lib.wlr_matrix_project_box(mat_ptr, box._ptr, transform, rotation, projection._ptr)
+        lib.wlr_matrix_project_box(
+            mat_ptr, box._ptr, transform, rotation, projection._ptr
+        )
         return Matrix(mat_ptr)
 
     def transpose(self) -> "Matrix":
@@ -65,7 +73,9 @@ class Matrix:
     def __str__(self) -> str:
         """String representation showing the matrix"""
         matrix_values = list(self._ptr)
-        return f"Matrix([{matrix_values[:3]}, {matrix_values[3:6]}, {matrix_values[6:]}])"
+        return (
+            f"Matrix([{matrix_values[:3]}, {matrix_values[3:6]}, {matrix_values[6:]}])"
+        )
 
     @staticmethod
     def _build_matrix_ptr():

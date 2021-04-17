@@ -92,8 +92,8 @@ class Output:
     def enable(self, *, enable: bool = True) -> None:
         """Enables or disables the output
 
-         A disabled output is turned off and doesn't emit `frame` events.
-         """
+        A disabled output is turned off and doesn't emit `frame` events.
+        """
         lib.wlr_output_enable(self._ptr, enable)
 
     def preferred_mode(self) -> Optional["OutputMode"]:

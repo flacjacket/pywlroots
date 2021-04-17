@@ -46,12 +46,16 @@ class Seat:
         self.pointer_grab_begin_event = Signal(
             ptr=ffi.addressof(self._ptr.events.pointer_grab_begin)
         )
-        self.pointer_grab_end_event = Signal(ptr=ffi.addressof(self._ptr.events.pointer_grab_end))
+        self.pointer_grab_end_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.pointer_grab_end)
+        )
 
         self.keyboard_grab_begin_event = Signal(
             ptr=ffi.addressof(self._ptr.events.keyboard_grab_begin)
         )
-        self.keyboard_grab_end_event = Signal(ptr=ffi.addressof(self._ptr.events.keyboard_grab_end))
+        self.keyboard_grab_end_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.keyboard_grab_end)
+        )
 
         self.request_set_cursor_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_set_cursor),
@@ -135,7 +139,9 @@ class Seat:
         """Clear the focused surface for the pointer and leave all entered surfaces"""
         return lib.wlr_seat_pointer_clear_focus(self._ptr)
 
-    def pointer_notify_enter(self, surface: Surface, surface_x: float, surface_y: float) -> None:
+    def pointer_notify_enter(
+        self, surface: Surface, surface_x: float, surface_y: float
+    ) -> None:
         """Notify the seat of a pointer enter event to the given surface
 
         Notify the seat of a pointer enter event to the given surface and
@@ -144,20 +150,26 @@ class Seat:
         """
         lib.wlr_seat_pointer_notify_enter(self._ptr, surface._ptr, surface_x, surface_y)
 
-    def pointer_notify_motion(self, time_msec: int, surface_x: float, surface_y: float) -> None:
+    def pointer_notify_motion(
+        self, time_msec: int, surface_x: float, surface_y: float
+    ) -> None:
         """Notify the seat of motion over the given surface
 
         Pass surface-local coordinates where the pointer motion occurred.
         """
         lib.wlr_seat_pointer_notify_motion(self._ptr, time_msec, surface_x, surface_y)
 
-    def pointer_notify_button(self, time_msec: int, button: int, button_state: ButtonState) -> int:
+    def pointer_notify_button(
+        self, time_msec: int, button: int, button_state: ButtonState
+    ) -> int:
         """Notify the seat that a button has been pressed
 
         Returns the serial of the button press or zero if no button press was
         sent.
         """
-        return lib.wlr_seat_pointer_notify_button(self._ptr, time_msec, button, button_state.value)
+        return lib.wlr_seat_pointer_notify_button(
+            self._ptr, time_msec, button, button_state.value
+        )
 
     def pointer_notify_axis(
         self,
@@ -332,7 +344,8 @@ class SeatPointerState:
         self._ptr = ptr
 
         self.focus_change_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.focus_change), data_wrapper=PointerFocusChangeEvent,
+            ptr=ffi.addressof(self._ptr.events.focus_change),
+            data_wrapper=PointerFocusChangeEvent,
         )
 
     @property
@@ -350,7 +363,8 @@ class SeatKeyboardState:
         self._ptr = ptr
 
         self.focus_change_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.focus_change), data_wrapper=KeyboardFocusChangeEvent,
+            ptr=ffi.addressof(self._ptr.events.focus_change),
+            data_wrapper=KeyboardFocusChangeEvent,
         )
 
     @property

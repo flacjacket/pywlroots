@@ -23,14 +23,7 @@ struct wlr_backend
     ...;
 };
 
-typedef int EGLint;
-typedef unsigned int EGLenum;
-
-typedef struct wlr_renderer *(*wlr_renderer_create_func_t)(struct wlr_egl *egl, EGLenum platform,
-    void *remote_display, EGLint *config_attribs, EGLint visual_id);
-
-struct wlr_backend *wlr_backend_autocreate(struct wl_display *display,
-    wlr_renderer_create_func_t create_renderer_func);
+struct wlr_backend *wlr_backend_autocreate(struct wl_display *display);
 
 bool wlr_backend_start(struct wlr_backend *backend);
 void wlr_backend_destroy(struct wlr_backend *backend);
@@ -49,8 +42,8 @@ bool wlr_render_texture(struct wlr_renderer *r, struct wlr_texture *texture,
 bool wlr_render_texture_with_matrix(struct wlr_renderer *r,
     struct wlr_texture *texture, const float matrix[static 9], float alpha);
 
-const enum wl_shm_format *wlr_renderer_get_formats(struct wlr_renderer *r,
-    size_t *len);
+const enum wl_shm_format *wlr_renderer_get_shm_texture_formats(
+    struct wlr_renderer *r, size_t *len);
 
 void wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_display);
 void wlr_renderer_destroy(struct wlr_renderer *renderer);
@@ -266,17 +259,11 @@ struct wlr_keyboard {
     ...;
 };
 
-enum wlr_key_state {
-    WLR_KEY_RELEASED,
-    WLR_KEY_PRESSED,
-    ...
-};
-
 struct wlr_event_keyboard_key {
     uint32_t time_msec;
     uint32_t keycode;
     bool update_state;
-    enum wlr_key_state state;
+    enum wl_keyboard_key_state state;
     ...;
 };
 
@@ -983,7 +970,7 @@ void wlr_xdg_surface_get_geometry(struct wlr_xdg_surface *surface,
 void wlr_xdg_surface_for_each_surface(struct wlr_xdg_surface *surface,
     wlr_surface_iterator_func_t iterator, void *user_data);
 
-void wlr_xdg_surface_for_each_popup(struct wlr_xdg_surface *surface,
+void wlr_xdg_surface_for_each_popup_surface(struct wlr_xdg_surface *surface,
     wlr_surface_iterator_func_t iterator, void *user_data);
 """
 

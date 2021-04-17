@@ -3,7 +3,9 @@
 from ._ffi import ffi, lib  # noqa: F401
 
 __wlroots_version__ = "{}.{}.{}".format(
-    lib.WLR_VERSION_MAJOR, lib.WLR_VERSION_MICRO, lib.WLR_VERSION_MINOR,
+    lib.WLR_VERSION_MAJOR,
+    lib.WLR_VERSION_MICRO,
+    lib.WLR_VERSION_MINOR,
 )
 
 __version__ = "0.1.3"
