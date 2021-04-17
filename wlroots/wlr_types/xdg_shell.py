@@ -194,6 +194,16 @@ class XdgTopLevel:
         self.set_title_event = Signal(ptr=ffi.addressof(self._ptr.events.set_title))
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
 
+    @property
+    def title(self) -> str:
+        """The title of the toplevel object"""
+        return ffi.string(self._ptr.title).decode()
+
+    @property
+    def app_id(self) -> str:
+        """The app id of the toplevel object"""
+        return ffi.string(self._ptr.app_id).decode()
+
 
 class XdgTopLevelMoveEvent:
     def __init__(self, ptr) -> None:
