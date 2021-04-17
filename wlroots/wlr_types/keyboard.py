@@ -74,10 +74,16 @@ class Keyboard:
         """
         self._ptr = ptr
 
-        self.modifiers_event = Signal(ptr=ffi.addressof(self._ptr.events.modifiers))
         self.key_event = Signal(
             ptr=ffi.addressof(self._ptr.events.key), data_wrapper=KeyboardKeyEvent
         )
+        # The `modifiers` event signals that the modifier state of the
+        # `wlr_keyboard` has been updated. At this time, you can read the
+        # modifier state of the `wlr_keyboard` and handle the updated state by
+        # sending it to clients.
+        self.modifiers_event = Signal(ptr=ffi.addressof(self._ptr.events.modifiers))
+        self.keymap_event = Signal(ptr=ffi.addressof(self._ptr.events.keymap))
+        self.repeat_info_event = Signal(ptr=ffi.addressof(self._ptr.events.repeat_info))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     def set_keymap(self, keymap) -> None:
