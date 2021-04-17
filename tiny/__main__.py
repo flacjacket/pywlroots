@@ -1,3 +1,8 @@
+"""An example basic compositor
+
+To run this example, install the wlroots required dependencies, build the ffi
+bindings (`python wlroots/ffi_build.py`), and launch the main (`python -m tiny`).
+"""
 from __future__ import annotations
 
 import logging
