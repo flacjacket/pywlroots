@@ -118,6 +118,8 @@ void wlr_cursor_destroy(struct wlr_cursor *cur);
 
 bool wlr_cursor_warp(struct wlr_cursor *cur, struct wlr_input_device *dev,
     double lx, double ly);
+void wlr_cursor_warp_closest(struct wlr_cursor *cur,
+    struct wlr_input_device *dev, double x, double y);
 void wlr_cursor_warp_absolute(struct wlr_cursor *cur,
     struct wlr_input_device *dev, double x, double y);
 void wlr_cursor_move(struct wlr_cursor *cur, struct wlr_input_device *dev,
