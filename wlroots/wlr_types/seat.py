@@ -6,7 +6,7 @@ from weakref import WeakKeyDictionary
 from pywayland.server import Display, Signal
 from pywayland.protocol.wayland import WlSeat
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 from .input_device import ButtonState, InputDevice
 from .keyboard import Keyboard, KeyboardModifiers, KeyboardKeyEvent
 from .pointer import AxisSource, AxisOrientation
@@ -15,7 +15,7 @@ from .surface import Surface
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
-class KeyboardGrab:
+class KeyboardGrab(Ptr):
     def __init__(self, seat: "Seat") -> None:
         """Setup the keyboard grab"""
         self._ptr = ffi.new("struct wlr_seat_keyboard_grab *")
@@ -31,7 +31,7 @@ class KeyboardGrab:
         lib.wlr_seat_keyboard_end_grab(self._seat)
 
 
-class Seat:
+class Seat(Ptr):
     def __init__(self, display: Display, name: str) -> None:
         """Allocates a new seat and adds a seat global to the display
 
@@ -280,7 +280,7 @@ class Seat:
         self.destroy()
 
 
-class PointerRequestSetCursorEvent:
+class PointerRequestSetCursorEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_seat_pointer_request_set_cursor_event *", ptr)
 
@@ -300,7 +300,7 @@ class PointerRequestSetCursorEvent:
         return self._ptr.hotspot_x, self._ptr.hotspot_y
 
 
-class RequestSetSelectionEvent:
+class RequestSetSelectionEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_seat_request_set_selection_event *", ptr)
 
@@ -311,7 +311,7 @@ class RequestSetSelectionEvent:
         return self._ptr.serial
 
 
-class RequestSetPrimarySelectionEvent:
+class RequestSetPrimarySelectionEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_seat_request_set_selection_event *", ptr)
 
@@ -322,28 +322,28 @@ class RequestSetPrimarySelectionEvent:
         return self._ptr.serial
 
 
-class RequestStartDragEvent:
+class RequestStartDragEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_seat_request_start_drag_event *", ptr)
 
     # TODO
 
 
-class PointerFocusChangeEvent:
+class PointerFocusChangeEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_seat_pointer_focus_change_event *", ptr)
 
     # TODO
 
 
-class KeyboardFocusChangeEvent:
+class KeyboardFocusChangeEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_seat_keyboard_focus_change_event *", ptr)
 
     # TODO
 
 
-class SeatPointerState:
+class SeatPointerState(Ptr):
     def __init__(self, ptr) -> None:
         """The current state of the pointer on the seat"""
         self._ptr = ptr
@@ -362,7 +362,7 @@ class SeatPointerState:
         return Surface(focused_surface)
 
 
-class SeatKeyboardState:
+class SeatKeyboardState(Ptr):
     def __init__(self, ptr) -> None:
         """The current state of the keyboard on the seat"""
         self._ptr = ptr

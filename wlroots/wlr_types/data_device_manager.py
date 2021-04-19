@@ -2,10 +2,10 @@
 
 from pywayland.server import Display
 
-from wlroots import lib
+from wlroots import lib, Ptr
 
 
-class DataDeviceManager:
+class DataDeviceManager(Ptr):
     def __init__(self, display: Display) -> None:
         """Data manager to handle the clipboard
 

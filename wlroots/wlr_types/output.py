@@ -5,11 +5,11 @@ from typing import Tuple, Optional
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 from .matrix import Matrix
 
 
-class Output:
+class Output(Ptr):
     def __init__(self, ptr) -> None:
         """A compositor output region
 
@@ -155,7 +155,7 @@ class Output:
         return WlOutput.transform(lib.wlr_output_transform_invert(transform))
 
 
-class OutputMode:
+class OutputMode(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
 

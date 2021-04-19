@@ -3,13 +3,13 @@
 from pywayland.server import Display
 from typing import TYPE_CHECKING
 
-from wlroots import lib
+from wlroots import lib, Ptr
 
 if TYPE_CHECKING:
     from wlroots.renderer import Renderer  # noqa: F401
 
 
-class Compositor:
+class Compositor(Ptr):
     def __init__(self, display: Display, renderer: "Renderer") -> None:
         """A compositor for clients to be able to allocate surfaces
 

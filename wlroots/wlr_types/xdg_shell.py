@@ -6,7 +6,7 @@ from typing import Callable, Optional, Tuple, TypeVar
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 from wlroots.util.edges import Edges
 from .box import Box
 from .output import Output
@@ -32,7 +32,7 @@ class XdgSurfaceRole(enum.IntEnum):
     POPUP = lib.WLR_XDG_SURFACE_ROLE_POPUP
 
 
-class XdgShell:
+class XdgShell(Ptr):
     def __init__(self, display: Display) -> None:
         """Create the shell for protocol windows
 
@@ -47,7 +47,7 @@ class XdgShell:
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
 
-class XdgSurface:
+class XdgSurface(Ptr):
     def __init__(self, ptr) -> None:
         """A user interface element requiring management by the compositor
 
@@ -168,7 +168,7 @@ class XdgSurface:
         )
 
 
-class XdgTopLevel:
+class XdgTopLevel(Ptr):
     def __init__(self, ptr) -> None:
         """A top level surface object
 
@@ -214,7 +214,7 @@ class XdgTopLevel:
         return ffi.string(self._ptr.app_id).decode()
 
 
-class XdgTopLevelMoveEvent:
+class XdgTopLevelMoveEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_move_event *", ptr)
 
@@ -230,7 +230,7 @@ class XdgTopLevelMoveEvent:
         return self._ptr.serial
 
 
-class XdgTopLevelResizeEvent:
+class XdgTopLevelResizeEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_resize_event *", ptr)
 
@@ -250,7 +250,7 @@ class XdgTopLevelResizeEvent:
         return self._ptr.edges
 
 
-class XdgTopLevelSetFullscreenEvent:
+class XdgTopLevelSetFullscreenEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_set_fullscreen_event *", ptr)
 
@@ -268,7 +268,7 @@ class XdgTopLevelSetFullscreenEvent:
         return Output(self._ptr.output)
 
 
-class XdgTopLevelShowWindowMenuEvent:
+class XdgTopLevelShowWindowMenuEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_show_window_menu_event *", ptr)
 

@@ -4,14 +4,14 @@ from typing import Any, List, Tuple, Union
 
 from pywayland.server import Display
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 from wlroots.backend import Backend
 from wlroots.wlr_types import Box, Matrix, Texture
 
 ColorType = Union[List, Tuple, ffi.CData]
 
 
-class Renderer:
+class Renderer(Ptr):
     def __init__(self, backend: Backend, display: Display) -> None:
         """Obtains the renderer this backend is using
 

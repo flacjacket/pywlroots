@@ -4,13 +4,13 @@ import weakref
 
 from pywayland.server import Display, Signal
 
-from . import ffi, lib
+from . import ffi, lib, Ptr
 from wlroots.util.log import logger
 from wlroots.wlr_types.input_device import InputDevice
 from wlroots.wlr_types.output import Output
 
 
-class Backend:
+class Backend(Ptr):
     def __init__(self, display: Display) -> None:
         """Create a backend to interact with a Wayland display
 
