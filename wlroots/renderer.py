@@ -36,6 +36,17 @@ class Renderer:
         color_ptr = ffi.new("float[4]", color)
         lib.wlr_renderer_clear(self._ptr, color_ptr)
 
+    def render_texture(
+        self, texture: Texture, projection: Matrix, x: int, y: int, alpha: float
+    ) -> None:
+        """Renders the requested texture"""
+        ret = lib.wlr_render_texture(
+            self._ptr, texture._ptr, projection._ptr, x, y, alpha
+        )
+        if not ret:
+            # TODO: get a better exception type
+            raise Exception("Bad render")
+
     def render_texture_with_matrix(
         self, texture: Texture, matrix: Matrix, alpha: float
     ) -> None:

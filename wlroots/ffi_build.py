@@ -54,6 +54,13 @@ void wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_
 void wlr_renderer_destroy(struct wlr_renderer *renderer);
 """
 
+# render/wlr_texture.h
+CDEF += """
+struct wlr_texture *wlr_texture_from_pixels(struct wlr_renderer *renderer,
+	uint32_t fmt, uint32_t stride, uint32_t width, uint32_t height,
+	const void *data);
+"""
+
 # types/wlr_box.h
 CDEF += """
 struct wlr_box {
