@@ -120,6 +120,15 @@ class XdgSurface:
 
         return lib.wlr_xdg_toplevel_set_activated(self._ptr, activated)
 
+    def set_tiled(self, tiled: int) -> int:
+        return lib.wlr_xdg_toplevel_set_tiled(self._ptr, tiled)
+
+    def set_fullscreen(self, fullscreened: bool) -> int:
+        return lib.wlr_xdg_toplevel_set_fullscreen(self._ptr, fullscreened)
+
+    def send_close(self, fullscreened: bool) -> int:
+        return lib.xdg_toplevel_send_close(self._ptr)
+
     def surface_at(
         self, surface_x: float, surface_y: float
     ) -> Tuple[Optional[Surface], float, float]:
