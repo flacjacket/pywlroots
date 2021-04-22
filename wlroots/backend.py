@@ -18,7 +18,7 @@ class Backend:
             The Wayland server display to create the backend against.  If this
             display is destroyed, the backend will be automatically cleaned-up.
         """
-        ptr = lib.wlr_backend_autocreate(display._ptr, ffi.NULL)
+        ptr = lib.wlr_backend_autocreate(display._ptr)
         if ptr == ffi.NULL:
             raise RuntimeError("Failed to create wlroots backend")
 
