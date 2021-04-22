@@ -126,8 +126,8 @@ class XdgSurface:
     def set_fullscreen(self, fullscreened: bool) -> int:
         return lib.wlr_xdg_toplevel_set_fullscreen(self._ptr, fullscreened)
 
-    def send_close(self, fullscreened: bool) -> int:
-        return lib.xdg_toplevel_send_close(self._ptr)
+    def send_close(self) -> int:
+        return lib.wlr_xdg_toplevel_send_close(self._ptr)
 
     def surface_at(
         self, surface_x: float, surface_y: float
