@@ -71,3 +71,15 @@ class Backend:
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         """Destroy the backend on context exit"""
         self.destroy()
+
+    def get_session(self) -> "Session":
+        return Session(self)
+
+
+class Session:
+    def __init__(self, backend: Backend) -> None:
+        """The running session"""
+        self._ptr = lib.wlr_backend_get_session(backend._ptr)
+
+    def change_vt(self, vt: int) -> bool:
+        return lib.wlr_session_change_vt(self._ptr, vt)

@@ -31,6 +31,11 @@ struct wlr_renderer *wlr_backend_get_renderer(struct wlr_backend *backend);
 struct wlr_session *wlr_backend_get_session(struct wlr_backend *backend);
 """
 
+# backend/session.h
+CDEF += """
+bool wlr_session_change_vt(struct wlr_session *session, unsigned vt);
+"""
+
 # render/wlr_renderer.h
 CDEF += """
 void wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
