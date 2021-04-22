@@ -8,4 +8,4 @@ __wlroots_version__ = "{}.{}.{}".format(
     lib.WLR_VERSION_MINOR,
 )
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
