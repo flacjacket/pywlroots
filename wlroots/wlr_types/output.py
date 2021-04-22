@@ -35,10 +35,9 @@ class Output:
         self.precommit_event = Signal(ptr=ffi.addressof(self._ptr.events.precommit))
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
         self.present_event = Signal(ptr=ffi.addressof(self._ptr.events.present))
+        self.bind_event = Signal(ptr=ffi.addressof(self._ptr.events.bind))
         self.enable_event = Signal(ptr=ffi.addressof(self._ptr.events.enable))
         self.mode_event = Signal(ptr=ffi.addressof(self._ptr.events.mode))
-        self.scale_event = Signal(ptr=ffi.addressof(self._ptr.events.scale))
-        self.transform_event = Signal(ptr=ffi.addressof(self._ptr.events.transform))
         self.description_event = Signal(ptr=ffi.addressof(self._ptr.events.description))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 

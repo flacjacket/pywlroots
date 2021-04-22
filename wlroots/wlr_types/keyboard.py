@@ -4,6 +4,7 @@ import enum
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
+from pywayland.protocol.wayland import WlKeyboard
 
 from wlroots import ffi, lib
 
@@ -27,12 +28,6 @@ class KeyboardModifier(enum.IntFlag):
     MOD3 = lib.WLR_MODIFIER_MOD3
     LOGO = lib.WLR_MODIFIER_LOGO
     MOD5 = lib.WLR_MODIFIER_MOD5
-
-
-@enum.unique
-class KeyState(enum.IntEnum):
-    KEY_RELEASED = lib.WLR_KEY_RELEASED
-    KEY_PRESSED = lib.WLR_KEY_PRESSED
 
 
 class KeyboardKeyEvent:
@@ -60,9 +55,9 @@ class KeyboardKeyEvent:
         return self._ptr.update_state
 
     @property
-    def state(self) -> KeyState:
+    def state(self) -> WlKeyboard.key_state:
         """The state of the keycode triggering the event"""
-        return KeyState(self._ptr.state)
+        return WlKeyboard.key_state(self._ptr.state)
 
 
 class Keyboard:

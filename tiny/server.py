@@ -4,7 +4,7 @@ import logging
 from typing import List, Optional, Tuple, TYPE_CHECKING
 
 from pywayland.server import Display, Listener
-from pywayland.protocol.wayland import WlSeat
+from pywayland.protocol.wayland import WlKeyboard, WlSeat
 from xkbcommon import xkb
 
 from wlroots import ffi, lib
@@ -24,7 +24,7 @@ from wlroots.wlr_types import (
 )
 from wlroots.wlr_types.cursor import WarpMode
 from wlroots.wlr_types.input_device import ButtonState, InputDeviceType
-from wlroots.wlr_types.keyboard import KeyState, KeyboardModifier
+from wlroots.wlr_types.keyboard import KeyboardModifier
 from wlroots.wlr_types.pointer import (
     PointerEventButton,
     PointerEventMotion,
@@ -194,7 +194,7 @@ class TinywlServer:
         # process it as a compositor keybinding
         if (
             keyboard_modifier == KeyboardModifier.ALT
-            and key_event.state == KeyState.KEY_PRESSED
+            and key_event.state == WlKeyboard.key_state.pressed
         ):
             # translate libinput keycode -> xkbcommon
             keycode = key_event.keycode + 8
