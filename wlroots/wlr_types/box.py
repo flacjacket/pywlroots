@@ -6,12 +6,14 @@ from wlroots import ffi
 def _int_getter(attr):
     def getter(self):
         return getattr(self._ptr, attr)
+
     return getter
 
 
 def _int_setter(attr):
     def setter(self, value):
         setattr(self._ptr, attr, value)
+
     return setter
 
 

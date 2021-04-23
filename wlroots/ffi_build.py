@@ -48,7 +48,7 @@ bool wlr_render_texture_with_matrix(struct wlr_renderer *r,
     struct wlr_texture *texture, const float matrix[static 9], float alpha);
 
 void wlr_render_rect(struct wlr_renderer *r, const struct wlr_box *box,
-	const float color[static 4], const float projection[static 9]);
+    const float color[static 4], const float projection[static 9]);
 
 const enum wl_shm_format *wlr_renderer_get_shm_texture_formats(
     struct wlr_renderer *r, size_t *len);
@@ -60,8 +60,8 @@ void wlr_renderer_destroy(struct wlr_renderer *renderer);
 # render/wlr_texture.h
 CDEF += """
 struct wlr_texture *wlr_texture_from_pixels(struct wlr_renderer *renderer,
-	uint32_t fmt, uint32_t stride, uint32_t width, uint32_t height,
-	const void *data);
+    uint32_t fmt, uint32_t stride, uint32_t width, uint32_t height,
+    const void *data);
 """
 
 # types/wlr_box.h

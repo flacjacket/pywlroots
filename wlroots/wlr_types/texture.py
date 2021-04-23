@@ -1,6 +1,7 @@
 # Copyright (c) Sean Vig 2020
 
 from wlroots import ffi, lib
+from wlroots.renderer import Renderer
 
 
 class Texture:
@@ -9,8 +10,13 @@ class Texture:
 
     @classmethod
     def from_pixels(
-        cls, renderer: "Renderer", fmt: int, stride: int, width: int, height: int,
-        data: ffi.CData
+        cls,
+        renderer: "Renderer",
+        fmt: int,
+        stride: int,
+        width: int,
+        height: int,
+        data: ffi.CData,
     ) -> "Texture":
         """
         Create a new texture from raw pixel data. `stride` is in bytes. The returned
@@ -19,5 +25,7 @@ class Texture:
         Should not be called in a rendering block like renderer_begin()/end() or
         between attaching a renderer to an output and committing it.
         """
-        ptr = lib.wlr_texture_from_pixels(renderer._ptr, fmt, stride, width, height, data)
+        ptr = lib.wlr_texture_from_pixels(
+            renderer._ptr, fmt, stride, width, height, data
+        )
         return Texture(ptr)
