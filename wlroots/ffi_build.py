@@ -544,6 +544,26 @@ struct wlr_event_pointer_pinch_end {
 };
 """
 
+# types/wlr_screencopy_v1.h
+CDEF += """
+struct wlr_screencopy_manager_v1 {
+    struct wl_global *global;
+    struct wl_list frames; // wlr_screencopy_frame_v1::link
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_screencopy_manager_v1 *wlr_screencopy_manager_v1_create(
+    struct wl_display *display);
+"""
+
 # types/wlr_seat.h
 CDEF += """
 struct timespec {
@@ -1037,6 +1057,7 @@ SOURCE = """
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
+#include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_shell.h>

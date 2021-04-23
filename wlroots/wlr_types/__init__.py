@@ -15,6 +15,7 @@ from .pointer import (  # noqa: F401
     PointerEventMotion,
     PointerEventMotionAbsolute,
 )
+from .screencopy_v1 import ScreencopyManagerV1  # noqa: F401
 from .seat import Seat  # noqa: F401
 from .surface import Surface, SurfaceState  # noqa: F401
 from .texture import Texture  # noqa: F401
