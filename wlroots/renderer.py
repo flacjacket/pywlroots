@@ -1,12 +1,14 @@
 # Copyright (c) 2019 Sean Vig
 
-from typing import Any
+from typing import Any, List, Tuple, Union
 
 from pywayland.server import Display
 
 from wlroots import ffi, lib
 from wlroots.backend import Backend
-from wlroots.wlr_types import Matrix, Texture
+from wlroots.wlr_types import Box, Matrix, Texture
+
+ColorType = Union[List, Tuple, ffi.CData]
 
 
 class Renderer:
@@ -31,10 +33,11 @@ class Renderer:
         """Finish rendering"""
         lib.wlr_renderer_end(self._ptr)
 
-    def clear(self, color) -> None:
+    def clear(self, color: ColorType) -> None:
         """Clear the renderer to the given RGBA color"""
-        color_ptr = ffi.new("float[4]", color)
-        lib.wlr_renderer_clear(self._ptr, color_ptr)
+        if not isinstance(color, ffi.CData):
+            color = ffi.new("float[4]", color)
+        lib.wlr_renderer_clear(self._ptr, color)
 
     def render_texture(
         self, texture: Texture, projection: Matrix, x: int, y: int, alpha: float
@@ -57,3 +60,9 @@ class Renderer:
         if not ret:
             # TODO: get a better exception type
             raise Exception("Bad render")
+
+    def render_rect(self, box: Box, color: ColorType, projection: Matrix) -> None:
+        """Renders a solid rectangle in the specified color."""
+        if not isinstance(color, ffi.CData):
+            color = ffi.new("float[4]", color)
+        lib.wlr_render_rect(self._ptr, box._ptr, color, projection._ptr)

@@ -47,6 +47,9 @@ bool wlr_render_texture(struct wlr_renderer *r, struct wlr_texture *texture,
 bool wlr_render_texture_with_matrix(struct wlr_renderer *r,
     struct wlr_texture *texture, const float matrix[static 9], float alpha);
 
+void wlr_render_rect(struct wlr_renderer *r, const struct wlr_box *box,
+	const float color[static 4], const float projection[static 9]);
+
 const enum wl_shm_format *wlr_renderer_get_shm_texture_formats(
     struct wlr_renderer *r, size_t *len);
 
