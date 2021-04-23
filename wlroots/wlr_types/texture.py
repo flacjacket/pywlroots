@@ -1,7 +1,11 @@
 # Copyright (c) Sean Vig 2020
 
+import typing
+
 from wlroots import ffi, lib
-from wlroots.renderer import Renderer
+
+if typing.TYPE_CHECKING:
+    from wlroots.renderer import Renderer
 
 
 class Texture:
