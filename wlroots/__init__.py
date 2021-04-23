@@ -12,8 +12,19 @@ __version__ = "0.2.3"
 
 
 class Ptr:
-    def __eq__(self, other):
+    """Add equality checks for objects holding the same cdata
+
+    Objects that reference the same cdata objects will be treated as equal.
+    Note that these objects will still have a different hash such that they
+    should not collide in a set or dictionary.
+    """
+
+    _ptr: ffi.CData
+
+    def __eq__(self, other) -> bool:
+        """Return true if the other object holds the same cdata"""
         return hasattr(other, "_ptr") and self._ptr == other._ptr
 
-    def __hash__(self):
-        return id(self)
+    def __hash__(self) -> int:
+        """Use the hash from `object`, which is unique per object"""
+        return super().__hash__()
