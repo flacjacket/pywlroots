@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 
 from pywayland.server import Signal
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 from .input_device import InputDevice, InputDeviceType
 from .output_layout import OutputLayout
 from .pointer import (
@@ -29,7 +29,7 @@ class WarpMode(enum.Enum):
     AbsoluteClosest = enum.auto()
 
 
-class Cursor:
+class Cursor(Ptr):
     def __init__(self, output_layout: OutputLayout) -> None:
         """Manage a cursor attached to the given output layout
 

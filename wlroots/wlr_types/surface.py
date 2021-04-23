@@ -5,14 +5,14 @@ from weakref import WeakKeyDictionary
 from pywayland.protocol.wayland import WlOutput
 from pywayland.server import Signal
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 from wlroots.util.clock import Timespec
 from .texture import Texture
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
-class Surface:
+class Surface(Ptr):
     def __init__(self, ptr):
         """Create a wlroots Surface
 
@@ -75,7 +75,7 @@ class Surface:
         lib.wlr_surface_send_frame_done(self._ptr, when._ptr)
 
 
-class SurfaceState:
+class SurfaceState(Ptr):
     def __init__(self, ptr):
         """The state of a given surface
 

@@ -6,7 +6,7 @@ from weakref import WeakKeyDictionary
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlKeyboard
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
@@ -30,7 +30,7 @@ class KeyboardModifier(enum.IntFlag):
     MOD5 = lib.WLR_MODIFIER_MOD5
 
 
-class KeyboardKeyEvent:
+class KeyboardKeyEvent(Ptr):
     def __init__(self, ptr) -> None:
         """Event that a key has been pressed or release
 
@@ -60,7 +60,7 @@ class KeyboardKeyEvent:
         return WlKeyboard.key_state(self._ptr.state)
 
 
-class Keyboard:
+class Keyboard(Ptr):
     def __init__(self, ptr) -> None:
         """The Keyboard wlroots object
 
@@ -119,7 +119,7 @@ class Keyboard:
         return KeyboardModifier(modifiers)
 
 
-class KeyboardModifiers:
+class KeyboardModifiers(Ptr):
     def __init__(self, ptr) -> None:
         """Modifiers of a given keyboard
 

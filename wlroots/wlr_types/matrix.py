@@ -2,11 +2,11 @@
 
 from pywayland.protocol.wayland import WlOutput
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 from .box import Box
 
 
-class Matrix:
+class Matrix(Ptr):
     def __init__(self, ptr) -> None:
         """A matrix which encodes transformations used for rendering"""
         self._ptr = ptr

@@ -9,3 +9,11 @@ __wlroots_version__ = "{}.{}.{}".format(
 )
 
 __version__ = "0.2.3"
+
+
+class Ptr:
+    def __eq__(self, other):
+        return hasattr(other, "_ptr") and self._ptr == other._ptr
+
+    def __hash__(self):
+        return id(self)

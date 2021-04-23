@@ -1,11 +1,11 @@
 # Copyright (c) Sean Vig 2019
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 
 from .cursor import Cursor
 
 
-class XCursorManager:
+class XCursorManager(Ptr):
     def __init__(self, size, scale=1):
         """Creates a new XCursor manager
 

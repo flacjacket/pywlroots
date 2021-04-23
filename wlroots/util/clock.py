@@ -1,9 +1,9 @@
 # Copyright Sean Vig (c) 2020
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 
 
-class Timespec:
+class Timespec(Ptr):
     def __init__(self, ptr) -> None:
         """A wrapper aronud a timespec struct"""
         self._ptr = ptr

@@ -1,14 +1,15 @@
 # Copyright (c) Sean Vig 2020
 
+
 import typing
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 
 if typing.TYPE_CHECKING:
     from wlroots.renderer import Renderer
 
 
-class Texture:
+class Texture(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
 

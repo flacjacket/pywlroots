@@ -2,11 +2,11 @@
 
 from typing import Tuple
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 from .output import Output
 
 
-class OutputLayout:
+class OutputLayout(Ptr):
     def __init__(self) -> None:
         """Creates an output layout to work with a layout of screens
 

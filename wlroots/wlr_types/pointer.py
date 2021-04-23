@@ -2,7 +2,7 @@
 
 import enum
 
-from wlroots import ffi, lib
+from wlroots import ffi, lib, Ptr
 from .input_device import ButtonState, InputDevice
 
 
@@ -20,7 +20,7 @@ class AxisOrientation(enum.IntEnum):
     HORIZONTAL = lib.WLR_AXIS_ORIENTATION_HORIZONTAL
 
 
-class PointerEventMotion:
+class PointerEventMotion(Ptr):
     def __init__(self, ptr) -> None:
         """A relative motion pointer event
 
@@ -55,7 +55,7 @@ class PointerEventMotion:
         return self._ptr.unaccel_dy
 
 
-class PointerEventMotionAbsolute:
+class PointerEventMotionAbsolute(Ptr):
     def __init__(self, ptr) -> None:
         """A absolute motion pointer event
 
@@ -84,7 +84,7 @@ class PointerEventMotionAbsolute:
         return self._ptr.y
 
 
-class PointerEventButton:
+class PointerEventButton(Ptr):
     def __init__(self, ptr) -> None:
         """A pointer button event
 
@@ -111,7 +111,7 @@ class PointerEventButton:
         return ButtonState(self._ptr.state)
 
 
-class PointerEventAxis:
+class PointerEventAxis(Ptr):
     def __init__(self, ptr) -> None:
         """A pointer axis event
 
@@ -146,37 +146,37 @@ class PointerEventAxis:
         return self._ptr.delta_discrete
 
 
-class PointerEventSwipeBegin:
+class PointerEventSwipeBegin(Ptr):
     def __init__(self, ptr) -> None:
         ptr = ffi.cast("struct wlr_event_pointer_swipe_begin *", ptr)
         self._ptr = ptr
 
 
-class PointerEventSwipeUpdate:
+class PointerEventSwipeUpdate(Ptr):
     def __init__(self, ptr) -> None:
         ptr = ffi.cast("struct wlr_event_pointer_swipe_update *", ptr)
         self._ptr = ptr
 
 
-class PointerEventSwipeEnd:
+class PointerEventSwipeEnd(Ptr):
     def __init__(self, ptr) -> None:
         ptr = ffi.cast("struct wlr_event_pointer_swipe_end *", ptr)
         self._ptr = ptr
 
 
-class PointerEventPinchBegin:
+class PointerEventPinchBegin(Ptr):
     def __init__(self, ptr) -> None:
         ptr = ffi.cast("struct wlr_event_pointer_pinch_begin *", ptr)
         self._ptr = ptr
 
 
-class PointerEventPinchUpdate:
+class PointerEventPinchUpdate(Ptr):
     def __init__(self, ptr) -> None:
         ptr = ffi.cast("struct wlr_event_pointer_pinch_update *", ptr)
         self._ptr = ptr
 
 
-class PointerEventPinchEnd:
+class PointerEventPinchEnd(Ptr):
     def __init__(self, ptr) -> None:
         ptr = ffi.cast("struct wlr_event_pointer_pinch_end *", ptr)
         self._ptr = ptr
