@@ -161,6 +161,8 @@ jobs:
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         if: ${{ success() }}
         run: pytest -Wall
+        env:
+          WLR_HEADLESS_OUTPUTS: '1'
   flake8-test:
     name: Python ${{ matrix.python-version}} flake8 tests
     runs-on: ubuntu-latest
