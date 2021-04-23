@@ -813,6 +813,29 @@ void wlr_xcursor_manager_set_cursor_image(struct wlr_xcursor_manager *manager,
     const char *name, struct wlr_cursor *cursor);
 """
 
+# types/wlr_xdg_output_v1.h
+CDEF += """
+struct wlr_xdg_output_manager_v1 {
+    struct wl_global *global;
+    struct wlr_output_layout *layout;
+
+    struct wl_list outputs;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    struct wl_listener display_destroy;
+    struct wl_listener layout_add;
+    struct wl_listener layout_change;
+    struct wl_listener layout_destroy;
+    ...;
+};
+
+struct wlr_xdg_output_manager_v1 *wlr_xdg_output_manager_v1_create(
+    struct wl_display *display, struct wlr_output_layout *layout);
+"""
+
 # types/wlr_xdg_shell.h
 CDEF += """
 struct wlr_xdg_shell {
@@ -1039,6 +1062,7 @@ SOURCE = """
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xcursor_manager.h>
+#include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
 #include <wlr/version.h>
