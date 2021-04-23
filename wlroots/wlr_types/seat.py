@@ -114,6 +114,11 @@ class Seat:
             ffi.release(self._ptr)
             self._ptr = None
 
+    @property
+    def destroyed(self) -> bool:
+        """Whether this seat has been destroyed."""
+        return self._ptr is None
+
     def set_capabilities(self, capabilities: WlSeat.capability) -> None:
         """Updates the capabilities available on this seat
 
