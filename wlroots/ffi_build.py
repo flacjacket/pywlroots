@@ -1019,6 +1019,24 @@ typedef void (*wrapped_log_func_t)(enum wlr_log_importance importance, const cha
 void wrapped_log_init(enum wlr_log_importance verbosity, wrapped_log_func_t callback);
 """
 
+# backend/headless.h
+CDEF += """
+struct wlr_backend *wlr_headless_backend_create(struct wl_display *display);
+
+struct wlr_backend *wlr_headless_backend_create_with_renderer(
+    struct wl_display *display, struct wlr_renderer *renderer);
+
+struct wlr_output *wlr_headless_add_output(struct wlr_backend *backend,
+    unsigned int width, unsigned int height);
+
+struct wlr_input_device *wlr_headless_add_input_device(
+    struct wlr_backend *backend, enum wlr_input_device_type type);
+
+bool wlr_backend_is_headless(struct wlr_backend *backend);
+bool wlr_input_device_is_headless(struct wlr_input_device *device);
+bool wlr_output_is_headless(struct wlr_output *output);
+"""
+
 # version.h
 CDEF += """
 #define WLR_VERSION_MAJOR ...
@@ -1028,6 +1046,7 @@ CDEF += """
 
 SOURCE = """
 #include <wlr/backend.h>
+#include <wlr/backend/headless.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_compositor.h>

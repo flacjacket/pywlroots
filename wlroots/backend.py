@@ -1,5 +1,6 @@
 # Copyright (c) 2019 Sean Vig
 
+import enum
 import weakref
 
 from pywayland.server import Display, Signal
@@ -10,15 +11,31 @@ from wlroots.wlr_types.input_device import InputDevice
 from wlroots.wlr_types.output import Output
 
 
+class BackendType(enum.Enum):
+    AUTO = enum.auto()
+    HEADLESS = enum.auto()
+
+
 class Backend(Ptr):
-    def __init__(self, display: Display) -> None:
+    def __init__(self, display: Display, *, backend_type=BackendType.AUTO) -> None:
         """Create a backend to interact with a Wayland display
 
         :param display:
             The Wayland server display to create the backend against.  If this
             display is destroyed, the backend will be automatically cleaned-up.
+        :param backend_type:
+            The type of the backend to create.  The default (auto-detection)
+            will use environment variables, including $DISPLAY (for X11 nested
+            backends), $WAYLAND_DISPLAY (for Wayland backends), and
+            $WLR_BACKENDS (to set the available backends).
         """
-        ptr = lib.wlr_backend_autocreate(display._ptr)
+        if backend_type == BackendType.AUTO:
+            ptr = lib.wlr_backend_autocreate(display._ptr)
+        elif backend_type == BackendType.HEADLESS:
+            ptr = lib.wlr_headless_backend_create(display._ptr)
+        else:
+            raise ValueError(f"Unknown backend type: {backend_type}")
+
         if ptr == ffi.NULL:
             raise RuntimeError("Failed to create wlroots backend")
 
