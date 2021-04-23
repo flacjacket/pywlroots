@@ -3,35 +3,28 @@
 from wlroots import ffi
 
 
+def _int_getter(attr):
+    def getter(self):
+        return getattr(self._ptr, attr)
+    return getter
+
+
+def _int_setter(attr):
+    def setter(self, value):
+        setattr(self._ptr, attr, value)
+    return setter
+
+
 class Box:
     def __init__(self, x: int, y: int, width: int, height: int) -> None:
         """A simple box structure, represented by a coordinate and dimensions"""
-        self._x = x
-        self._y = y
-        self._width = width
-        self._height = height
         self._ptr = ffi.new("struct wlr_box *")
-        self._ptr.x = x
-        self._ptr.y = y
-        self._ptr.width = width
-        self._ptr.height = height
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
 
-    @property
-    def x(self) -> int:
-        """x position of the box"""
-        return self._x
-
-    @property
-    def y(self) -> int:
-        """y position of the box"""
-        return self._y
-
-    @property
-    def width(self) -> int:
-        """width of the box"""
-        return self._width
-
-    @property
-    def height(self) -> int:
-        """height of the box"""
-        return self._height
+    x = property(_int_getter("x"), _int_setter("x"))
+    y = property(_int_getter("y"), _int_setter("y"))
+    width = property(_int_getter("width"), _int_setter("width"))
+    height = property(_int_getter("height"), _int_setter("height"))
