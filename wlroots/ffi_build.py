@@ -149,8 +149,33 @@ void wlr_cursor_attach_output_layout(struct wlr_cursor *cur,
 
 # types/wlr_compositor.h
 CDEF += """
+struct wlr_subcompositor {
+    struct wl_global *global;
+    ...;
+};
+
+struct wlr_compositor {
+    struct wl_global *global;
+    struct wlr_renderer *renderer;
+
+    struct wlr_subcompositor subcompositor;
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal new_surface;
+        struct wl_signal destroy;
+    } events;
+    ...;
+};
+
 struct wlr_compositor *wlr_compositor_create(struct wl_display *display,
     struct wlr_renderer *renderer);
+
+bool wlr_surface_is_subsurface(struct wlr_surface *surface);
+
+struct wlr_subsurface *wlr_subsurface_from_wlr_surface(
+    struct wlr_surface *surface);
 """
 
 # types/wlr_data_device.h
@@ -780,6 +805,7 @@ bool wlr_seat_keyboard_has_grab(struct wlr_seat *seat);
 CDEF += """
 struct wlr_surface_state {
     uint32_t committed;
+    uint32_t seq;
 
     struct wl_resource *buffer_resource;
     int32_t dx, dy;
@@ -792,7 +818,6 @@ struct wlr_surface_state {
     int width, height;
     int buffer_width, buffer_height;
 
-    struct wl_listener buffer_destroy;
     ...;
 };
 
@@ -800,6 +825,16 @@ struct wlr_surface_role {
     const char *name;
     void (*commit)(struct wlr_surface *surface);
     void (*precommit)(struct wlr_surface *surface);
+    ...;
+};
+
+struct wlr_surface_output {
+    struct wlr_surface *surface;
+    struct wlr_output *output;
+    struct wl_list link;
+    struct wl_listener bind;
+    struct wl_listener destroy;
+    ...;
 };
 
 struct wlr_surface {
@@ -812,6 +847,8 @@ struct wlr_surface {
     struct pixman_region32 input_region;
     struct wlr_surface_state current, pending, previous;
 
+    struct wl_list cached;
+
     const struct wlr_surface_role *role;
     void *role_data;
 
@@ -823,19 +860,96 @@ struct wlr_surface {
 
     struct wl_list subsurfaces;
     struct wl_list subsurface_pending_list;
+    struct wl_list current_outputs;
     struct wl_listener renderer_destroy;
 
     void *data;
     ...;
 };
 
+struct wlr_subsurface_state {
+    int32_t x, y;
+    ...;
+};
+
+struct wlr_subsurface {
+    struct wl_resource *resource;
+    struct wlr_surface *surface;
+    struct wlr_surface *parent;
+
+    struct wlr_subsurface_state current, pending;
+
+    uint32_t cached_seq;
+    bool has_cache;
+
+    bool synchronized;
+    bool reordered;
+    bool mapped;
+
+    struct wl_list parent_link;
+    struct wl_list parent_pending_link;
+
+    struct wl_listener surface_destroy;
+    struct wl_listener parent_destroy;
+
+    struct {
+        struct wl_signal destroy;
+        struct wl_signal map;
+        struct wl_signal unmap;
+    } events;
+
+    void *data;
+    ...;
+};
+
+typedef void (*wlr_surface_iterator_func_t)(struct wlr_surface *surface,
+    int sx, int sy, void *data);
+
+bool wlr_surface_set_role(struct wlr_surface *surface,
+    const struct wlr_surface_role *role, void *role_data,
+    struct wl_resource *error_resource, uint32_t error_code);
+
+bool wlr_surface_has_buffer(struct wlr_surface *surface);
+
 struct wlr_texture *wlr_surface_get_texture(struct wlr_surface *surface);
+
+struct wlr_subsurface *wlr_subsurface_create(struct wlr_surface *surface,
+    struct wlr_surface *parent, uint32_t version, uint32_t id,
+    struct wl_list *resource_list);
+
+struct wlr_surface *wlr_surface_get_root_surface(struct wlr_surface *surface);
+
+bool wlr_surface_point_accepts_input(struct wlr_surface *surface,
+    double sx, double sy);
+
+struct wlr_surface *wlr_surface_surface_at(struct wlr_surface *surface,
+    double sx, double sy, double *sub_x, double *sub_y);
+
+void wlr_surface_send_enter(struct wlr_surface *surface,
+    struct wlr_output *output);
+
+void wlr_surface_send_leave(struct wlr_surface *surface,
+    struct wlr_output *output);
 
 void wlr_surface_send_frame_done(struct wlr_surface *surface,
     const struct timespec *when);
 
-typedef void (*wlr_surface_iterator_func_t)(struct wlr_surface *surface,
-    int sx, int sy, void *data);
+void wlr_surface_get_extends(struct wlr_surface *surface, struct wlr_box *box);
+
+struct wlr_surface *wlr_surface_from_resource(struct wl_resource *resource);
+
+void wlr_surface_for_each_surface(struct wlr_surface *surface,
+    wlr_surface_iterator_func_t iterator, void *user_data);
+
+void wlr_surface_get_effective_damage(struct wlr_surface *surface,
+    struct pixman_region32 *damage);
+
+void wlr_surface_get_buffer_source_box(struct wlr_surface *surface,
+    struct wlr_fbox *box);
+
+uint32_t wlr_surface_lock_pending(struct wlr_surface *surface);
+
+void wlr_surface_unlock_cached(struct wlr_surface *surface, uint32_t seq);
 
 extern "Python" void surface_iterator_callback(struct wlr_surface *surface, int sx, int sy, void *data);
 """
@@ -1153,6 +1267,7 @@ SOURCE = """
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_screencopy_v1.h>
+#include <wlr/types/wlr_surface.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
