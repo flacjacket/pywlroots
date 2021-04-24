@@ -840,6 +840,39 @@ typedef void (*wlr_surface_iterator_func_t)(struct wlr_surface *surface,
 extern "Python" void surface_iterator_callback(struct wlr_surface *surface, int sx, int sy, void *data);
 """
 
+# types/wlr_virtual_keyboard_v1.h
+CDEF += """
+struct wlr_virtual_keyboard_manager_v1 {
+    struct wl_global *global;
+    struct wl_list virtual_keyboards; // struct wlr_virtual_keyboard_v1*
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal new_virtual_keyboard; // struct wlr_virtual_keyboard_v1*
+        struct wl_signal destroy;
+    } events;
+    ...;
+};
+
+struct wlr_virtual_keyboard_v1 {
+    struct wlr_input_device input_device;
+    struct wl_resource *resource;
+    struct wlr_seat *seat;
+    bool has_keymap;
+
+    struct wl_list link;
+
+    struct {
+        struct wl_signal destroy; // struct wlr_virtual_keyboard_v1*
+    } events;
+    ...;
+};
+
+struct wlr_virtual_keyboard_manager_v1* wlr_virtual_keyboard_manager_v1_create(
+    struct wl_display *display);
+"""
+
 # types/wlr_xcursor_manager.h
 CDEF += """
 struct wlr_xcursor_manager *wlr_xcursor_manager_create(const char *name,
@@ -1121,6 +1154,7 @@ SOURCE = """
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_seat.h>
+#include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/types/wlr_xdg_shell.h>
