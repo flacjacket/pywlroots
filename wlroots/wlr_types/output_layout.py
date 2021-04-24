@@ -1,6 +1,6 @@
 # Copyright (c) Sean Vig 2019
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 from wlroots import ffi, lib, Ptr
 from .output import Output
@@ -56,3 +56,13 @@ class OutputLayout(Ptr):
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         """Clean up the output layout when exiting the context"""
         self.destroy()
+
+    def output_at(self, x: float, y: float) -> Optional[Output]:
+        """
+        Get the output at the specified layout coordinates. Returns None if no output
+        matches the coordinates.
+        """
+        output_ptr = lib.wlr_output_layout_output_at(self._ptr, x, y)
+        if output_ptr == ffi.NULL:
+            return None
+        return Output(output_ptr)
