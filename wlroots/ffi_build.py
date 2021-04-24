@@ -162,6 +162,25 @@ void wlr_seat_set_selection(struct wlr_seat *seat,
     struct wlr_data_source *source, uint32_t serial);
 """
 
+# types/wlr_gamma_control_v1.h
+CDEF += """
+struct wlr_gamma_control_manager_v1 {
+    struct wl_global *global;
+    struct wl_list controls; // wlr_gamma_control_v1::link
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+struct wlr_gamma_control_manager_v1 *wlr_gamma_control_manager_v1_create(
+    struct wl_display *display);
+"""
+
 # types/wlr_input_device.h
 CDEF += """
 enum wlr_button_state {
@@ -1094,6 +1113,7 @@ SOURCE = """
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_matrix.h>
