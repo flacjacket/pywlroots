@@ -69,6 +69,8 @@ class XdgSurface(Ptr):
     @classmethod
     def from_surface(cls, surface: Surface) -> "XdgSurface":
         """Get the xdg surface associated with the given surface"""
+        if not surface.is_xdg_surface:
+            raise RuntimeError("Surface is not XDG surface")
         surface_ptr = lib.wlr_xdg_surface_from_wlr_surface(surface._ptr)
         return XdgSurface(surface_ptr)
 
