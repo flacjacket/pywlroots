@@ -8,7 +8,7 @@ __wlroots_version__ = "{}.{}.{}".format(
     lib.WLR_VERSION_MINOR,
 )
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 
 class Ptr:
