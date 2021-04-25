@@ -9,7 +9,6 @@ from xkbcommon import xkb
 
 from wlroots import ffi, lib
 from wlroots.backend import Backend
-from wlroots.renderer import Renderer
 from wlroots.util.edges import Edges
 from wlroots.wlr_types import (
     Box,
@@ -61,7 +60,6 @@ class TinywlServer:
         *,
         display: Display,
         backend: Backend,
-        renderer: Renderer,
         xdg_shell: XdgShell,
         cursor: Cursor,
         cursor_manager: XCursorManager,
@@ -71,7 +69,6 @@ class TinywlServer:
         # elements that we need to hold on to
         self._display = display
         self._backend = backend
-        self._renderer = renderer
 
         # the xdg shell will generate new surfaces
         self._xdg_shell = xdg_shell
@@ -297,8 +294,8 @@ class TinywlServer:
 
         output = self.outputs[0]
         width, height = output.effective_resolution()
-        with output, self._renderer.render(width, height):
-            self._renderer.clear([0.3, 0.3, 0.3, 1.0])
+        with output, self._backend.renderer.render(width, height) as renderer:
+            renderer.clear([0.3, 0.3, 0.3, 1.0])
 
             for view in self.views:
                 if not view.mapped:
@@ -333,7 +330,7 @@ class TinywlServer:
 
         matrix = Matrix.project_box(box, inverse, 0, output.transform_matrix)
 
-        self._renderer.render_texture_with_matrix(texture, matrix, 1)
+        self._backend.renderer.render_texture_with_matrix(texture, matrix, 1)
         surface.send_frame_done(now)
 
     # #############################################################

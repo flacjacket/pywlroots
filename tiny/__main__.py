@@ -12,10 +12,8 @@ from functools import partial
 
 from pywayland.server import Display
 
-from wlroots.backend import Backend
-from wlroots.renderer import Renderer
+from wlroots.helper import build_compositor
 from wlroots.wlr_types import (
-    Compositor,
     Cursor,
     DataDeviceManager,
     OutputLayout,
@@ -37,9 +35,7 @@ def main(argv):
     with Display() as display:
         signal.signal(signal.SIGINT, partial(sig_cb, display))
 
-        backend = Backend(display)
-        renderer = Renderer(backend, display)
-        compositor = Compositor(display, renderer)  # noqa: F841
+        compositor, backend = build_compositor(display)
         device_manager = DataDeviceManager(display)  # noqa: F841
         xdg_shell = XdgShell(display)
         with OutputLayout() as output_layout, Cursor(
@@ -50,7 +46,6 @@ def main(argv):
             tinywl_server = TinywlServer(  # noqa: F841
                 display=display,
                 backend=backend,
-                renderer=renderer,
                 xdg_shell=xdg_shell,
                 cursor=cursor,
                 cursor_manager=xcursor_manager,

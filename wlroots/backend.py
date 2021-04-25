@@ -9,6 +9,7 @@ from . import ffi, lib, Ptr
 from wlroots.util.log import logger
 from wlroots.wlr_types.input_device import InputDevice
 from wlroots.wlr_types.output import Output
+from wlroots.renderer import Renderer
 
 
 class BackendType(enum.Enum):
@@ -49,6 +50,12 @@ class Backend(Ptr):
         self.new_output_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_output), data_wrapper=Output
         )
+
+    @property
+    def renderer(self) -> Renderer:
+        """Obtains the Renderer reference this backend is using."""
+        renderer_ptr = lib.wlr_backend_get_renderer(self._ptr)
+        return Renderer(renderer_ptr)
 
     def destroy(self) -> None:
         """Destroy the backend and clean up all of its resources
