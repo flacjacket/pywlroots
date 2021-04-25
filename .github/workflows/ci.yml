@@ -231,4 +231,4 @@ jobs:
       - name: Run mypy test
         run: |
           mypy -p wlroots
-          mypy -p tiny
+          mypy -p tiny --python-version 3.7

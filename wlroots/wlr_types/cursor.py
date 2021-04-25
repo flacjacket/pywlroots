@@ -190,7 +190,7 @@ class Cursor(Ptr):
             raise ValueError("Invalid warp mode")
 
     def absolute_to_layout_coords(
-        self, input_device: InputDevice, x: float, y: float
+        self, input_device: Optional[InputDevice], x: float, y: float
     ) -> Tuple[float, float]:
         """Convert absolute 0..1 coordinates to layout coordinates
 
@@ -210,7 +210,7 @@ class Cursor(Ptr):
 
         return xy_ptr[0], xy_ptr[1]
 
-    def set_surface(self, surface: Surface, hotspot: Tuple[int, int]) -> None:
+    def set_surface(self, surface: Optional[Surface], hotspot: Tuple[int, int]) -> None:
         """Set the cursor surface
 
         The surface can be committed to update the cursor image. The surface
