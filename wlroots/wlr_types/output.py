@@ -144,6 +144,9 @@ class Output(Ptr):
         If `.attach_render` has been called, the pending frame will be
         submitted for display.
         """
+        if not lib.wlr_output_test(self._ptr):
+            self.rollback()
+            raise RuntimeError("Rendering on output failed")
         if not lib.wlr_output_commit(self._ptr):
             raise RuntimeError("Unable to commit output")
 

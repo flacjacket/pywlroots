@@ -1,6 +1,7 @@
 # Copyright (c) 2019 Sean Vig
 
-from typing import Any, List, Tuple, Union
+import contextlib
+from typing import Any, Iterator, List, Tuple, Union
 
 from pywayland.server import Display
 
@@ -24,6 +25,15 @@ class Renderer(Ptr):
         """
         self._ptr: Any = lib.wlr_backend_get_renderer(backend._ptr)
         lib.wlr_renderer_init_wl_display(self._ptr, display._ptr)
+
+    @contextlib.contextmanager
+    def render(self, width: int, height: int) -> Iterator["Renderer"]:
+        """Render within the generated context"""
+        self.begin(width, height)
+        try:
+            yield self
+        finally:
+            self.end()
 
     def begin(self, width: int, height: int) -> None:
         """Begin rendering with the given height and width"""

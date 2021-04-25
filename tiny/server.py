@@ -299,10 +299,8 @@ class TinywlServer:
         now = Timespec.get_monotonic_time()
 
         output = self.outputs[0]
-        with output:
-            width, height = output.effective_resolution()
-
-            self._renderer.begin(width, height)
+        width, height = output.effective_resolution()
+        with output, self._renderer.render(width, height):
             self._renderer.clear([0.3, 0.3, 0.3, 1.0])
 
             for view in self.views:
@@ -313,8 +311,6 @@ class TinywlServer:
                 view.xdg_surface.for_each_surface(self._render_surface, data)
 
             output.render_software_cursors()
-
-            self._renderer.end()
 
     def _render_surface(
         self, surface: Surface, sx: int, sy: int, data: Tuple[Output, View, Timespec]

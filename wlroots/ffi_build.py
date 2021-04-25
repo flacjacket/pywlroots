@@ -449,6 +449,7 @@ void wlr_output_set_mode(struct wlr_output *output,
 bool wlr_output_attach_render(struct wlr_output *output, int *buffer_age);
 void wlr_output_effective_resolution(struct wlr_output *output,
     int *width, int *height);
+bool wlr_output_test(struct wlr_output *output);
 bool wlr_output_commit(struct wlr_output *output);
 void wlr_output_rollback(struct wlr_output *output);
 
