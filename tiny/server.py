@@ -285,10 +285,7 @@ class TinywlServer:
                 return
             output.set_mode(mode)
             output.enable()
-
-            if not output.commit():
-                logger.error("Unable to commit output")
-                return
+            output.commit()
 
         self.outputs.append(output)
         self._output_layout.add_auto(output)
