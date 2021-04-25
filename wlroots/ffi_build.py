@@ -450,6 +450,7 @@ bool wlr_output_attach_render(struct wlr_output *output, int *buffer_age);
 void wlr_output_effective_resolution(struct wlr_output *output,
     int *width, int *height);
 bool wlr_output_commit(struct wlr_output *output);
+void wlr_output_rollback(struct wlr_output *output);
 
 void wlr_output_render_software_cursors(struct wlr_output *output,
     struct pixman_region32 *damage);

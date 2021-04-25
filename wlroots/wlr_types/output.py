@@ -117,21 +117,39 @@ class Output(Ptr):
         """Create the global corresponding to the output"""
         lib.wlr_output_create_global(self._ptr)
 
-    def attach_render(self) -> bool:
+    def __enter__(self) -> "Output":
+        """Start rendering frame"""
+        self.attach_render()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
+        """Stop rendering frame, commit when exiting normally, otherwise rollback"""
+        if exc_type is None:
+            self.commit()
+        else:
+            self.rollback()
+
+    def attach_render(self) -> None:
         """Attach the renderer's buffer to the output
 
         Compositors must call this function before rendering. After they are
         done rendering, they should call `.commit()` to submit the new frame.
         """
-        return lib.wlr_output_attach_render(self._ptr, ffi.NULL)
+        if not lib.wlr_output_attach_render(self._ptr, ffi.NULL):
+            raise RuntimeError("Unable to attach render")
 
-    def commit(self) -> bool:
+    def commit(self) -> None:
         """Commit the pending output state
 
         If `.attach_render` has been called, the pending frame will be
         submitted for display.
         """
-        return lib.wlr_output_commit(self._ptr)
+        if not lib.wlr_output_commit(self._ptr):
+            raise RuntimeError("Unable to commit output")
+
+    def rollback(self) -> None:
+        """Discard the pending output state"""
+        lib.wlr_output_commit(self._ptr)
 
     def effective_resolution(self) -> Tuple[int, int]:
         """Computes the transformed and scaled output resolution"""
