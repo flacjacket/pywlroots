@@ -16,11 +16,10 @@ class VirtualKeyboardManagerV1(Ptr):
         self._ptr = lib.wlr_virtual_keyboard_manager_v1_create(display._ptr)
 
         self.new_virtual_keyboard_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.new_virtual_keyboard), data_wrapper=VirtualKeyboardV1
+            ptr=ffi.addressof(self._ptr.events.new_virtual_keyboard),
+            data_wrapper=VirtualKeyboardV1,
         )
-        self.destroy_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.destroy)
-        )
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
 
 class VirtualKeyboardV1(Ptr):

@@ -10,6 +10,4 @@ class ScreencopyManagerV1(Ptr):
         """Create a wlr_screencopy_manager_v1"""
         self._ptr = lib.wlr_screencopy_manager_v1_create(display._ptr)
 
-        self.destroy_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.destroy)
-        )
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))

@@ -11,6 +11,4 @@ class XdgOutputManagerV1(Ptr):
         """Create an wlr_xdg_output_manager_v1"""
         self._ptr = lib.wlr_xdg_output_manager_v1_create(display._ptr, layout._ptr)
 
-        self.destroy_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.destroy)
-        )
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
