@@ -470,6 +470,9 @@ void wlr_output_layout_output_coords(struct wlr_output_layout *layout,
 
 void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
     struct wlr_output *output);
+
+struct wlr_output *wlr_output_layout_output_at(struct wlr_output_layout *layout,
+    double lx, double ly);
 """
 
 # types/wlr_pointer.h
@@ -1264,6 +1267,7 @@ SOURCE = """
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_keyboard.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output.h>
@@ -1310,6 +1314,82 @@ void wrapped_log_init(enum wlr_log_importance verbosity, wrapped_log_func_t call
         wlr_log_init(verbosity, wrapped_log_callback);
     }
 }
+"""
+
+# types//wlr_layer_shell_v1.h
+CDEF += """
+struct wlr_layer_shell_v1 {
+    struct wl_global *global;
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal new_surface;
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_layer_surface_v1_state {
+    uint32_t anchor;
+    int32_t exclusive_zone;
+    struct {
+        uint32_t top, right, bottom, left;
+    } margin;
+    enum zwlr_layer_surface_v1_keyboard_interactivity keyboard_interactive;
+    uint32_t desired_width, desired_height;
+    uint32_t actual_width, actual_height;
+    enum zwlr_layer_shell_v1_layer layer;
+    ...;
+};
+
+struct wlr_layer_surface_v1 {
+    struct wlr_surface *surface;
+    struct wlr_output *output;
+    struct wl_resource *resource;
+    struct wlr_layer_shell_v1 *shell;
+    struct wl_list popups; // wlr_xdg_popup::link
+    char *namespace;
+    bool added, configured, mapped, closed;
+    uint32_t configure_serial;
+    uint32_t configure_next_serial;
+    struct wl_list configure_list;
+    struct wlr_layer_surface_v1_configure *acked_configure;
+    struct wlr_layer_surface_v1_state client_pending;
+    struct wlr_layer_surface_v1_state server_pending;
+    struct wlr_layer_surface_v1_state current;
+    struct wl_listener surface_destroy;
+    struct {
+        struct wl_signal destroy;
+        struct wl_signal map;
+        struct wl_signal unmap;
+        struct wl_signal new_popup;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_layer_shell_v1 *wlr_layer_shell_v1_create(struct wl_display *display);
+
+void wlr_layer_surface_v1_configure(struct wlr_layer_surface_v1 *surface,
+    uint32_t width, uint32_t height);
+
+void wlr_layer_surface_v1_close(struct wlr_layer_surface_v1 *surface);
+
+bool wlr_surface_is_layer_surface(struct wlr_surface *surface);
+
+struct wlr_layer_surface_v1 *wlr_layer_surface_v1_from_wlr_surface(
+    struct wlr_surface *surface);
+
+void wlr_layer_surface_v1_for_each_surface(struct wlr_layer_surface_v1 *surface,
+    wlr_surface_iterator_func_t iterator, void *user_data);
+
+struct wlr_surface *wlr_layer_surface_v1_surface_at(
+    struct wlr_layer_surface_v1 *surface, double sx, double sy,
+    double *sub_x, double *sub_y);
 """
 
 include_dir = (Path(__file__).parent.parent / "include").resolve()

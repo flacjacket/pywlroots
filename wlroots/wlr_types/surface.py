@@ -40,6 +40,11 @@ class Surface(Ptr):
         return lib.wlr_surface_is_xdg_surface(self._ptr)
 
     @property
+    def is_layer_surface(self) -> bool:
+        """True if the current surface is a layer surface"""
+        return lib.wlr_surface_is_layer_surface(self._ptr)
+
+    @property
     def sx(self) -> int:
         """Surface local buffer x position"""
         return self._ptr.sx
