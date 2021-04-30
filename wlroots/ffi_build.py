@@ -53,7 +53,7 @@ void wlr_render_rect(struct wlr_renderer *r, const struct wlr_box *box,
 const enum wl_shm_format *wlr_renderer_get_shm_texture_formats(
     struct wlr_renderer *r, size_t *len);
 
-void wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_display);
+bool wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_display);
 void wlr_renderer_destroy(struct wlr_renderer *renderer);
 """
 

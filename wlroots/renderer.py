@@ -1,30 +1,33 @@
 # Copyright (c) 2019 Sean Vig
 
 import contextlib
-from typing import Any, Iterator, List, Tuple, Union
+from typing import Iterator, List, Tuple, Union
 
 from pywayland.server import Display
 
 from wlroots import ffi, lib, Ptr
-from wlroots.backend import Backend
 from wlroots.wlr_types import Box, Matrix, Texture
 
 ColorType = Union[List, Tuple, ffi.CData]
 
 
 class Renderer(Ptr):
-    def __init__(self, backend: Backend, display: Display) -> None:
+    def __init__(self, ptr) -> None:
         """Obtains the renderer this backend is using
 
         The renderer is automatically destroyed as the backend is destroyed.
+        """
+        self._ptr = ptr
 
-        :param backend:
-            The wlroots backend to get the renderer for.
+    def init_display(self, display: Display) -> None:
+        """Creates necessary shm and invokes the initialization of the implementation
+
         :param display:
             The Wayland display to initialize the renderer against.
         """
-        self._ptr: Any = lib.wlr_backend_get_renderer(backend._ptr)
-        lib.wlr_renderer_init_wl_display(self._ptr, display._ptr)
+        ret = lib.wlr_renderer_init_wl_display(self._ptr, display._ptr)
+        if not ret:
+            raise RuntimeError("Unable to initialize renderer for display")
 
     @contextlib.contextmanager
     def render(self, width: int, height: int) -> Iterator["Renderer"]:
