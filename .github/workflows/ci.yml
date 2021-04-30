@@ -108,13 +108,14 @@ jobs:
             wayland-protocols-version: "1.20"
             wlroots-version: master
     steps:
-      - uses: actions/checkout@v2
       - name: Download wayland libraries
         uses: actions/download-artifact@v2
         with:
           name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
       - name: Unpack wayland artifact
         run: sudo tar xf wayland.tar.gz -C /
+      - name: Checkout repo
+        uses: actions/checkout@v2
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -160,13 +161,14 @@ jobs:
         wayland-protocols-version: ["1.20"]
         wlroots-version: ["0.13.0"]
     steps:
-      - uses: actions/checkout@v2
       - name: Download wayland libraries
         uses: actions/download-artifact@v2
         with:
           name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
       - name: Unpack wayland artifact
         run: sudo tar xf wayland.tar.gz -C /
+      - name: Checkout repo
+        uses: actions/checkout@v2
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -210,13 +212,14 @@ jobs:
         wayland-protocols-version: ["1.20"]
         wlroots-version: ["0.13.0"]
     steps:
-      - uses: actions/checkout@v2
       - name: Download wayland libraries
         uses: actions/download-artifact@v2
         with:
           name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
       - name: Unpack wayland artifact
         run: sudo tar xf wayland.tar.gz -C /
+      - name: Checkout repo
+        uses: actions/checkout@v2
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
