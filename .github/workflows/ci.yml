@@ -1,4 +1,4 @@
-name: ci
+name: CI
 on:
   pull_request:
   push:
@@ -6,12 +6,14 @@ on:
 jobs:
   build-wayland:
     name: Build Wayland libraries
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    env:
+      seatd-version: "0.5.0"
     strategy:
       matrix:
-        wayland-version: [1.19.0]
+        wayland-version: ["1.19.0"]
         wayland-protocols-version: ["1.20"]
-        wlroots-version: [0.13.0]
+        wlroots-version: ["0.13.0", master]
     steps:
       - name: Install dependencies
         run: |
@@ -23,6 +25,7 @@ jobs:
             libgles2-mesa-dev \
             libinput-dev \
             libxcb-composite0-dev \
+            libxcb-dri3-dev \
             libxcb-icccm4-dev \
             libxcb-image0-dev \
             libxcb-render0-dev \
@@ -31,66 +34,87 @@ jobs:
             libxcb1-dev \
             libxkbcommon-dev \
             ninja-build
+          sudo pip install meson
       - name: Set environment variables
         run: |
-          echo "CPATH=${HOME}/wayland/include" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
-          echo "LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=${HOME}/wayland/share/pkgconfig:${HOME}/wayland/lib/pkgconfig" >> $GITHUB_ENV
+          echo "CPATH=${HOME}/wayland/usr/include" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${HOME}/wayland/usr/lib" >> $GITHUB_ENV
+          echo "LIBRARY_PATH=${HOME}/wayland/usr/lib" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=${HOME}/wayland/usr/share/pkgconfig:${HOME}/wayland/usr/lib/pkgconfig" >> $GITHUB_ENV
       - name: Download and unpack Wayland source
         run: |
-          wget --no-check-certificate $WAYLAND_URL
-          wget --no-check-certificate $WAYLAND_PROTOCOLS_URL
-          wget --no-check-certificate -O wlroots.tar.gz $WLROOTS_URL
+          wget $WAYLAND_URL
+          wget $WAYLAND_PROTOCOLS_URL
+          wget -O seatd.tar.gz $SEATD_URL
+          wget -O wlroots.tar.gz $WLROOTS_URL
           tar -xJf wayland-${{ matrix.wayland-version }}.tar.xz
           tar -xJf wayland-protocols-${{ matrix.wayland-protocols-version }}.tar.xz
+          tar -xzf seatd.tar.gz
           tar -xzf wlroots.tar.gz
         env:
           WAYLAND_URL: https://wayland.freedesktop.org/releases/wayland-${{ matrix.wayland-version }}.tar.xz
           WAYLAND_PROTOCOLS_URL: https://wayland.freedesktop.org/releases/wayland-protocols-${{ matrix.wayland-protocols-version }}.tar.xz
+          SEATD_URL: https://git.sr.ht/~kennylevinsen/seatd/archive/${{ env.seatd-version }}.tar.gz
           WLROOTS_URL: https://github.com/swaywm/wlroots/archive/${{ matrix.wlroots-version }}.tar.gz
       - name: Build wayland
         working-directory: wayland-${{ matrix.wayland-version }}
         run: |
-          ./configure --disable-documentation --prefix=${HOME}/wayland
+          ./configure --disable-documentation --prefix=/usr
           make
-          make install
+          DESTDIR=~/wayland make install
+          sudo make install
       - name: Build wayland-protocols
         working-directory: wayland-protocols-${{ matrix.wayland-protocols-version }}
         run: |
-          ./configure --prefix=${HOME}/wayland
+          ./configure --prefix=/usr
           make
-          make install
+          DESTDIR=~/wayland make install
+          sudo make install
+      - name: Build seatd
+        working-directory: seatd-${{ env.seatd-version }}
+        if: ${{ matrix.wlroots-version == 'master' }}
+        run: |
+          meson build --prefix=/usr
+          ninja -C build
+          DESTDIR=~/wayland ninja -C build install
+          sudo ninja -C build install
       - name: Build wlroots
         working-directory: wlroots-${{ matrix.wlroots-version }}
         run: |
-          sudo pip install meson
-          meson build --prefix=${HOME}/wayland  --libdir=lib
+          meson build --prefix=/usr
           ninja -C build
-          ninja -C build install
+          DESTDIR=~/wayland ninja -C build install
+      - name: Create artifact
+        run: tar czf ~/wayland.tar.gz -C ${HOME}/wayland/ .
       - name: Upload built libraries
         uses: actions/upload-artifact@v2
         with:
           name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
-          path: ~/wayland/
+          path: ~/wayland.tar.gz
           if-no-files-found: error
   unit-test:
     name: Python ${{ matrix.python-version}} unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: build-wayland
     strategy:
       matrix:
         python-version: [pypy3, "3.6", "3.7", "3.8", "3.9"]
-        wayland-version: [1.19.0]
+        wayland-version: ["1.19.0"]
         wayland-protocols-version: ["1.20"]
-        wlroots-version: [0.13.0]
+        wlroots-version: ["0.13.0"]
+        include:
+          - python-version: "3.9"
+            wayland-version: "1.19.0"
+            wayland-protocols-version: "1.20"
+            wlroots-version: master
     steps:
       - uses: actions/checkout@v2
       - name: Download wayland libraries
         uses: actions/download-artifact@v2
         with:
-          path: ~/wayland/
           name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
+      - name: Unpack wayland artifact
+        run: sudo tar xf wayland.tar.gz -C /
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -105,6 +129,7 @@ jobs:
             libgles2-mesa-dev \
             libinput-dev \
             libxcb-composite0-dev \
+            libxcb-dri3-dev \
             libxcb-icccm4-dev \
             libxcb-image0-dev \
             libxcb-render0-dev \
@@ -114,35 +139,34 @@ jobs:
             libxkbcommon-dev
       - name: Set environment variables
         run: |
-          echo "CPATH=${HOME}/wayland/include" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
-          echo "LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=${HOME}/wayland/share/pkgconfig:${HOME}/wayland/lib/pkgconfig" >> $GITHUB_ENV
           echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
       - name: Install Python dependencies
+        continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: |
           pip install -r requirements.txt
           pip install pytest
           python wlroots/ffi_build.py
       - name: Run unit tests
+        continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: pytest -Wall
   flake8-test:
     name: Python ${{ matrix.python-version}} flake8 tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: build-wayland
     strategy:
       matrix:
         python-version: ["3.9"]
-        wayland-version: [1.19.0]
+        wayland-version: ["1.19.0"]
         wayland-protocols-version: ["1.20"]
-        wlroots-version: [0.13.0]
+        wlroots-version: ["0.13.0"]
     steps:
       - uses: actions/checkout@v2
       - name: Download wayland libraries
         uses: actions/download-artifact@v2
         with:
-          path: ~/wayland/
           name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
+      - name: Unpack wayland artifact
+        run: sudo tar xf wayland.tar.gz -C /
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -157,6 +181,7 @@ jobs:
             libgles2-mesa-dev \
             libinput-dev \
             libxcb-composite0-dev \
+            libxcb-dri3-dev \
             libxcb-icccm4-dev \
             libxcb-image0-dev \
             libxcb-render0-dev \
@@ -166,10 +191,6 @@ jobs:
             libxkbcommon-dev
       - name: Set environment variables
         run: |
-          echo "CPATH=${HOME}/wayland/include" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
-          echo "LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=${HOME}/wayland/share/pkgconfig:${HOME}/wayland/lib/pkgconfig" >> $GITHUB_ENV
           echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
       - name: Install Python dependencies
         run: |
@@ -180,21 +201,22 @@ jobs:
         run: flake8 wlroots tiny
   mypy-test:
     name: Python ${{ matrix.python-version}} mypy tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: build-wayland
     strategy:
       matrix:
         python-version: ["3.9"]
-        wayland-version: [1.19.0]
+        wayland-version: ["1.19.0"]
         wayland-protocols-version: ["1.20"]
-        wlroots-version: [0.13.0]
+        wlroots-version: ["0.13.0"]
     steps:
       - uses: actions/checkout@v2
       - name: Download wayland libraries
         uses: actions/download-artifact@v2
         with:
-          path: ~/wayland/
           name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
+      - name: Unpack wayland artifact
+        run: sudo tar xf wayland.tar.gz -C /
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -209,6 +231,7 @@ jobs:
             libgles2-mesa-dev \
             libinput-dev \
             libxcb-composite0-dev \
+            libxcb-dri3-dev \
             libxcb-icccm4-dev \
             libxcb-image0-dev \
             libxcb-render0-dev \
@@ -218,10 +241,6 @@ jobs:
             libxkbcommon-dev
       - name: Set environment variables
         run: |
-          echo "CPATH=${HOME}/wayland/include" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
-          echo "LIBRARY_PATH=${HOME}/wayland/lib" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=${HOME}/wayland/share/pkgconfig:${HOME}/wayland/lib/pkgconfig" >> $GITHUB_ENV
           echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
       - name: Install Python dependencies
         run: |
