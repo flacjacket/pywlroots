@@ -1,4 +1,5 @@
 # Copyright (c) Sean Vig 2019
+# Copyright (c) Matt Colligan 2021
 
 from typing import Tuple, Optional
 
@@ -6,6 +7,7 @@ from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
 
 from wlroots import ffi, lib, Ptr
+from wlroots.util.region import PixmanRegion32
 from .matrix import Matrix
 
 
@@ -84,6 +86,10 @@ class Output(Ptr):
         return self._ptr.scale
 
     @property
+    def transform(self) -> WlOutput.transform:
+        return WlOutput.transform(self._ptr.transform)
+
+    @property
     def transform_matrix(self) -> Matrix:
         """The transform matrix giving the projection of the output"""
         return Matrix(self._ptr.transform_matrix)
@@ -119,7 +125,6 @@ class Output(Ptr):
 
     def __enter__(self) -> "Output":
         """Start rendering frame"""
-        self.attach_render()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
@@ -152,7 +157,7 @@ class Output(Ptr):
 
     def rollback(self) -> None:
         """Discard the pending output state"""
-        lib.wlr_output_commit(self._ptr)
+        lib.wlr_output_rollback(self._ptr)
 
     def effective_resolution(self) -> Tuple[int, int]:
         """Computes the transformed and scaled output resolution"""
@@ -163,17 +168,43 @@ class Output(Ptr):
         height = height_ptr[0]
         return width, height
 
-    def render_software_cursors(self) -> None:
+    def transformed_resolution(self) -> Tuple[int, int]:
+        """Computes the transformed output resolution"""
+        width_ptr = ffi.new("int *")
+        height_ptr = ffi.new("int *")
+        lib.wlr_output_transformed_resolution(self._ptr, width_ptr, height_ptr)
+        width = width_ptr[0]
+        height = height_ptr[0]
+        return width, height
+
+    def render_software_cursors(self, damage: Optional[PixmanRegion32] = None) -> None:
         """Renders software cursors
 
         This is a utility function that can be called when compositors render.
         """
-        lib.wlr_output_render_software_cursors(self._ptr, ffi.NULL)
+        if damage is None:
+            lib.wlr_output_render_software_cursors(self._ptr, ffi.NULL)
+        else:
+            lib.wlr_output_render_software_cursors(self._ptr, damage._ptr)
 
     @staticmethod
     def transform_invert(transform: WlOutput.transform) -> WlOutput.transform:
         """Returns the transform that, when composed with transform gives transform.normal"""
         return WlOutput.transform(lib.wlr_output_transform_invert(transform))
+
+    def set_damage(self, damage: PixmanRegion32) -> None:
+        """
+        Set the damage region for the frame to be submitted. This is the region of
+        the screen that has changed since the last frame.
+
+        Compositors implementing damage tracking should call this function with the
+        damaged region in output-buffer-local coordinates.
+
+        This region is not to be confused with the renderer's buffer damage, ie. the
+        region compositors need to repaint. Compositors usually need to repaint more
+        than what changed since last frame since multiple render buffers are used.
+        """
+        lib.wlr_output_set_damage(self._ptr, damage._ptr)
 
 
 class OutputMode(Ptr):
