@@ -1,7 +1,7 @@
 # Copyright (c) 2019 Sean Vig
 
 import contextlib
-from typing import Iterator, List, Tuple, Union
+from typing import Iterator, List, Optional, Tuple, Union
 
 from pywayland.server import Display
 
@@ -79,3 +79,11 @@ class Renderer(Ptr):
         if not isinstance(color, ffi.CData):
             color = ffi.new("float[4]", color)
         lib.wlr_render_rect(self._ptr, box._ptr, color, projection._ptr)
+
+    def scissor(self, box: Optional[Box]) -> None:
+        """
+        Defines a scissor box. Only pixels that lie within the scissor box can be
+        modified by drawing functions. Providing a NULL `box` disables the scissor
+        box.
+        """
+        lib.wlr_renderer_scissor(self._ptr, box._ptr if box else ffi.NULL)

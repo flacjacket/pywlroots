@@ -294,6 +294,7 @@ class TinywlServer:
 
         output = self.outputs[0]
         width, height = output.effective_resolution()
+        output.attach_render()
         with output, self._backend.renderer.render(width, height) as renderer:
             renderer.clear([0.3, 0.3, 0.3, 1.0])
 

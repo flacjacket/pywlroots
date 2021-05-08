@@ -42,6 +42,8 @@ void wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
 void wlr_renderer_end(struct wlr_renderer *r);
 void wlr_renderer_clear(struct wlr_renderer *r, const float color[static 4]);
 
+void wlr_renderer_scissor(struct wlr_renderer *r, struct wlr_box *box);
+
 bool wlr_render_texture(struct wlr_renderer *r, struct wlr_texture *texture,
     const float projection[static 9], int x, int y, float alpha);
 bool wlr_render_texture_with_matrix(struct wlr_renderer *r,
@@ -367,12 +369,30 @@ void wlr_matrix_project_box(float mat[static 9], const struct wlr_box *box,
     const float projection[static 9]);
 """
 
-# types/wlr_output.h
+# Adapted from /usr/include/pixman-1/pixman.h
+# Used for some wlr_output methods
 CDEF += """
 struct pixman_region32 {
     ...;
 };
 
+struct pixman_box32 {
+    int32_t x1, y1, x2, y2;
+    ...;
+};
+
+void pixman_region32_init(struct pixman_region32 *region);
+
+void pixman_region32_fini(struct pixman_region32 *region);
+
+struct pixman_box32* pixman_region32_rectangles(struct pixman_region32 *region,
+    int *n_rects);
+
+bool pixman_region32_not_empty(struct pixman_region32 *region);
+"""
+
+# types/wlr_output.h
+CDEF += """
 struct wlr_output_state {
     ...;
 };
@@ -447,8 +467,12 @@ void wlr_output_set_mode(struct wlr_output *output,
     struct wlr_output_mode *mode);
 
 bool wlr_output_attach_render(struct wlr_output *output, int *buffer_age);
+void wlr_output_transformed_resolution(struct wlr_output *output,
+    int *width, int *height);
 void wlr_output_effective_resolution(struct wlr_output *output,
     int *width, int *height);
+void wlr_output_set_damage(struct wlr_output *output,
+    struct pixman_region32 *damage);
 bool wlr_output_test(struct wlr_output *output);
 bool wlr_output_commit(struct wlr_output *output);
 void wlr_output_rollback(struct wlr_output *output);
@@ -458,6 +482,52 @@ void wlr_output_render_software_cursors(struct wlr_output *output,
 
 enum wl_output_transform wlr_output_transform_invert(
     enum wl_output_transform tr);
+"""
+
+# types/wlr_output_damage.h
+CDEF += """
+#define WLR_OUTPUT_DAMAGE_PREVIOUS_LEN 2
+
+struct wlr_output_damage {
+    struct wlr_output *output;
+    int max_rects; // max number of damaged rectangles
+
+    struct pixman_region32 current; // in output-local coordinates
+
+    // circular queue for previous damage
+    struct pixman_region32 previous[WLR_OUTPUT_DAMAGE_PREVIOUS_LEN];
+    size_t previous_idx;
+
+    enum wlr_output_state_buffer_type pending_buffer_type;
+
+    struct {
+        struct wl_signal frame;
+        struct wl_signal destroy;
+    } events;
+
+    struct wl_listener output_destroy;
+    struct wl_listener output_mode;
+    struct wl_listener output_needs_frame;
+    struct wl_listener output_damage;
+    struct wl_listener output_frame;
+    struct wl_listener output_precommit;
+    struct wl_listener output_commit;
+    ...;
+};
+
+struct wlr_output_damage *wlr_output_damage_create(struct wlr_output *output);
+void wlr_output_damage_destroy(struct wlr_output_damage *output_damage);
+
+bool wlr_output_damage_attach_render(struct wlr_output_damage *output_damage,
+    bool *needs_frame, struct pixman_region32  *buffer_damage);
+
+void wlr_output_damage_add(struct wlr_output_damage *output_damage,
+    struct pixman_region32 *damage);
+
+void wlr_output_damage_add_whole(struct wlr_output_damage *output_damage);
+
+void wlr_output_damage_add_box(struct wlr_output_damage *output_damage,
+    struct wlr_box *box);
 """
 
 # types/wlr_output_layout.h
@@ -1297,6 +1367,12 @@ typedef void (*wrapped_log_func_t)(enum wlr_log_importance importance, const cha
 void wrapped_log_init(enum wlr_log_importance verbosity, wrapped_log_func_t callback);
 """
 
+# util/region.h
+CDEF += """
+void wlr_region_transform(struct pixman_region32 *dst, struct pixman_region32 *src,
+    enum wl_output_transform transform, int width, int height);
+"""
+
 # backend/headless.h
 CDEF += """
 struct wlr_backend *wlr_headless_backend_create(struct wl_display *display);
@@ -1335,6 +1411,7 @@ SOURCE = """
 #include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output.h>
+#include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_surface.h>
@@ -1345,6 +1422,7 @@ SOURCE = """
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
+#include <wlr/util/region.h>
 #include <wlr/version.h>
 
 #include <xkbcommon/xkbcommon.h>
