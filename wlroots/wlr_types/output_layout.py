@@ -2,6 +2,8 @@
 
 from typing import Optional, Tuple
 
+from pywayland.server import Signal
+
 from wlroots import ffi, lib, Ptr
 from .box import Box
 from .output import Output
@@ -17,6 +19,10 @@ class OutputLayout(Ptr):
         """
         ptr = lib.wlr_output_layout_create()
         self._ptr = ffi.gc(ptr, lib.wlr_output_layout_destroy)
+
+        self.add_event = Signal(ptr=ffi.addressof(ptr.events.add))
+        self.change_event = Signal(ptr=ffi.addressof(ptr.events.change))
+        self.destroy_event = Signal(ptr=ffi.addressof(ptr.events.destroy))
 
     def destroy(self) -> None:
         """Destroy the current output layout"""
@@ -38,7 +44,7 @@ class OutputLayout(Ptr):
         """
         lib.wlr_output_layout_add_auto(self._ptr, output._ptr)
 
-    def output_coords(self, output) -> Tuple[float, float]:
+    def output_coords(self, output: Output) -> Tuple[float, float]:
         """Determine coordinates of the output in the layout
 
         Given x and y in layout coordinates, adjusts them to local output

@@ -82,6 +82,10 @@ class Output(PtrHasData):
         return self._ptr.enabled
 
     @property
+    def current_mode(self) -> "OutputMode":
+        return OutputMode(self._ptr.current_mode)
+
+    @property
     def scale(self) -> float:
         return self._ptr.scale
 
@@ -118,6 +122,16 @@ class Output(PtrHasData):
         The output needs to be enabled.
         """
         lib.wlr_output_set_mode(self._ptr, mode._ptr)
+
+    def set_custom_mode(
+        self, mode: "OutputMode", width: int, height: int, refresh: int
+    ) -> None:
+        """
+        Sets a custom mode on the output. If modes are available, they are preferred.
+        Setting `refresh` to zero lets the backend pick a preferred value. The
+        output needs to be enabled.
+        """
+        lib.wlr_output_set_custom_mode(self._ptr, width, height, refresh)
 
     def create_global(self) -> None:
         """Create the global corresponding to the output"""
@@ -205,6 +219,32 @@ class Output(PtrHasData):
         than what changed since last frame since multiple render buffers are used.
         """
         lib.wlr_output_set_damage(self._ptr, damage._ptr)
+
+    def set_transform(self, transform: WlOutput.transform) -> None:
+        """
+        Sets a transform for the output.
+
+        Transform is double-buffered state, see `wlr_output_commit`.
+        """
+        lib.wlr_output_set_transform(self._ptr, transform)
+
+    def set_scale(self, scale: float) -> None:
+        """
+        Sets a scale for the output.
+
+        Scale is double-buffered state, see `wlr_output_commit`.
+        """
+        lib.wlr_output_set_scale(self._ptr, scale)
+
+    def test(self) -> bool:
+        """
+        Test whether the pending output state would be accepted by the backend. If
+        this function returns true, `wlr_output_commit` can only fail due to a
+        runtime error.
+
+        This function doesn't mutate the pending state.
+        """
+        return lib.wlr_output_test(self._ptr)
 
 
 class OutputMode(Ptr):

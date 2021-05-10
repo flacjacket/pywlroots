@@ -31,6 +31,10 @@ class OutputDamage(Ptr):
         """The name of the output"""
         return Output(self._ptr.output)
 
+    @property
+    def current(self) -> PixmanRegion32:
+        return PixmanRegion32(ffi.addressof(self._ptr.current))
+
     def destroy(self) -> None:
         """The name of the output"""
         lib.wlr_output_damage_destroy(self._ptr)
