@@ -1196,6 +1196,39 @@ struct wlr_xdg_shell {
     ...;
 };
 
+struct wlr_xdg_positioner {
+    struct wlr_box anchor_rect;
+    enum xdg_positioner_anchor anchor;
+    enum xdg_positioner_gravity gravity;
+    enum xdg_positioner_constraint_adjustment constraint_adjustment;
+
+    struct {
+        int32_t width, height;
+    } size;
+
+    struct {
+        int32_t x, y;
+    } offset;
+    ...;
+};
+
+struct wlr_xdg_popup {
+    struct wlr_xdg_surface *base;
+    struct wl_list link;
+
+    struct wl_resource *resource;
+    bool committed;
+    struct wlr_surface *parent;
+    struct wlr_seat *seat;
+
+    struct wlr_box geometry;
+
+    struct wlr_xdg_positioner positioner;
+
+    struct wl_list grab_link; // wlr_xdg_popup_grab::popups
+    ...;
+};
+
 struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
 
 struct wlr_xdg_toplevel_state {
@@ -1317,6 +1350,9 @@ struct wlr_xdg_toplevel_show_window_menu_event {
     uint32_t x, y;
     ...;
 };
+
+void wlr_xdg_popup_unconstrain_from_box(struct wlr_xdg_popup *popup,
+    const struct wlr_box *toplevel_sx_box);
 
 void wlr_xdg_surface_ping(struct wlr_xdg_surface *surface);
 

@@ -65,6 +65,9 @@ class XdgSurface(PtrHasData):
         self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
         self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
+        self.new_popup_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.new_popup), data_wrapper=XdgPopup
+        )
 
     @classmethod
     def from_surface(cls, surface: Surface) -> "XdgSurface":
@@ -292,3 +295,26 @@ class XdgTopLevelShowWindowMenuEvent(Ptr):
     @property
     def y(self) -> int:
         return self._ptr.y
+
+
+class XdgPopup(Ptr):
+    def __init__(self, ptr) -> None:
+        """A wlr_xdg_popup
+
+        :param ptr:
+            The wlr_xdg_popup cdata pointer
+        """
+        self._ptr = ffi.cast("struct wlr_xdg_popup *", ptr)
+
+    @property
+    def base(self) -> XdgSurface:
+        """The xdg surface associated with the popup"""
+        return XdgSurface(self._ptr.base)
+
+    def unconstrain_from_box(self, box: Box) -> None:
+        """
+        Set the geometry of this popup to unconstrain it according to its xdg-positioner
+        rules. The box should be in the popup's root toplevel parent surface coordinate
+        system.
+        """
+        lib.wlr_xdg_popup_unconstrain_from_box(self._ptr, box._ptr)
