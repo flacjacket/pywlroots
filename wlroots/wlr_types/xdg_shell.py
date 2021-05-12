@@ -6,7 +6,7 @@ from typing import Callable, Optional, Tuple, TypeVar
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, lib, Ptr
+from wlroots import ffi, PtrHasData, lib, Ptr
 from wlroots.util.edges import Edges
 from .box import Box
 from .output import Output
@@ -32,7 +32,7 @@ class XdgSurfaceRole(enum.IntEnum):
     POPUP = lib.WLR_XDG_SURFACE_ROLE_POPUP
 
 
-class XdgShell(Ptr):
+class XdgShell(PtrHasData):
     def __init__(self, display: Display) -> None:
         """Create the shell for protocol windows
 
@@ -47,7 +47,7 @@ class XdgShell(Ptr):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
 
-class XdgSurface(Ptr):
+class XdgSurface(PtrHasData):
     def __init__(self, ptr) -> None:
         """A user interface element requiring management by the compositor
 

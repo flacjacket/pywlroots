@@ -6,12 +6,12 @@ from typing import Tuple, Optional
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
 
-from wlroots import ffi, lib, Ptr
+from wlroots import ffi, PtrHasData, lib, Ptr
 from wlroots.util.region import PixmanRegion32
 from .matrix import Matrix
 
 
-class Output(Ptr):
+class Output(PtrHasData):
     def __init__(self, ptr) -> None:
         """A compositor output region
 

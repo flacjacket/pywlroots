@@ -6,7 +6,7 @@ from weakref import WeakKeyDictionary
 from pywayland.server import Display, Signal
 from pywayland.protocol.wayland import WlSeat
 
-from wlroots import ffi, lib, Ptr
+from wlroots import ffi, PtrHasData, lib, Ptr
 from .input_device import ButtonState, InputDevice
 from .keyboard import Keyboard, KeyboardModifiers, KeyboardKeyEvent
 from .pointer import AxisSource, AxisOrientation
@@ -31,7 +31,7 @@ class KeyboardGrab(Ptr):
         lib.wlr_seat_keyboard_end_grab(self._seat)
 
 
-class Seat(Ptr):
+class Seat(PtrHasData):
     def __init__(self, display: Display, name: str) -> None:
         """Allocates a new seat and adds a seat global to the display
 

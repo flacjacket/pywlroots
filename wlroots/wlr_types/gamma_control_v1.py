@@ -2,10 +2,10 @@
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, lib, Ptr
+from wlroots import ffi, PtrHasData, lib
 
 
-class GammaControlManagerV1(Ptr):
+class GammaControlManagerV1(PtrHasData):
     def __init__(self, display: Display) -> None:
         """Creates a wlr_gamma_control_manager_v1"""
         self._ptr = lib.wlr_gamma_control_manager_v1_create(display._ptr)
