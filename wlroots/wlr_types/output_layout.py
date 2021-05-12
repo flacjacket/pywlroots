@@ -3,6 +3,7 @@
 from typing import Optional, Tuple
 
 from wlroots import ffi, lib, Ptr
+from .box import Box
 from .output import Output
 
 
@@ -66,3 +67,46 @@ class OutputLayout(Ptr):
         if output_ptr == ffi.NULL:
             return None
         return Output(output_ptr)
+
+    def add(self, output: Output, lx: int, ly: int) -> None:
+        """
+        Add the output to the layout at the specified coordinates. If the output is
+        already part of the output layout, this moves the output.
+        """
+        lib.wlr_output_layout_add(self._ptr, output._ptr, lx, ly)
+
+    def move(self, output: Output, lx: int, ly: int) -> None:
+        """Move an output to specified coordinates."""
+        lib.wlr_output_layout_move(self._ptr, output._ptr, lx, ly)
+
+    def remove(self, output: Output) -> None:
+        """Remove an output from the layout."""
+        lib.wlr_output_layout_remove(self._ptr, output._ptr)
+
+    def get_box(self, reference: Output) -> Box:
+        """
+        Get the box of the layout for the given reference output in layout
+        coordinates. If `reference` is NULL, the box will be for the extents of the
+        entire layout.
+        """
+        box_ptr = lib.wlr_output_layout_get_box(self._ptr, reference._ptr)
+        return Box(ptr=box_ptr)
+
+    def closest_point(
+        self, lx: float, ly: float, reference: Optional[Output] = None
+    ) -> Tuple[float, float]:
+        """
+        Get the closest point on this layout from the given point from the reference
+        output. If reference is NULL, gets the closest point from the entire layout.
+        """
+        if reference:
+            reference_ptr = reference._ptr
+        else:
+            reference_ptr = ffi.NULL
+
+        dest_lx = ffi.new("double *")
+        dest_ly = ffi.new("double *")
+        lib.wlr_output_layout_closest_point(
+            self._ptr, reference_ptr, lx, ly, dest_lx, dest_ly
+        )
+        return dest_lx[0], dest_ly[0]

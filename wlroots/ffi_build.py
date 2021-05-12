@@ -538,6 +538,22 @@ void wlr_output_layout_destroy(struct wlr_output_layout *layout);
 void wlr_output_layout_output_coords(struct wlr_output_layout *layout,
     struct wlr_output *reference, double *lx, double *ly);
 
+void wlr_output_layout_closest_point(struct wlr_output_layout *layout,
+    struct wlr_output *reference, double lx, double ly, double *dest_lx,
+    double *dest_ly);
+
+void wlr_output_layout_add(struct wlr_output_layout *layout,
+    struct wlr_output *output, int lx, int ly);
+
+void wlr_output_layout_move(struct wlr_output_layout *layout,
+    struct wlr_output *output, int lx, int ly);
+
+void wlr_output_layout_remove(struct wlr_output_layout *layout,
+    struct wlr_output *output);
+
+struct wlr_box *wlr_output_layout_get_box(
+    struct wlr_output_layout *layout, struct wlr_output *reference);
+
 void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
     struct wlr_output *output);
 
