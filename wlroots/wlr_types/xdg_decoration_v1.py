@@ -28,7 +28,7 @@ class XdgDecorationManagerV1(PtrHasData):
 
         self.new_toplevel_decoration_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_toplevel_decoration),
-            data_wrapper=XdgToplevelDecorationV1
+            data_wrapper=XdgToplevelDecorationV1,
         )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
@@ -45,7 +45,9 @@ class XdgToplevelDecorationV1(PtrHasData):
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_decoration_v1 *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-        self.request_mode_event = Signal(ptr=ffi.addressof(self._ptr.events.request_mode))
+        self.request_mode_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_mode)
+        )
 
     @property
     def surface(self) -> Surface:

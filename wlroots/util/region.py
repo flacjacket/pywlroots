@@ -42,7 +42,11 @@ class PixmanRegion32(Ptr):
         return boxes
 
     def transform(
-        self, src: "PixmanRegion32", transform: WlOutput.transform, width: int, height: int
+        self,
+        src: "PixmanRegion32",
+        transform: WlOutput.transform,
+        width: int,
+        height: int,
     ) -> None:
         """
         Applies a transform to a region inside a box of size `width` x `height`.
