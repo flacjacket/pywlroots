@@ -123,9 +123,7 @@ class Output(PtrHasData):
         """
         lib.wlr_output_set_mode(self._ptr, mode._ptr)
 
-    def set_custom_mode(
-        self, mode: "OutputMode", width: int, height: int, refresh: int
-    ) -> None:
+    def set_custom_mode(self, width: int, height: int, refresh: int) -> None:
         """
         Sets a custom mode on the output. If modes are available, they are preferred.
         Setting `refresh` to zero lets the backend pick a preferred value. The
