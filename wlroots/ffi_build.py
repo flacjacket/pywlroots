@@ -1289,6 +1289,18 @@ struct wlr_xdg_shell {
     ...;
 };
 
+struct wlr_xdg_client {
+    struct wlr_xdg_shell *shell;
+    struct wl_resource *resource;
+    struct wl_client *client;
+    struct wl_list surfaces;
+
+    struct wl_list link; // wlr_xdg_shell::clients
+
+    uint32_t ping_serial;
+    struct wl_event_source *ping_timer;
+};
+
 struct wlr_xdg_positioner {
     struct wlr_box anchor_rect;
     enum xdg_positioner_anchor anchor;
