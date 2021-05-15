@@ -4,7 +4,7 @@ import enum
 import weakref
 
 from .keyboard import Keyboard
-from wlroots import ffi, lib, Ptr
+from wlroots import ffi, PtrHasData, lib
 
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 
@@ -25,7 +25,7 @@ class InputDeviceType(enum.IntEnum):
     SWITCH = lib.WLR_INPUT_DEVICE_SWITCH
 
 
-class InputDevice(Ptr):
+class InputDevice(PtrHasData):
     def __init__(self, ptr) -> None:
         """Create the input device from the given cdata
 

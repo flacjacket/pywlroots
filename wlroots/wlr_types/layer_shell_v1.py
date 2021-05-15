@@ -7,7 +7,7 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
 
-from wlroots import ffi, lib, Ptr
+from wlroots import ffi, PtrHasData, lib, Ptr
 from .output import Output
 from .surface import Surface
 from .xdg_shell import SurfaceCallback, T
@@ -90,7 +90,7 @@ class LayerSurfaceV1State(Ptr):
         return LayerShellV1Layer(self._ptr.layer)
 
 
-class LayerSurfaceV1(Ptr):
+class LayerSurfaceV1(PtrHasData):
     def __init__(self, ptr):
         self._ptr = ffi.cast("struct wlr_layer_surface_v1 *", ptr)
 
@@ -199,7 +199,7 @@ class LayerSurfaceV1(Ptr):
         return Surface(surface_ptr), sub_x_data[0], sub_y_data[0]
 
 
-class LayerShellV1(Ptr):
+class LayerShellV1(PtrHasData):
     def __init__(self, display: "Display") -> None:
         """Create an wlr_xdg_output_manager_v1"""
         self._ptr = lib.wlr_layer_shell_v1_create(display._ptr)

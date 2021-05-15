@@ -465,6 +465,11 @@ struct wlr_output_mode *wlr_output_preferred_mode(struct wlr_output *output);
 
 void wlr_output_set_mode(struct wlr_output *output,
     struct wlr_output_mode *mode);
+void wlr_output_set_custom_mode(struct wlr_output *output, int32_t width,
+    int32_t height, int32_t refresh);
+void wlr_output_set_transform(struct wlr_output *output,
+    enum wl_output_transform transform);
+void wlr_output_set_scale(struct wlr_output *output, float scale);
 
 bool wlr_output_attach_render(struct wlr_output *output, int *buffer_age);
 void wlr_output_transformed_resolution(struct wlr_output *output,
@@ -532,17 +537,121 @@ void wlr_output_damage_add_box(struct wlr_output_damage *output_damage,
 
 # types/wlr_output_layout.h
 CDEF += """
+struct wlr_output_layout {
+    struct wl_list outputs;
+    struct wlr_output_layout_state *state;
+
+    struct {
+        struct wl_signal add;
+        struct wl_signal change;
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
 struct wlr_output_layout *wlr_output_layout_create(void);
 void wlr_output_layout_destroy(struct wlr_output_layout *layout);
 
 void wlr_output_layout_output_coords(struct wlr_output_layout *layout,
     struct wlr_output *reference, double *lx, double *ly);
 
+void wlr_output_layout_closest_point(struct wlr_output_layout *layout,
+    struct wlr_output *reference, double lx, double ly, double *dest_lx,
+    double *dest_ly);
+
+void wlr_output_layout_add(struct wlr_output_layout *layout,
+    struct wlr_output *output, int lx, int ly);
+
+void wlr_output_layout_move(struct wlr_output_layout *layout,
+    struct wlr_output *output, int lx, int ly);
+
+void wlr_output_layout_remove(struct wlr_output_layout *layout,
+    struct wlr_output *output);
+
+struct wlr_box *wlr_output_layout_get_box(
+    struct wlr_output_layout *layout, struct wlr_output *reference);
+
 void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
     struct wlr_output *output);
 
 struct wlr_output *wlr_output_layout_output_at(struct wlr_output_layout *layout,
     double lx, double ly);
+"""
+
+# types/wlr_output_management_v1.h
+CDEF += """
+struct wlr_output_manager_v1 {
+    struct wl_display *display;
+    struct wl_global *global;
+    struct wl_list resources; // wl_resource_get_link
+    struct wl_list heads; // wlr_output_head_v1::link
+    uint32_t serial;
+    bool current_configuration_dirty;
+
+    struct {
+        struct wl_signal apply; // wlr_output_configuration_v1
+        struct wl_signal test; // wlr_output_configuration_v1
+        struct wl_signal destroy;
+    } events;
+
+    struct wl_listener display_destroy;
+    void *data;
+    ...;
+};
+
+struct wlr_output_configuration_v1 {
+    struct wl_list heads; // wlr_output_configuration_head_v1::link
+
+    // client state
+    struct wlr_output_manager_v1 *manager;
+    uint32_t serial;
+    bool finalized; // client has requested to apply the config
+    bool finished; // feedback has been sent by the compositor
+    struct wl_resource *resource; // can be NULL if destroyed early
+    ...;
+};
+
+struct wlr_output_configuration_head_v1 {
+    struct wlr_output_head_v1_state state;
+    struct wlr_output_configuration_v1 *config;
+    struct wl_list link; // wlr_output_configuration_v1::heads
+    // client state
+    struct wl_resource *resource; // can be NULL if finalized or disabled
+    struct wl_listener output_destroy;
+    ...;
+};
+
+struct wlr_output_head_v1_state {
+    struct wlr_output *output;
+
+    bool enabled;
+    struct wlr_output_mode *mode;
+    struct {
+        int32_t width, height;
+        int32_t refresh;
+    } custom_mode;
+    int32_t x, y;
+    enum wl_output_transform transform;
+    float scale;
+};
+
+struct wlr_output_manager_v1 *wlr_output_manager_v1_create(
+    struct wl_display *display);
+
+void wlr_output_manager_v1_set_configuration(
+    struct wlr_output_manager_v1 *manager,
+    struct wlr_output_configuration_v1 *config);
+struct wlr_output_configuration_v1 *wlr_output_configuration_v1_create(void);
+void wlr_output_configuration_v1_send_succeeded(
+    struct wlr_output_configuration_v1 *config);
+void wlr_output_configuration_v1_send_failed(
+    struct wlr_output_configuration_v1 *config);
+struct wlr_output_configuration_head_v1 *
+    wlr_output_configuration_head_v1_create(
+    struct wlr_output_configuration_v1 *config, struct wlr_output *output);
+void wlr_output_configuration_v1_destroy(
+    struct wlr_output_configuration_v1 *config);
 """
 
 # types/wlr_pointer.h
@@ -1180,6 +1289,51 @@ struct wlr_xdg_shell {
     ...;
 };
 
+struct wlr_xdg_client {
+    struct wlr_xdg_shell *shell;
+    struct wl_resource *resource;
+    struct wl_client *client;
+    struct wl_list surfaces;
+
+    struct wl_list link; // wlr_xdg_shell::clients
+
+    uint32_t ping_serial;
+    struct wl_event_source *ping_timer;
+};
+
+struct wlr_xdg_positioner {
+    struct wlr_box anchor_rect;
+    enum xdg_positioner_anchor anchor;
+    enum xdg_positioner_gravity gravity;
+    enum xdg_positioner_constraint_adjustment constraint_adjustment;
+
+    struct {
+        int32_t width, height;
+    } size;
+
+    struct {
+        int32_t x, y;
+    } offset;
+    ...;
+};
+
+struct wlr_xdg_popup {
+    struct wlr_xdg_surface *base;
+    struct wl_list link;
+
+    struct wl_resource *resource;
+    bool committed;
+    struct wlr_surface *parent;
+    struct wlr_seat *seat;
+
+    struct wlr_box geometry;
+
+    struct wlr_xdg_positioner positioner;
+
+    struct wl_list grab_link; // wlr_xdg_popup_grab::popups
+    ...;
+};
+
 struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
 
 struct wlr_xdg_toplevel_state {
@@ -1302,6 +1456,9 @@ struct wlr_xdg_toplevel_show_window_menu_event {
     ...;
 };
 
+void wlr_xdg_popup_unconstrain_from_box(struct wlr_xdg_popup *popup,
+    const struct wlr_box *toplevel_sx_box);
+
 void wlr_xdg_surface_ping(struct wlr_xdg_surface *surface);
 
 uint32_t wlr_xdg_toplevel_set_size(struct wlr_xdg_surface *surface,
@@ -1413,6 +1570,7 @@ SOURCE = """
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_output_layout.h>
+#include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_surface.h>
 #include <wlr/types/wlr_seat.h>

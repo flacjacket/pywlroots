@@ -6,7 +6,7 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
 
-from wlroots import ffi, lib, Ptr
+from wlroots import ffi, PtrHasData, lib
 from .surface import Surface
 
 if TYPE_CHECKING:
@@ -21,14 +21,14 @@ class XdgToplevelDecorationV1Mode(enum.IntEnum):
     SERVER_SIDE = lib.WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE
 
 
-class XdgDecorationManagerV1(Ptr):
+class XdgDecorationManagerV1(PtrHasData):
     def __init__(self, ptr) -> None:
         """An XDG decoration manager: wlr_xdg_decoration_manager_v1."""
         self._ptr = ffi.cast("struct wlr_xdg_decoration_manager_v1 *", ptr)
 
         self.new_toplevel_decoration_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_toplevel_decoration),
-            data_wrapper=XdgToplevelDecorationV1
+            data_wrapper=XdgToplevelDecorationV1,
         )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
@@ -39,13 +39,15 @@ class XdgDecorationManagerV1(Ptr):
         return cls(ptr)
 
 
-class XdgToplevelDecorationV1(Ptr):
+class XdgToplevelDecorationV1(PtrHasData):
     def __init__(self, ptr) -> None:
         """struct wlr_xdg_toplevel_decoration_v1"""
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_decoration_v1 *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-        self.request_mode_event = Signal(ptr=ffi.addressof(self._ptr.events.request_mode))
+        self.request_mode_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_mode)
+        )
 
     @property
     def surface(self) -> Surface:

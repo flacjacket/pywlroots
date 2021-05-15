@@ -31,6 +31,10 @@ class OutputDamage(Ptr):
         """The name of the output"""
         return Output(self._ptr.output)
 
+    @property
+    def current(self) -> PixmanRegion32:
+        return PixmanRegion32(ffi.addressof(self._ptr.current))
+
     def destroy(self) -> None:
         """The name of the output"""
         lib.wlr_output_damage_destroy(self._ptr)
@@ -53,7 +57,9 @@ class OutputDamage(Ptr):
         Returns a bool specifying whether the output needs a new frame rendered.
         """
         needs_frame_ptr = ffi.new("bool *")
-        if not lib.wlr_output_damage_attach_render(self._ptr, needs_frame_ptr, damage._ptr):
+        if not lib.wlr_output_damage_attach_render(
+            self._ptr, needs_frame_ptr, damage._ptr
+        ):
             raise RuntimeError("Rendering on output failed")
 
         return needs_frame_ptr[0]

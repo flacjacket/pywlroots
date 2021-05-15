@@ -1,5 +1,7 @@
 # Copyright (c) Sean Vig 2018
 
+from typing import Any
+
 from ._ffi import ffi, lib  # noqa: F401
 
 __wlroots_version__ = "{}.{}.{}".format(
@@ -28,3 +30,19 @@ class Ptr:
     def __hash__(self) -> int:
         """Use the hash from `object`, which is unique per object"""
         return super().__hash__()
+
+
+class PtrHasData(Ptr):
+    """
+    Add methods to get and set the void *data member on the wrapped struct. The value
+    stored can be of any Python type.
+    """
+
+    @property
+    def data(self) -> Any:
+        return ffi.from_handle(self._ptr.data)
+
+    @data.setter
+    def data(self, data: Any) -> None:
+        self._data_handle = ffi.new_handle(data)
+        self._ptr.data = self._data_handle

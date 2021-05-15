@@ -8,13 +8,16 @@ from wlroots.wlr_types.box import Box
 
 
 class PixmanRegion32(Ptr):
-    def __init__(self) -> None:
+    def __init__(self, ptr=None) -> None:
         """This is a convenience wrapper around pixman_region32_t
 
         :param ptr:
             The pixman_region32_t cdata pointer
         """
-        self._ptr = ffi.new("struct pixman_region32 *")
+        if ptr is None:
+            self._ptr = ffi.new("struct pixman_region32 *")
+        else:
+            self._ptr = ptr
 
     def __enter__(self) -> "PixmanRegion32":
         """Use the pixman_region32 in a context manager"""
@@ -39,7 +42,11 @@ class PixmanRegion32(Ptr):
         return boxes
 
     def transform(
-        self, src: "PixmanRegion32", transform: WlOutput.transform, width: int, height: int
+        self,
+        src: "PixmanRegion32",
+        transform: WlOutput.transform,
+        width: int,
+        height: int,
     ) -> None:
         """
         Applies a transform to a region inside a box of size `width` x `height`.
