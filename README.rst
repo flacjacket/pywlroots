@@ -36,5 +36,5 @@ on the given wlroots version.
  .. _PyPI: https://pypi.org/project/pywlroots/
 
 .. |ci| image:: https://github.com/flacjacket/pywlroots/actions/workflows/ci.yml/badge.svg
-    :taget: https://github.com/flacjacket/pywlroots/actions/workflows/ci.yml
+    :target: https://github.com/flacjacket/pywlroots/actions/workflows/ci.yml
     :alt: Build Status
