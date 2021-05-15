@@ -1,6 +1,6 @@
 # Copyright (c) Sean Vig 2018
 
-from typing import Any
+from typing import Any, Optional
 
 from ._ffi import ffi, lib  # noqa: F401
 
@@ -10,7 +10,7 @@ __wlroots_version__ = "{}.{}.{}".format(
     lib.WLR_VERSION_MINOR,
 )
 
-__version__ = "0.2.9"
+__version__ = "0.13.0"
 
 
 class Ptr:
@@ -39,10 +39,14 @@ class PtrHasData(Ptr):
     """
 
     @property
-    def data(self) -> Any:
+    def data(self) -> Optional[Any]:
+        """Return any data that has been stored on the object"""
+        if self._ptr.data == ffi.NULL:
+            return None
         return ffi.from_handle(self._ptr.data)
 
     @data.setter
     def data(self, data: Any) -> None:
+        """Store the given data on the current object"""
         self._data_handle = ffi.new_handle(data)
         self._ptr.data = self._data_handle
