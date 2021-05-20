@@ -59,3 +59,8 @@ class Texture(Ptr):
         return lib.wlr_texture_write_pixels(
             self._ptr, stride, width, height, src_x, src_y, dst_x, dst_y, data,
         )
+
+    def destroy(self) -> None:
+        """Destroys this wlr_texture."""
+        if self._ptr is not None:
+            lib.wlr_texture_destroy(self._ptr)

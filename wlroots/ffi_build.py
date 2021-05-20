@@ -69,6 +69,8 @@ bool wlr_texture_write_pixels(struct wlr_texture *texture,
     uint32_t stride, uint32_t width, uint32_t height,
     uint32_t src_x, uint32_t src_y, uint32_t dst_x, uint32_t dst_y,
     const void *data);
+
+void wlr_texture_destroy(struct wlr_texture *texture);
 """
 
 # types/wlr_box.h
