@@ -118,6 +118,11 @@ class Keyboard(PtrHasData):
         modifiers = lib.wlr_keyboard_get_modifiers(self._ptr)
         return KeyboardModifier(modifiers)
 
+    @property
+    def destroyed(self) -> bool:
+        """Tells you whether or not this keyboard has been destroyed"""
+        return self._ptr == ffi.NULL
+
 
 class KeyboardModifiers(Ptr):
     def __init__(self, ptr) -> None:
