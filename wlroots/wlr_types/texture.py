@@ -34,6 +34,7 @@ class Texture(Ptr):
         ptr = lib.wlr_texture_from_pixels(
             renderer._ptr, fmt, stride, width, height, data
         )
+        ptr = ffi.gc(ptr, lib.wlr_texture_destroy)
         return Texture(ptr)
 
     def write_pixels(
@@ -57,10 +58,19 @@ class Texture(Ptr):
         data must be a CData pointer to pixel data.
         """
         return lib.wlr_texture_write_pixels(
-            self._ptr, stride, width, height, src_x, src_y, dst_x, dst_y, data,
+            self._ptr,
+            stride,
+            width,
+            height,
+            src_x,
+            src_y,
+            dst_x,
+            dst_y,
+            data,
         )
 
     def destroy(self) -> None:
         """Destroys this wlr_texture."""
         if self._ptr is not None:
-            lib.wlr_texture_destroy(self._ptr)
+            ffi.release(self._ptr)
+            self._ptr = None
