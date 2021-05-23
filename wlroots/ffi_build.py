@@ -992,6 +992,31 @@ void wlr_seat_keyboard_clear_focus(struct wlr_seat *wlr_seat);
 bool wlr_seat_keyboard_has_grab(struct wlr_seat *seat);
 """
 
+# types/wlr_server_decoration.h
+CDEF += """
+enum wlr_server_decoration_manager_mode {
+    WLR_SERVER_DECORATION_MANAGER_MODE_NONE = 0,
+    WLR_SERVER_DECORATION_MANAGER_MODE_CLIENT = 1,
+    WLR_SERVER_DECORATION_MANAGER_MODE_SERVER = 2,
+};
+struct wlr_server_decoration_manager {
+    struct wl_global *global;
+    struct wl_list resources; // wl_resource_get_link
+    struct wl_list decorations; // wlr_server_decoration::link
+    uint32_t default_mode; // enum wlr_server_decoration_manager_mode
+    struct wl_listener display_destroy;
+    struct {
+        struct wl_signal new_decoration;
+        struct wl_signal destroy;
+    } events;
+    void *data;
+};
+struct wlr_server_decoration_manager *wlr_server_decoration_manager_create(
+    struct wl_display *display);
+void wlr_server_decoration_manager_set_default_mode(
+    struct wlr_server_decoration_manager *manager, uint32_t default_mode);
+"""
+
 # types/wlr_surface.h
 CDEF += """
 struct wlr_surface_state {
@@ -1581,6 +1606,7 @@ SOURCE = """
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_surface.h>
 #include <wlr/types/wlr_seat.h>
+#include <wlr/types/wlr_server_decoration.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_decoration_v1.h>
