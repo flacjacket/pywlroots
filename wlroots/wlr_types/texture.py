@@ -1,4 +1,5 @@
 # Copyright (c) Sean Vig 2020
+# Copyright (c) Matt Colligan 2021
 
 
 import typing
@@ -34,3 +35,32 @@ class Texture(Ptr):
             renderer._ptr, fmt, stride, width, height, data
         )
         return Texture(ptr)
+
+    def write_pixels(
+        self,
+        stride: int,
+        width: int,
+        height: int,
+        data: ffi.CData,
+        src_x: int = 0,
+        src_y: int = 0,
+        dst_x: int = 0,
+        dst_y: int = 0,
+    ) -> bool:
+        """
+        Update a texture with raw pixels. The texture must be mutable, and the input
+        data must have the same pixel format that the texture was created with.
+
+        Should not be called in a rendering block like renderer_begin()/end() or
+        between attaching a renderer to an output and committing it.
+
+        data must be a CData pointer to pixel data.
+        """
+        return lib.wlr_texture_write_pixels(
+            self._ptr, stride, width, height, src_x, src_y, dst_x, dst_y, data,
+        )
+
+    def destroy(self) -> None:
+        """Destroys this wlr_texture."""
+        if self._ptr is not None:
+            lib.wlr_texture_destroy(self._ptr)
