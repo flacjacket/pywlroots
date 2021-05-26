@@ -23,7 +23,8 @@ class Surface(PtrHasData):
 
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
         self.new_subsurface_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.new_subsurface)
+            ptr=ffi.addressof(self._ptr.events.new_subsurface),
+            data_wrapper=SubSurface,
         )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
@@ -108,3 +109,22 @@ class SurfaceState(Ptr):
     def height(self) -> int:
         """In surface local height"""
         return self._ptr.height
+
+
+class SubSurface(PtrHasData):
+    def __init__(self, ptr):
+        """A wlroots subsurface
+
+        :param ptr:
+            The cdata for the given subsurface
+        """
+        self._ptr = ffi.cast("struct wlr_subsurface *", ptr)
+
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
+        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
+        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
+
+    @property
+    def surface(self) -> Surface:
+        """Get the wlr_surface underlying this subsurface"""
+        return Surface(self._ptr.surface)
