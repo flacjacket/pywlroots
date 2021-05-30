@@ -50,3 +50,13 @@ class PtrHasData(Ptr):
         """Store the given data on the current object"""
         self._data_handle = ffi.new_handle(data)
         self._ptr.data = self._data_handle
+
+
+def str_or_none(member: ffi.CData) -> Optional[str]:
+    """
+    Helper function to check struct members for ffi.NULL, returning None, or a char
+    array, returning a string.
+    """
+    if member:
+        return ffi.string(member).decode()
+    return None
