@@ -18,6 +18,7 @@ from .pointer import (  # noqa: F401
     PointerEventMotion,
     PointerEventMotionAbsolute,
 )
+from .primary_selection_v1 import PrimarySelectionV1DeviceManager  # noqa: F401
 from .screencopy_v1 import ScreencopyManagerV1  # noqa: F401
 from .seat import Seat  # noqa: F401
 from .surface import Surface, SurfaceState  # noqa: F401
