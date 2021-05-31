@@ -779,6 +779,24 @@ struct wlr_event_pointer_pinch_end {
 };
 """
 
+# types/wlr_primary_selection_v1.h
+CDEF += """
+struct wlr_primary_selection_v1_device_manager {
+    struct wl_global *global;
+    struct wl_list devices;
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+};
+struct wlr_primary_selection_v1_device_manager *
+    wlr_primary_selection_v1_device_manager_create(struct wl_display *display);
+"""
+
 # types/wlr_screencopy_v1.h
 CDEF += """
 struct wlr_screencopy_manager_v1 {
@@ -1603,6 +1621,7 @@ SOURCE = """
 #include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_output_management_v1.h>
+#include <wlr/types/wlr_primary_selection_v1.h>
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_surface.h>
 #include <wlr/types/wlr_seat.h>
