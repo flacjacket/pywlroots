@@ -6,7 +6,7 @@ from typing import Tuple, Optional
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
 
-from wlroots import ffi, PtrHasData, lib, Ptr
+from wlroots import ffi, PtrHasData, lib, Ptr, str_or_none
 from wlroots.util.region import PixmanRegion32
 from .matrix import Matrix
 
@@ -44,28 +44,26 @@ class Output(PtrHasData):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
-    def name(self) -> str:
+    def name(self) -> Optional[str]:
         """The name of the output"""
-        return ffi.string(self._ptr.name).decode()
+        return str_or_none(self._ptr.name)
 
     @property
     def description(self) -> Optional[str]:
         """The description of the output"""
-        if self._ptr.description == ffi.NULL:
-            return None
-        return ffi.string(self._ptr.description).decode()
+        return str_or_none(self._ptr.description)
 
     @property
-    def make(self) -> str:
-        return ffi.string(self._ptr.make).decode()
+    def make(self) -> Optional[str]:
+        return str_or_none(self._ptr.make)
 
     @property
-    def model(self) -> str:
-        return ffi.string(self._ptr.model).decode()
+    def model(self) -> Optional[str]:
+        return str_or_none(self._ptr.model)
 
     @property
-    def serial(self) -> str:
-        return ffi.string(self._ptr.serial).decode()
+    def serial(self) -> Optional[str]:
+        return str_or_none(self._ptr.serial)
 
     @property
     def physical_size_mm(self) -> Tuple[int, int]:

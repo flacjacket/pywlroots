@@ -6,7 +6,7 @@ from typing import Callable, Optional, Tuple, TypeVar
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, PtrHasData, lib, Ptr
+from wlroots import ffi, PtrHasData, lib, Ptr, str_or_none
 from wlroots.util.edges import Edges
 from .box import Box
 from .output import Output
@@ -209,14 +209,14 @@ class XdgTopLevel(Ptr):
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
 
     @property
-    def title(self) -> str:
+    def title(self) -> Optional[str]:
         """The title of the toplevel object"""
-        return ffi.string(self._ptr.title).decode()
+        return str_or_none(self._ptr.title)
 
     @property
-    def app_id(self) -> str:
+    def app_id(self) -> Optional[str]:
         """The app id of the toplevel object"""
-        return ffi.string(self._ptr.app_id).decode()
+        return str_or_none(self._ptr.app_id)
 
 
 class XdgTopLevelMoveEvent(Ptr):
