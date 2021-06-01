@@ -31,6 +31,12 @@ struct wlr_renderer *wlr_backend_get_renderer(struct wlr_backend *backend);
 struct wlr_session *wlr_backend_get_session(struct wlr_backend *backend);
 """
 
+# backend/libinput.h
+CDEF += """
+struct libinput_device *wlr_libinput_get_device_handle(struct wlr_input_device *dev);
+bool wlr_input_device_is_libinput(struct wlr_input_device *device);
+"""
+
 # backend/session.h
 CDEF += """
 bool wlr_session_change_vt(struct wlr_session *session, unsigned vt);
@@ -1608,6 +1614,7 @@ CDEF += """
 SOURCE = """
 #include <wlr/backend.h>
 #include <wlr/backend/headless.h>
+#include <wlr/backend/libinput.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_compositor.h>

@@ -2,6 +2,7 @@
 
 import enum
 import weakref
+from typing import Optional
 
 from .keyboard import Keyboard
 from wlroots import ffi, PtrHasData, lib
@@ -55,3 +56,14 @@ class InputDevice(PtrHasData):
         _weakkeydict[keyboard] = self._ptr
 
         return keyboard
+
+    def libinput_get_device_handle(self) -> Optional[ffi.CData]:
+        """
+        Returns the underlying libinput device if there is one.
+
+        Returns a pointer to a `struct libinput_device` for use by libinput-interfacing
+        code.
+        """
+        if lib.wlr_input_device_is_libinput(self._ptr):
+            return lib.wlr_libinput_get_device_handle(self._ptr)
+        return None
