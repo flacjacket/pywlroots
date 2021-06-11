@@ -193,6 +193,24 @@ struct wlr_subsurface *wlr_subsurface_from_wlr_surface(
     struct wlr_surface *surface);
 """
 
+# types/wlr_data_control_v1.h
+CDEF += """
+struct wlr_data_control_manager_v1 {
+    struct wl_global *global;
+    struct wl_list devices; // wlr_data_control_device_v1::link
+
+    struct {
+        struct wl_signal destroy;
+        struct wl_signal new_device; // wlr_data_control_device_v1
+    } events;
+
+    struct wl_listener display_destroy;
+    ...;
+};
+struct wlr_data_control_manager_v1 *wlr_data_control_manager_v1_create(
+    struct wl_display *display);
+"""
+
 # types/wlr_data_device.h
 CDEF += """
 struct wlr_data_device_manager *wlr_data_device_manager_create(
@@ -1618,6 +1636,7 @@ SOURCE = """
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_keyboard.h>
