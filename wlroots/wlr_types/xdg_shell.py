@@ -209,6 +209,14 @@ class XdgTopLevel(Ptr):
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
 
     @property
+    def parent(self) -> Optional[XdgSurface]:
+        """The surface of the parent of this toplevel"""
+        parent_ptr = self._ptr.parent
+        if parent_ptr is None:
+            return None
+        return XdgSurface(parent_ptr)
+
+    @property
     def title(self) -> Optional[str]:
         """The title of the toplevel object"""
         return str_or_none(self._ptr.title)
