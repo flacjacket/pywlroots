@@ -248,7 +248,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
-          pip install mypy
+          pip install -r requirements_types.txt
           python wlroots/ffi_build.py
       - name: Run mypy test
         run: |
