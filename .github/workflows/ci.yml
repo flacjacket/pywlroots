@@ -13,7 +13,7 @@ jobs:
       matrix:
         wayland-version: ["1.19.0"]
         wayland-protocols-version: ["1.21"]
-        wlroots-version: ["0.13.0", master]
+        wlroots-version: ["0.13.0"]
     steps:
       - name: Install dependencies
         run: |
@@ -70,14 +70,6 @@ jobs:
           make
           DESTDIR=~/wayland make install
           sudo make install
-      - name: Build seatd
-        working-directory: seatd-${{ env.seatd-version }}
-        if: ${{ matrix.wlroots-version == 'master' }}
-        run: |
-          meson build --prefix=/usr
-          ninja -C build
-          DESTDIR=~/wayland ninja -C build install
-          sudo ninja -C build install
       - name: Build wlroots
         working-directory: wlroots-${{ matrix.wlroots-version }}
         run: |
@@ -102,11 +94,6 @@ jobs:
         wayland-version: ["1.19.0"]
         wayland-protocols-version: ["1.21"]
         wlroots-version: ["0.13.0"]
-        include:
-          - python-version: "3.9"
-            wayland-version: "1.19.0"
-            wayland-protocols-version: "1.21"
-            wlroots-version: master
     steps:
       - name: Download wayland libraries
         uses: actions/download-artifact@v2
@@ -142,13 +129,11 @@ jobs:
         run: |
           echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
       - name: Install Python dependencies
-        continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: |
           pip install -r requirements.txt
           pip install pytest
           python wlroots/ffi_build.py
       - name: Run unit tests
-        continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: pytest -Wall
   flake8-test:
     name: Python ${{ matrix.python-version}} flake8 tests
