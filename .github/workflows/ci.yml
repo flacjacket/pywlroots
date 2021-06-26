@@ -8,6 +8,7 @@ jobs:
     name: Build Wayland libraries
     runs-on: ubuntu-latest
     env:
+      libdrm-version: "2.4.105"
       seatd-version: "0.5.0"
     strategy:
       matrix:
@@ -19,11 +20,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
-            libdrm-dev \
             libegl1-mesa-dev \
             libgbm-dev \
             libgles2-mesa-dev \
             libinput-dev \
+            libpciaccess-dev \
             libxcb-composite0-dev \
             libxcb-dri3-dev \
             libxcb-icccm4-dev \
@@ -45,15 +46,18 @@ jobs:
         run: |
           wget $WAYLAND_URL
           wget $WAYLAND_PROTOCOLS_URL
+          wget $LIBDRM_URL
           wget -O seatd.tar.gz $SEATD_URL
           wget -O wlroots.tar.gz $WLROOTS_URL
           tar -xJf wayland-${{ matrix.wayland-version }}.tar.xz
           tar -xJf wayland-protocols-${{ matrix.wayland-protocols-version }}.tar.xz
+          tar -xzf drm-libdrm-${{ env.libdrm-version }}.tar.gz
           tar -xzf seatd.tar.gz
           tar -xzf wlroots.tar.gz
         env:
           WAYLAND_URL: https://wayland.freedesktop.org/releases/wayland-${{ matrix.wayland-version }}.tar.xz
           WAYLAND_PROTOCOLS_URL: https://wayland.freedesktop.org/releases/wayland-protocols-${{ matrix.wayland-protocols-version }}.tar.xz
+          LIBDRM_URL: https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-${{ env.libdrm-version }}/drm-libdrm-${{ env.libdrm-version }}.tar.gz
           SEATD_URL: https://git.sr.ht/~kennylevinsen/seatd/archive/${{ env.seatd-version }}.tar.gz
           WLROOTS_URL: https://github.com/swaywm/wlroots/archive/${{ matrix.wlroots-version }}.tar.gz
       - name: Build wayland
@@ -70,6 +74,13 @@ jobs:
           make
           DESTDIR=~/wayland make install
           sudo make install
+      - name: Build libdrm
+        working-directory: drm-libdrm-${{ env.libdrm-version }}
+        run: |
+          meson build --prefix=/usr
+          ninja -C build
+          DESTDIR=~/wayland ninja -C build install
+          sudo ninja -C build install
       - name: Build seatd
         working-directory: seatd-${{ env.seatd-version }}
         run: |
@@ -123,11 +134,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
-            libdrm-dev \
             libegl1-mesa-dev \
             libgbm-dev \
             libgles2-mesa-dev \
             libinput-dev \
+            libpciaccess-dev \
             libxcb-composite0-dev \
             libxcb-dri3-dev \
             libxcb-icccm4-dev \
@@ -176,11 +187,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
-            libdrm-dev \
             libegl1-mesa-dev \
             libgbm-dev \
             libgles2-mesa-dev \
             libinput-dev \
+            libpciaccess-dev \
             libxcb-composite0-dev \
             libxcb-dri3-dev \
             libxcb-icccm4-dev \
@@ -227,11 +238,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
-            libdrm-dev \
             libegl1-mesa-dev \
             libgbm-dev \
             libgles2-mesa-dev \
             libinput-dev \
+            libpciaccess-dev \
             libxcb-composite0-dev \
             libxcb-dri3-dev \
             libxcb-icccm4-dev \
