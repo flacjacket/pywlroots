@@ -1116,8 +1116,10 @@ struct wlr_surface {
         struct wl_signal destroy;
     } events;
 
-    struct wl_list subsurfaces;
-    struct wl_list subsurface_pending_list;
+    struct wl_list subsurfaces_below;
+    struct wl_list subsurfaces_above;
+    struct wl_list subsurfaces_pending_below;
+    struct wl_list subsurfaces_pending_above;
     struct wl_list current_outputs;
     struct wl_listener renderer_destroy;
 
