@@ -1,10 +1,46 @@
 # Copyright (c) 2018 Sean Vig
 
 from pathlib import Path
+import importlib.util
+import os
 
 from cffi import FFI
 from pywayland.ffi_build import ffi_builder as pywayland_ffi
 from xkbcommon.ffi_build import ffibuilder as xkb_ffi
+
+
+def load_version():
+    """Load the current pywlroots version"""
+    dirname = os.path.dirname(__file__)
+    spec = importlib.util.spec_from_file_location(
+        "wlroots.version", os.path.join(dirname, "version.py")
+    )
+    version_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(version_module)
+    return version_module.version
+
+
+def load_wlroots_version():
+    """Load the current wlroots version
+
+    Load the version from the in-line cffi module.
+    """
+    ffi = FFI()
+    ffi.cdef(CDEF_VERSION)
+    lib = ffi.verify("#include <wlr/version.h>")
+
+    return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"
+
+
+def check_version():
+    """Check for wlroots version compatibility"""
+    version = load_version()
+    wlroots_version = load_wlroots_version()
+    if version.split(".")[:2] != wlroots_version.split(".")[:2]:
+        major, minor = list(map(int, version.split(".")[:2]))
+        raise RuntimeError(
+            f"Installing wlroots v{version} requires wlroots v{major}.{minor}.x, found v{wlroots_version}"
+        )
 
 
 # backend.h
@@ -1623,11 +1659,12 @@ bool wlr_output_is_headless(struct wlr_output *output);
 """
 
 # version.h
-CDEF += """
+CDEF_VERSION = """
 #define WLR_VERSION_MAJOR ...
 #define WLR_VERSION_MINOR ...
 #define WLR_VERSION_MICRO ...
 """
+CDEF += CDEF_VERSION
 
 SOURCE = """
 #include <wlr/backend.h>
@@ -1770,6 +1807,8 @@ struct wlr_surface *wlr_layer_surface_v1_surface_at(
     struct wlr_layer_surface_v1 *surface, double sx, double sy,
     double *sub_x, double *sub_y);
 """
+
+check_version()
 
 include_dir = (Path(__file__).parent.parent / "include").resolve()
 assert include_dir.is_dir(), f"missing {include_dir}"
