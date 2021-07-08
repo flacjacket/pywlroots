@@ -99,6 +99,10 @@ class Backend(Ptr):
     def get_session(self) -> "Session":
         return Session(self)
 
+    @property
+    def is_headless(self) -> bool:
+        return lib.wlr_backend_is_headless(self._ptr)
+
 
 class Session:
     def __init__(self, backend: Backend) -> None:
