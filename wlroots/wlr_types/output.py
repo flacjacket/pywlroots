@@ -242,6 +242,10 @@ class Output(PtrHasData):
         """
         return lib.wlr_output_test(self._ptr)
 
+    @property
+    def is_headless(self) -> bool:
+        return lib.wlr_output_is_headless(self._ptr)
+
 
 class OutputMode(Ptr):
     def __init__(self, ptr) -> None:
