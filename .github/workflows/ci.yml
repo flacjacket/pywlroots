@@ -103,7 +103,7 @@ jobs:
           path: ~/wayland.tar.gz
           if-no-files-found: error
   unit-test:
-    name: Python ${{ matrix.python-version}} unit tests
+    name: Python ${{ matrix.python-version}} unit tests (${{ matrix.wlroots-version }})
     runs-on: ubuntu-latest
     needs: build-wayland
     strategy:

@@ -3,6 +3,7 @@
 from pathlib import Path
 import importlib.util
 import os
+import sys
 
 from cffi import FFI
 from pywayland.ffi_build import ffi_builder as pywayland_ffi
@@ -38,8 +39,9 @@ def check_version():
     wlroots_version = load_wlroots_version()
     if version.split(".")[:2] != wlroots_version.split(".")[:2]:
         major, minor = list(map(int, version.split(".")[:2]))
-        raise RuntimeError(
-            f"Installing wlroots v{version} requires wlroots v{major}.{minor}.x, found v{wlroots_version}"
+        print(
+            f"Installing wlroots v{version} requires wlroots v{major}.{minor}.x, found v{wlroots_version}",
+            file=sys.stderr,
         )
 
 
