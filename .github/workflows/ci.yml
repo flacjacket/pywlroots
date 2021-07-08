@@ -159,6 +159,7 @@ jobs:
           python wlroots/ffi_build.py
       - name: Run unit tests
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
+        if: ${{ success() }}
         run: pytest -Wall
   flake8-test:
     name: Python ${{ matrix.python-version}} flake8 tests
