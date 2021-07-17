@@ -1,1 +1,4 @@
+include *.txt
 include include/*.h
+include tiny/*.py
+recursive-include tests *.py
