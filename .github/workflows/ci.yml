@@ -10,10 +10,10 @@ jobs:
     env:
       libdrm-version: "2.4.105"
       seatd-version: "0.5.0"
+      wayland-version: "1.19.0"
+      wayland-protocols-version: "1.21"
     strategy:
       matrix:
-        wayland-version: ["1.19.0"]
-        wayland-protocols-version: ["1.21"]
         wlroots-version: ["0.14.1", master]
     steps:
       - name: Install dependencies
@@ -49,26 +49,26 @@ jobs:
           wget $LIBDRM_URL
           wget -O seatd.tar.gz $SEATD_URL
           wget -O wlroots.tar.gz $WLROOTS_URL
-          tar -xJf wayland-${{ matrix.wayland-version }}.tar.xz
-          tar -xJf wayland-protocols-${{ matrix.wayland-protocols-version }}.tar.xz
+          tar -xJf wayland-${{ env.wayland-version }}.tar.xz
+          tar -xJf wayland-protocols-${{ env.wayland-protocols-version }}.tar.xz
           tar -xzf drm-libdrm-${{ env.libdrm-version }}.tar.gz
           tar -xzf seatd.tar.gz
           tar -xzf wlroots.tar.gz
         env:
-          WAYLAND_URL: https://wayland.freedesktop.org/releases/wayland-${{ matrix.wayland-version }}.tar.xz
-          WAYLAND_PROTOCOLS_URL: https://wayland.freedesktop.org/releases/wayland-protocols-${{ matrix.wayland-protocols-version }}.tar.xz
+          WAYLAND_URL: https://wayland.freedesktop.org/releases/wayland-${{ env.wayland-version }}.tar.xz
+          WAYLAND_PROTOCOLS_URL: https://wayland.freedesktop.org/releases/wayland-protocols-${{ env.wayland-protocols-version }}.tar.xz
           LIBDRM_URL: https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-${{ env.libdrm-version }}/drm-libdrm-${{ env.libdrm-version }}.tar.gz
           SEATD_URL: https://git.sr.ht/~kennylevinsen/seatd/archive/${{ env.seatd-version }}.tar.gz
           WLROOTS_URL: https://github.com/swaywm/wlroots/archive/${{ matrix.wlroots-version }}.tar.gz
       - name: Build wayland
-        working-directory: wayland-${{ matrix.wayland-version }}
+        working-directory: wayland-${{ env.wayland-version }}
         run: |
           ./configure --disable-documentation --prefix=/usr
           make
           DESTDIR=~/wayland make install
           sudo make install
       - name: Build wayland-protocols
-        working-directory: wayland-protocols-${{ matrix.wayland-protocols-version }}
+        working-directory: wayland-protocols-${{ env.wayland-protocols-version }}
         run: |
           ./configure --prefix=/usr
           make
@@ -99,7 +99,7 @@ jobs:
       - name: Upload built libraries
         uses: actions/upload-artifact@v2
         with:
-          name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
+          name: wlroots-${{ matrix.wlroots-version }}
           path: ~/wayland.tar.gz
           if-no-files-found: error
   unit-test:
@@ -109,19 +109,15 @@ jobs:
     strategy:
       matrix:
         python-version: [pypy3, "3.6", "3.7", "3.8", "3.9"]
-        wayland-version: ["1.19.0"]
-        wayland-protocols-version: ["1.21"]
         wlroots-version: ["0.14.1"]
         include:
           - python-version: "3.9"
-            wayland-version: "1.19.0"
-            wayland-protocols-version: "1.21"
             wlroots-version: master
     steps:
       - name: Download wayland libraries
         uses: actions/download-artifact@v2
         with:
-          name: wayland-${{ matrix.wayland-version }}_${{ matrix.wayland-protocols-version }}_${{ matrix.wlroots-version }}
+          name: wlroots-${{ matrix.wlroots-version }}
       - name: Unpack wayland artifact
         run: sudo tar xf wayland.tar.gz -C /
       - name: Checkout repo
@@ -215,14 +211,12 @@ jobs:
     needs: build-wayland
     env:
       python-version: "3.9"
-      wayland-version: "1.19.0"
-      wayland-protocols-version: "1.21"
       wlroots-version: "0.14.1"
     steps:
       - name: Download wayland libraries
         uses: actions/download-artifact@v2
         with:
-          name: wayland-${{ env.wayland-version }}_${{ env.wayland-protocols-version }}_${{ env.wlroots-version }}
+          name: wlroots-${{ env.wlroots-version }}
       - name: Unpack wayland artifact
         run: sudo tar xf wayland.tar.gz -C /
       - name: Install dependencies
