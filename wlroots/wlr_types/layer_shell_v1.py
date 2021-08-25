@@ -130,10 +130,6 @@ class LayerSurfaceV1(PtrHasData):
         return self._ptr.mapped
 
     @property
-    def closed(self) -> bool:
-        return self._ptr.closed
-
-    @property
     def client_pending(self) -> LayerSurfaceV1State:
         state_ptr = self._ptr.client_pending
         _weakkeydict[state_ptr] = self._ptr
@@ -159,8 +155,8 @@ class LayerSurfaceV1(PtrHasData):
         """
         lib.wlr_layer_surface_v1_configure(self._ptr, width, height)
 
-    def close(self) -> None:
-        lib.wlr_layer_surface_v1_close(self._ptr)
+    def destroy(self) -> None:
+        lib.wlr_layer_surface_v1_destroy(self._ptr)
 
     @classmethod
     def from_wlr_surface(cls, surface: Surface):
