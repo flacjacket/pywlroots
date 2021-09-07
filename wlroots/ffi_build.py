@@ -1102,7 +1102,7 @@ struct wlr_surface_state {
     uint32_t committed;
     uint32_t seq;
 
-    struct wl_resource *buffer_resource;
+    struct wlr_buffer *buffer;
     int32_t dx, dy;
     struct pixman_region32 surface_damage, buffer_damage;
     struct pixman_region32 opaque, input;
@@ -1113,6 +1113,8 @@ struct wlr_surface_state {
     int width, height;
     int buffer_width, buffer_height;
 
+    struct wl_list subsurfaces_below;
+    struct wl_list subsurfaces_above;
     ...;
 };
 
@@ -1153,18 +1155,14 @@ struct wlr_surface {
         struct wl_signal destroy;
     } events;
 
-    struct wl_list subsurfaces_below;
-    struct wl_list subsurfaces_above;
-    struct wl_list subsurfaces_pending_below;
-    struct wl_list subsurfaces_pending_above;
     struct wl_list current_outputs;
+    void *data;
     struct wl_listener renderer_destroy;
 
-    void *data;
     ...;
 };
 
-struct wlr_subsurface_state {
+struct wlr_subsurface_parent_state {
     int32_t x, y;
     ...;
 };
@@ -1174,7 +1172,7 @@ struct wlr_subsurface {
     struct wlr_surface *surface;
     struct wlr_surface *parent;
 
-    struct wlr_subsurface_state current, pending;
+    struct wlr_subsurface_parent_state current, pending;
 
     uint32_t cached_seq;
     bool has_cache;
@@ -1182,9 +1180,6 @@ struct wlr_subsurface {
     bool synchronized;
     bool reordered;
     bool mapped;
-
-    struct wl_list parent_link;
-    struct wl_list parent_pending_link;
 
     struct wl_listener surface_destroy;
     struct wl_listener parent_destroy;
