@@ -1540,6 +1540,14 @@ struct wlr_xdg_surface {
     ...;
 };
 
+struct wlr_xdg_surface_configure {
+    struct wlr_xdg_surface *surface;
+    struct wl_list link; // wlr_xdg_surface::configure_list
+    uint32_t serial;
+
+    struct wlr_xdg_toplevel_state *toplevel_state;
+};
+
 struct wlr_xdg_toplevel_move_event {
     struct wlr_xdg_surface *surface;
     struct wlr_seat_client *seat;
