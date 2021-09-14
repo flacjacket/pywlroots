@@ -1,9 +1,9 @@
 # Copyright Sean Vig (c) 2020
 # Copyright Matt Colligan (c) 2021
 
-from typing import Optional
+from typing import Optional, Tuple
 
-from wlroots import ffi
+from wlroots import ffi, lib
 
 
 def _int_getter(attr):
@@ -48,3 +48,14 @@ class Box:
     y = property(_int_getter("y"), _int_setter("y"))
     width = property(_int_getter("width"), _int_setter("width"))
     height = property(_int_getter("height"), _int_setter("height"))
+
+    def __repr__(self):
+        return "Box(%s, %s, %s, %s)" % (self.x, self.y, self.width, self.height)
+
+    def closest_point(self, x: float, y: float) -> Tuple[float, float]:
+        xy_ptr = ffi.new("double[2]")
+        lib.wlr_box_closest_point(self._ptr, x, y, xy_ptr, xy_ptr + 1)
+        return xy_ptr[0], xy_ptr[1]
+
+    def contains_point(self, x: float, y: float) -> bool:
+        return lib.wlr_box_contains_point(self._ptr, x, y)
