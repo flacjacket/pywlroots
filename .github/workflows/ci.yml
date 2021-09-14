@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       libdrm-version: "2.4.105"
-      seatd-version: "0.5.0"
+      seatd-version: "0.6.1"
       wayland-version: "1.19.0"
-      wayland-protocols-version: "1.21"
+      wayland-protocols-version: "1.22"
     strategy:
       matrix:
         wlroots-version: ["0.14.1", master]
