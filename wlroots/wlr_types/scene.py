@@ -1,5 +1,7 @@
 # Copyright (c) Sean Vig 2022
 
+from __future__ import annotations
+
 import weakref
 
 from wlroots import ffi, lib, PtrHasData, Ptr
@@ -18,13 +20,13 @@ class Scene(Ptr):
             raise RuntimeError("Unable to attach scene to output layout")
 
     @property
-    def node(self) -> "SceneNode":
+    def node(self) -> SceneNode:
         """The associated scene node."""
         node = SceneNode(ffi.addressof(self._ptr.node))
         _weakkeydict[node] = self._ptr
         return node
 
-    def get_scene_output(self, output: Output) -> "SceneOutput":
+    def get_scene_output(self, output: Output) -> SceneOutput:
         """Get a scene-graph output from a wlr_output."""
         ptr = lib.wlr_scene_get_scene_output(self._ptr, output._ptr)
         return SceneOutput(ptr)
@@ -57,8 +59,8 @@ class SceneNode(PtrHasData):
 
     @classmethod
     def xdg_surface_create(
-        cls, parent: "SceneNode", xdg_surface: XdgSurface
-    ) -> "SceneNode":
+        cls, parent: SceneNode, xdg_surface: XdgSurface
+    ) -> SceneNode:
         """Add a node displaying an xdg_surface and all of its sub-surfaces to the scene-graph.
 
         The origin of the returned scene-graph node will match the top-left
@@ -79,10 +81,10 @@ class SceneNode(PtrHasData):
         """Move the node below all of its sibling nodes."""
         lib.wlr_scene_node_lower_to_bottom(self._ptr)
 
-    def place_above(self, sibling: "SceneNode") -> None:
+    def place_above(self, sibling: SceneNode) -> None:
         """Move the node right above the specified sibling."""
         lib.wlr_scene_node_place_above(self._ptr, sibling._ptr)
 
-    def place_below(self, sibling: "SceneNode") -> None:
+    def place_below(self, sibling: SceneNode) -> None:
         """Move the node right below the specified sibling."""
         lib.wlr_scene_node_place_below(self._ptr, sibling._ptr)

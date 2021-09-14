@@ -1,8 +1,9 @@
 # Copyright (c) 2021 Matt Colligan
+from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
@@ -106,7 +107,7 @@ class LayerSurfaceV1(PtrHasData):
         return Surface(surface_ptr)
 
     @property
-    def output(self) -> Optional[Output]:
+    def output(self) -> Output | None:
         output_ptr = self._ptr.output
         if output_ptr == ffi.NULL:
             return None
@@ -159,7 +160,7 @@ class LayerSurfaceV1(PtrHasData):
         return LayerSurfaceV1(surface_ptr)
 
     def for_each_surface(
-        self, iterator: SurfaceCallback[T], data: Optional[T] = None
+        self, iterator: SurfaceCallback[T], data: T | None = None
     ) -> None:
         """
         Calls the iterator function for each sub-surface and popup of this surface
@@ -170,9 +171,7 @@ class LayerSurfaceV1(PtrHasData):
             self._ptr, lib.surface_iterator_callback, handle
         )
 
-    def surface_at(
-        self, sx: float, sy: float
-    ) -> Tuple[Optional[Surface], float, float]:
+    def surface_at(self, sx: float, sy: float) -> tuple[Surface | None, float, float]:
         """
         Find a surface within this layer-surface tree at the given surface-local
         coordinates. Returns the surface and coordinates in the leaf surface
@@ -190,7 +189,7 @@ class LayerSurfaceV1(PtrHasData):
 
 
 class LayerShellV1(PtrHasData):
-    def __init__(self, display: "Display") -> None:
+    def __init__(self, display: Display) -> None:
         """Create an wlr_xdg_output_manager_v1"""
         self._ptr = lib.wlr_layer_shell_v1_create(display._ptr)
 

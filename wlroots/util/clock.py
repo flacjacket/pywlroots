@@ -1,5 +1,7 @@
 # Copyright Sean Vig (c) 2020
 
+from __future__ import annotations
+
 from wlroots import ffi, lib, Ptr
 
 
@@ -9,7 +11,7 @@ class Timespec(Ptr):
         self._ptr = ptr
 
     @classmethod
-    def get_monotonic_time(cls) -> "Timespec":
+    def get_monotonic_time(cls) -> Timespec:
         """Get the current monotonic time"""
         timespec = ffi.new("struct timespec *")
         ret = lib.clock_gettime(lib.CLOCK_MONOTONIC, timespec)

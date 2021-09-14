@@ -1,6 +1,6 @@
 # Copyright (c) Matt Colligan 2021
 
-from typing import List
+from __future__ import annotations
 
 from pywayland.protocol.wayland import WlOutput
 from wlroots import ffi, lib, Ptr
@@ -19,7 +19,7 @@ class PixmanRegion32(Ptr):
         else:
             self._ptr = ptr
 
-    def __enter__(self) -> "PixmanRegion32":
+    def __enter__(self) -> PixmanRegion32:
         """Use the pixman_region32 in a context manager"""
         lib.pixman_region32_init(self._ptr)
         return self
@@ -28,7 +28,7 @@ class PixmanRegion32(Ptr):
         """Finish up when exiting the context"""
         lib.pixman_region32_fini(self._ptr)
 
-    def rectangles_as_boxes(self) -> List[Box]:
+    def rectangles_as_boxes(self) -> list[Box]:
         nrects_ptr = ffi.new("int *")
         rects = lib.pixman_region32_rectangles(self._ptr, nrects_ptr)
         nrects = nrects_ptr[0]
@@ -43,7 +43,7 @@ class PixmanRegion32(Ptr):
 
     def transform(
         self,
-        src: "PixmanRegion32",
+        src: PixmanRegion32,
         transform: WlOutput.transform,
         width: int,
         height: int,

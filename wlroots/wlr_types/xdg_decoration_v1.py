@@ -1,5 +1,7 @@
 # Copyright (c) Matt Colligan 2021
 
+from __future__ import annotations
+
 import enum
 from typing import TYPE_CHECKING
 from weakref import WeakKeyDictionary
@@ -33,7 +35,7 @@ class XdgDecorationManagerV1(PtrHasData):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @classmethod
-    def create(cls, display: "Display"):
+    def create(cls, display: Display):
         """Create a wlr_xdg_decoration_manager_v1 for the given display."""
         ptr = lib.wlr_xdg_decoration_manager_v1_create(display._ptr)
         return cls(ptr)

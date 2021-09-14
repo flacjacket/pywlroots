@@ -1,4 +1,5 @@
 # Copyright (c) Matt Colligan 2021
+from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Iterator
@@ -141,7 +142,7 @@ class OutputConfigurationHeadV1(Ptr):
     @classmethod
     def create(
         cls, config: OutputConfigurationV1, output: Output
-    ) -> "OutputConfigurationHeadV1":
+    ) -> OutputConfigurationHeadV1:
         """Create a new wlr_output_configuration_head_v1"""
         ptr = lib.wlr_output_configuration_head_v1_create(config._ptr, output._ptr)
         return OutputConfigurationHeadV1(ptr)

@@ -1,5 +1,7 @@
 # Copyright (c) Matt Colligan 2021
 
+from __future__ import annotations
+
 import enum
 from typing import TYPE_CHECKING
 from weakref import WeakKeyDictionary
@@ -11,8 +13,6 @@ from .output import Output
 from .surface import Surface
 
 if TYPE_CHECKING:
-    from typing import Optional
-
     from pywayland.server import Display
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
@@ -33,12 +33,12 @@ class ForeignToplevelManagerV1(PtrHasData):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @classmethod
-    def create(cls, display: "Display") -> "ForeignToplevelManagerV1":
+    def create(cls, display: Display) -> ForeignToplevelManagerV1:
         """Create a wlr_foreign_toplevel_manager_v1 for the given display."""
         ptr = lib.wlr_foreign_toplevel_manager_v1_create(display._ptr)
         return cls(ptr)
 
-    def create_handle(self) -> "ForeignToplevelHandleV1":
+    def create_handle(self) -> ForeignToplevelHandleV1:
         """Create a new wlr_foreign_toplevel_handle_v1."""
         ptr = lib.wlr_foreign_toplevel_handle_v1_create(self._ptr)
         return ForeignToplevelHandleV1(ptr)
@@ -81,19 +81,19 @@ class ForeignToplevelHandleV1(PtrHasData):
         return ForeignToplevelManagerV1(manager_ptr)
 
     @property
-    def title(self) -> "Optional[str]":
+    def title(self) -> str | None:
         if self._ptr.title == ffi.NULL:
             return None
         return ffi.string(self._ptr.title).decode()
 
     @property
-    def app_id(self) -> "Optional[str]":
+    def app_id(self) -> str | None:
         if self._ptr.app_id == ffi.NULL:
             return None
         return ffi.string(self._ptr.app_id).decode()
 
     @property
-    def parent(self) -> "Optional[ForeignToplevelHandleV1]":
+    def parent(self) -> ForeignToplevelHandleV1 | None:
         if self._ptr.parent == ffi.NULL:
             return None
         return ForeignToplevelHandleV1(self._ptr.parent)
@@ -107,10 +107,10 @@ class ForeignToplevelHandleV1(PtrHasData):
     def set_app_id(self, app_id: str) -> None:
         lib.wlr_foreign_toplevel_handle_v1_set_app_id(self._ptr, app_id.encode())
 
-    def output_enter(self, output: "Output") -> None:
+    def output_enter(self, output: Output) -> None:
         lib.wlr_foreign_toplevel_handle_v1_output_enter(self._ptr, output._ptr)
 
-    def output_leave(self, output: "Output") -> None:
+    def output_leave(self, output: Output) -> None:
         lib.wlr_foreign_toplevel_handle_v1_output_leave(self._ptr, output._ptr)
 
     def set_maximized(self, maximized: bool) -> None:
@@ -125,7 +125,7 @@ class ForeignToplevelHandleV1(PtrHasData):
     def set_fullscreen(self, fullscreen: bool) -> None:
         lib.wlr_foreign_toplevel_handle_v1_set_fullscreen(self._ptr, fullscreen)
 
-    def set_parent(self, parent: "ForeignToplevelHandleV1") -> None:
+    def set_parent(self, parent: ForeignToplevelHandleV1) -> None:
         lib.wlr_foreign_toplevel_handle_v1_set_parent(self._ptr, parent._ptr)
 
 
@@ -183,7 +183,7 @@ class ForeignToplevelHandleV1FullscreenEvent(_EventBase):
         return self._ptr.fullscreen
 
     @property
-    def output(self) -> "Output":
+    def output(self) -> Output:
         """The output on which to fullscreen this toplevel."""
         return Output(self._ptr.output)
 

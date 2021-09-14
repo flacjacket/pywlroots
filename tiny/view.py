@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from pywayland.server import Listener
 
@@ -99,7 +99,7 @@ class View:
 
     def view_at(
         self, layout_x: int, layout_y: int
-    ) -> Tuple[Optional[Surface], float, float]:
+    ) -> tuple[Surface | None, float, float]:
         view_x = layout_x - self.x
         view_y = layout_y - self.y
         return self.xdg_surface.surface_at(view_x, view_y)

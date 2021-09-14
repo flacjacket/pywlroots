@@ -1,5 +1,7 @@
 # Copyright Sean Vig (c) 2020
 
+from __future__ import annotations
+
 from weakref import WeakKeyDictionary
 
 from pywayland.protocol.wayland import WlOutput
@@ -56,14 +58,14 @@ class Surface(PtrHasData):
         return self._ptr.sy
 
     @property
-    def current(self) -> "SurfaceState":
+    def current(self) -> SurfaceState:
         """The current commited surface state"""
         current_ptr = self._ptr.current
         _weakkeydict[current_ptr] = self._ptr
         return SurfaceState(current_ptr)
 
     @property
-    def previous(self) -> "SurfaceState":
+    def previous(self) -> SurfaceState:
         """The state of the previous commit"""
         previous_ptr = self._ptr.previous
         _weakkeydict[previous_ptr] = self._ptr

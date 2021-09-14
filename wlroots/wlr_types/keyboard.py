@@ -1,5 +1,7 @@
 # Copyright Sean Vig (c) 2020
 
+from __future__ import annotations
+
 import enum
 from weakref import WeakKeyDictionary
 
@@ -106,7 +108,7 @@ class Keyboard(PtrHasData):
         return self._ptr.num_keycodes
 
     @property
-    def modifiers(self) -> "KeyboardModifiers":
+    def modifiers(self) -> KeyboardModifiers:
         """The modifiers associated with the keyboard"""
         modifiers_ptr = ffi.addressof(self._ptr.modifiers)
         _weakkeydict[modifiers_ptr] = self._ptr

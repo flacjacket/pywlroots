@@ -1,5 +1,7 @@
 # Copyright (c) 2019 Sean Vig
 
+from __future__ import annotations
+
 import enum
 import weakref
 
@@ -80,7 +82,7 @@ class Backend(Ptr):
             self.destroy()
             raise RuntimeError("Unable to start backend")
 
-    def __enter__(self) -> "Backend":
+    def __enter__(self) -> Backend:
         """Context manager to create and clean-up the backend"""
         self.start()
         return self
@@ -89,7 +91,7 @@ class Backend(Ptr):
         """Destroy the backend on context exit"""
         self.destroy()
 
-    def get_session(self) -> "Session":
+    def get_session(self) -> Session:
         return Session(self)
 
     @property

@@ -1,8 +1,8 @@
 # Copyright (c) Sean Vig 2019
+from __future__ import annotations
 
 import enum
 import weakref
-from typing import Optional
 
 from .keyboard import Keyboard
 from wlroots import ffi, PtrHasData, lib
@@ -69,7 +69,7 @@ class InputDevice(PtrHasData):
 
         return keyboard
 
-    def libinput_get_device_handle(self) -> Optional[ffi.CData]:
+    def libinput_get_device_handle(self) -> ffi.CData | None:
         """
         Returns the underlying libinput device if there is one.
 

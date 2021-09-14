@@ -1,5 +1,7 @@
 # Copyright (c) 2022 Sean Vig
 
+from __future__ import annotations
+
 from wlroots import lib, Ptr
 from wlroots.renderer import Renderer
 from wlroots.backend import Backend
@@ -16,7 +18,7 @@ class Allocator(Ptr):
         self._ptr = ptr
 
     @classmethod
-    def autocreate(cls, backend: Backend, renderer: Renderer) -> "Allocator":
+    def autocreate(cls, backend: Backend, renderer: Renderer) -> Allocator:
         """Creates the adequate allocator given a backend and a renderer."""
         ret = lib.wlr_allocator_autocreate(backend._ptr, renderer._ptr)
         if not ret:

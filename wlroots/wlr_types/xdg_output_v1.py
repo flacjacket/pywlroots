@@ -7,7 +7,7 @@ from .output_layout import OutputLayout
 
 
 class XdgOutputManagerV1(Ptr):
-    def __init__(self, display: "Display", layout: "OutputLayout") -> None:
+    def __init__(self, display: Display, layout: OutputLayout) -> None:
         """Create an wlr_xdg_output_manager_v1"""
         self._ptr = lib.wlr_xdg_output_manager_v1_create(display._ptr, layout._ptr)
 
