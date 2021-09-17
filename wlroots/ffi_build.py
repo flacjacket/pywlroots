@@ -841,6 +841,80 @@ struct wlr_event_pointer_pinch_end {
 };
 """
 
+# types/wlr_pointer_constraints_v1.h
+CDEF += """
+enum wlr_pointer_constraint_v1_type {
+    WLR_POINTER_CONSTRAINT_V1_LOCKED,
+    WLR_POINTER_CONSTRAINT_V1_CONFINED,
+};
+
+enum wlr_pointer_constraint_v1_state_field {
+    WLR_POINTER_CONSTRAINT_V1_STATE_REGION = 1 << 0,
+    WLR_POINTER_CONSTRAINT_V1_STATE_CURSOR_HINT = 1 << 1,
+};
+
+struct wlr_pointer_constraint_v1_state {
+    uint32_t committed; // enum wlr_pointer_constraint_v1_state_field
+    struct pixman_region32 region;
+    struct {
+        double x, y;
+    } cursor_hint;
+    ...;
+};
+
+struct wlr_pointer_constraint_v1 {
+    struct wlr_pointer_constraints_v1 *pointer_constraints;
+
+    struct wl_resource *resource;
+    struct wlr_surface *surface;
+    struct wlr_seat *seat;
+    enum zwp_pointer_constraints_v1_lifetime lifetime;
+    enum wlr_pointer_constraint_v1_type type;
+    struct pixman_region32 region;
+
+    struct wlr_pointer_constraint_v1_state current, pending;
+
+    struct wl_listener surface_commit;
+    struct wl_listener surface_destroy;
+    struct wl_listener seat_destroy;
+
+    struct wl_list link; // wlr_pointer_constraints_v1::constraints
+
+    struct {
+        struct wl_signal set_region;
+        struct wl_signal destroy;
+    } events;
+
+   void *data;
+   ...;
+};
+
+struct wlr_pointer_constraints_v1 {
+    struct wl_global *global;
+    struct wl_list constraints; // wlr_pointer_constraint_v1::link
+
+    struct {
+        struct wl_signal new_constraint;
+    } events;
+
+    struct wl_listener display_destroy;
+
+    void *data;
+    ...;
+};
+
+struct wlr_pointer_constraints_v1 *wlr_pointer_constraints_v1_create(
+    struct wl_display *display);
+struct wlr_pointer_constraint_v1 *
+wlr_pointer_constraints_v1_constraint_for_surface(
+    struct wlr_pointer_constraints_v1 *pointer_constraints,
+    struct wlr_surface *surface, struct wlr_seat *seat);
+void wlr_pointer_constraint_v1_send_activated(
+    struct wlr_pointer_constraint_v1 *constraint);
+void wlr_pointer_constraint_v1_send_deactivated(
+    struct wlr_pointer_constraint_v1 *constraint);
+"""
+
 # types/wlr_primary_selection_v1.h
 CDEF += """
 struct wlr_primary_selection_v1_device_manager {
@@ -1696,6 +1770,7 @@ SOURCE = """
 #include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_output_management_v1.h>
+#include <wlr/types/wlr_pointer_constraints_v1.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_surface.h>

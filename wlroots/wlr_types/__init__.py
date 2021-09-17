@@ -19,6 +19,7 @@ from .pointer import (  # noqa: F401
     PointerEventMotion,
     PointerEventMotionAbsolute,
 )
+from .pointer_constraints_v1 import PointerContraintsV1, PointerContraintV1  # noqa: F401
 from .primary_selection_v1 import PrimarySelectionV1DeviceManager  # noqa: F401
 from .screencopy_v1 import ScreencopyManagerV1  # noqa: F401
 from .seat import Seat  # noqa: F401
