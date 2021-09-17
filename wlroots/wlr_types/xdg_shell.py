@@ -68,6 +68,14 @@ class XdgSurface(PtrHasData):
         self.new_popup_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_popup), data_wrapper=XdgPopup
         )
+        self.configure_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.configure),
+            data_wrapper=XdgSurfaceConfigure,
+        )
+        self.ack_configure_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.ack_configure),
+            data_wrapper=XdgSurfaceConfigure,
+        )
 
     @classmethod
     def from_surface(cls, surface: Surface) -> "XdgSurface":
@@ -171,6 +179,20 @@ class XdgSurface(PtrHasData):
         lib.wlr_xdg_surface_for_each_surface(
             self._ptr, lib.surface_iterator_callback, handle
         )
+
+
+class XdgSurfaceConfigure(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_xdg_surface_configure *", ptr)
+
+    @property
+    def surface(self) -> XdgSurface:
+        # TODO: keep weakref
+        return XdgSurface(self._ptr.surface)
+
+    @property
+    def serial(self) -> int:
+        return self._ptr.serial
 
 
 class XdgTopLevel(Ptr):
