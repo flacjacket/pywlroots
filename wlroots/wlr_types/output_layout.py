@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 from pywayland.server import Signal
 
 from wlroots import ffi, lib, Ptr
-from .box import Box
+from wlroots.util.box import Box
 from .output import Output
 
 
