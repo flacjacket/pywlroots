@@ -933,6 +933,40 @@ struct wlr_primary_selection_v1_device_manager *
     wlr_primary_selection_v1_device_manager_create(struct wl_display *display);
 """
 
+# types/wlr_relative_pointer_v1.h
+CDEF += """
+struct wlr_relative_pointer_manager_v1 {
+    struct wl_global *global;
+    struct wl_list relative_pointers; // wlr_relative_pointer_v1::link
+
+    struct {
+        struct wl_signal destroy;
+        struct wl_signal new_relative_pointer; // wlr_relative_pointer_v1
+    } events;
+    ...;
+};
+
+struct wlr_relative_pointer_v1 {
+    struct wl_resource *resource;
+    struct wl_resource *pointer_resource;
+    struct wlr_seat *seat;
+    struct wl_list link; // wlr_relative_pointer_manager_v1::relative_pointers
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+    ...;
+};
+
+struct wlr_relative_pointer_manager_v1 *wlr_relative_pointer_manager_v1_create(
+    struct wl_display *display);
+
+void wlr_relative_pointer_manager_v1_send_relative_motion(
+    struct wlr_relative_pointer_manager_v1 *manager, struct wlr_seat *seat,
+    uint64_t time_usec, double dx, double dy,
+    double dx_unaccel, double dy_unaccel);
+"""
+
 # types/wlr_screencopy_v1.h
 CDEF += """
 struct wlr_screencopy_manager_v1 {
@@ -1772,6 +1806,7 @@ SOURCE = """
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_pointer_constraints_v1.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
+#include <wlr/types/wlr_relative_pointer_v1.h>
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_surface.h>
 #include <wlr/types/wlr_seat.h>
