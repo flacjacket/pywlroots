@@ -3,7 +3,7 @@
 from pywayland.protocol.wayland import WlOutput
 
 from wlroots import ffi, lib, Ptr
-from .box import Box
+from wlroots.util.box import Box
 
 
 class Matrix(Ptr):

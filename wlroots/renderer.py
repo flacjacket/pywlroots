@@ -6,7 +6,8 @@ from typing import Iterator, List, Optional, Tuple, Union
 from pywayland.server import Display
 
 from wlroots import ffi, lib, Ptr
-from wlroots.wlr_types import Box, Matrix, Texture
+from wlroots.util.box import Box
+from wlroots.wlr_types import Matrix, Texture
 
 ColorType = Union[List, Tuple, ffi.CData]
 

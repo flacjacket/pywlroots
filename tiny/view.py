@@ -5,7 +5,7 @@ from typing import Optional, Tuple, TYPE_CHECKING
 
 from pywayland.server import Listener
 
-from wlroots.wlr_types import Box
+from wlroots.util.box import Box
 from wlroots.util.edges import Edges
 from .cursor_mode import CursorMode
 

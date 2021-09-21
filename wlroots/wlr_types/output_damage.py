@@ -3,8 +3,8 @@
 from pywayland.server import Signal
 
 from wlroots import ffi, lib, Ptr
+from wlroots.util.box import Box
 from wlroots.util.region import PixmanRegion32
-from .box import Box
 from .output import Output
 
 

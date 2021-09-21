@@ -4,7 +4,7 @@ from typing import List
 
 from pywayland.protocol.wayland import WlOutput
 from wlroots import ffi, lib, Ptr
-from wlroots.wlr_types.box import Box
+from wlroots.util.box import Box
 
 
 class PixmanRegion32(Ptr):
