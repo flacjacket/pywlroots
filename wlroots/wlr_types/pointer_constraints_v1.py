@@ -26,7 +26,7 @@ class PointerConstraintV1StateField(enum.IntEnum):
     CURSOR_HINT = lib.WLR_POINTER_CONSTRAINT_V1_STATE_CURSOR_HINT
 
 
-class PointerContraintsV1(Ptr):
+class PointerConstraintsV1(Ptr):
     def __init__(self, display: "Display") -> None:
         """Manager to handle pointer constraint requests.
 
@@ -37,11 +37,11 @@ class PointerContraintsV1(Ptr):
 
         self.new_constraint_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_constraint),
-            data_wrapper=PointerContraintV1,
+            data_wrapper=PointerConstraintV1,
         )
 
 
-class PointerContraintV1(Ptr):
+class PointerConstraintV1(Ptr):
     def __init__(self, ptr) -> None:
         """A `struct wlr_pointer_constraint_v1` instance."""
         self._ptr = ffi.cast("struct wlr_pointer_constraint_v1 *", ptr)
@@ -51,7 +51,7 @@ class PointerContraintV1(Ptr):
         )
         self.destroy_event = Signal(
             ptr=ffi.addressof(self._ptr.events.destroy),
-            data_wrapper=PointerContraintV1,
+            data_wrapper=PointerConstraintV1,
         )
 
     def send_activated(self) -> None:
@@ -76,15 +76,15 @@ class PointerContraintV1(Ptr):
         return PixmanRegion32(region_ptr)
 
     @property
-    def current(self) -> "PointerContraintV1State":
-        return PointerContraintV1State(self._ptr.current)
+    def current(self) -> "PointerConstraintV1State":
+        return PointerConstraintV1State(self._ptr.current)
 
     @property
-    def pending(self) -> "PointerContraintV1State":
-        return PointerContraintV1State(self._ptr.pending)
+    def pending(self) -> "PointerConstraintV1State":
+        return PointerConstraintV1State(self._ptr.pending)
 
 
-class PointerContraintV1State(Ptr):
+class PointerConstraintV1State(Ptr):
     def __init__(self, ptr):
         self._ptr = ptr
 
