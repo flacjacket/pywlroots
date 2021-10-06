@@ -326,6 +326,29 @@ struct wlr_input_device {
 };
 """
 
+# types/wlr_input_inhibitor.h
+CDEF += """
+struct wlr_input_inhibit_manager {
+    struct wl_global *global;
+    struct wl_client *active_client;
+    struct wl_resource *active_inhibitor;
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal activate;   // struct wlr_input_inhibit_manager *
+        struct wl_signal deactivate; // struct wlr_input_inhibit_manager *
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_input_inhibit_manager *wlr_input_inhibit_manager_create(
+    struct wl_display *display);
+"""
+
 # types/wlr_keyboard.h
 CDEF += """
 #define WLR_LED_COUNT 3
@@ -1796,6 +1819,7 @@ SOURCE = """
 #include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
+#include <wlr/types/wlr_input_inhibitor.h>
 #include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_linux_dmabuf_v1.h>
