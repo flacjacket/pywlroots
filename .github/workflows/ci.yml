@@ -70,10 +70,10 @@ jobs:
       - name: Build wayland-protocols
         working-directory: wayland-protocols-${{ env.wayland-protocols-version }}
         run: |
-          ./configure --prefix=/usr
-          make
-          DESTDIR=~/wayland make install
-          sudo make install
+          meson build --prefix=/usr
+          ninja -C build
+          DESTDIR=~/wayland ninja -C build install
+          sudo ninja -C build install
       - name: Build libdrm
         working-directory: drm-libdrm-${{ env.libdrm-version }}
         run: |
