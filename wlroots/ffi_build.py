@@ -329,6 +329,100 @@ struct wlr_data_source {
 void wlr_data_source_destroy(struct wlr_data_source *source);
 """
 
+# types/wlr_foreign_toplevel_management_v1.h
+CDEF += """
+struct wlr_foreign_toplevel_manager_v1 {
+    struct wl_event_loop *event_loop;
+    struct wl_global *global;
+    struct wl_list resources; // wl_resource_get_link
+    struct wl_list toplevels; // wlr_foreign_toplevel_handle_v1::link
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_foreign_toplevel_handle_v1 {
+    struct wlr_foreign_toplevel_manager_v1 *manager;
+    struct wl_list resources;
+    struct wl_list link;
+    struct wl_event_source *idle_source;
+
+    char *title;
+    char *app_id;
+    struct wlr_foreign_toplevel_handle_v1 *parent;
+    struct wl_list outputs; // wlr_foreign_toplevel_v1_output
+    uint32_t state; // wlr_foreign_toplevel_v1_state
+
+    struct {
+        struct wl_signal request_maximize;
+        struct wl_signal request_minimize;
+        struct wl_signal request_activate;
+        struct wl_signal request_fullscreen;
+        struct wl_signal request_close;
+        struct wl_signal set_rectangle;
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_foreign_toplevel_handle_v1_maximized_event {
+    struct wlr_foreign_toplevel_handle_v1 *toplevel;
+    bool maximized;
+};
+struct wlr_foreign_toplevel_handle_v1_minimized_event {
+    struct wlr_foreign_toplevel_handle_v1 *toplevel;
+    bool minimized;
+};
+struct wlr_foreign_toplevel_handle_v1_activated_event {
+    struct wlr_foreign_toplevel_handle_v1 *toplevel;
+    struct wlr_seat *seat;
+};
+struct wlr_foreign_toplevel_handle_v1_fullscreen_event {
+    struct wlr_foreign_toplevel_handle_v1 *toplevel;
+    bool fullscreen;
+    struct wlr_output *output;
+};
+struct wlr_foreign_toplevel_handle_v1_set_rectangle_event {
+    struct wlr_foreign_toplevel_handle_v1 *toplevel;
+    struct wlr_surface *surface;
+    int32_t x, y, width, height;
+};
+
+struct wlr_foreign_toplevel_manager_v1 *wlr_foreign_toplevel_manager_v1_create(
+    struct wl_display *display);
+struct wlr_foreign_toplevel_handle_v1 *wlr_foreign_toplevel_handle_v1_create(
+    struct wlr_foreign_toplevel_manager_v1 *manager);
+void wlr_foreign_toplevel_handle_v1_destroy(
+    struct wlr_foreign_toplevel_handle_v1 *toplevel);
+void wlr_foreign_toplevel_handle_v1_set_title(
+    struct wlr_foreign_toplevel_handle_v1 *toplevel, const char *title);
+void wlr_foreign_toplevel_handle_v1_set_app_id(
+    struct wlr_foreign_toplevel_handle_v1 *toplevel, const char *app_id);
+void wlr_foreign_toplevel_handle_v1_output_enter(
+    struct wlr_foreign_toplevel_handle_v1 *toplevel, struct wlr_output *output);
+void wlr_foreign_toplevel_handle_v1_output_leave(
+    struct wlr_foreign_toplevel_handle_v1 *toplevel, struct wlr_output *output);
+void wlr_foreign_toplevel_handle_v1_set_maximized(
+    struct wlr_foreign_toplevel_handle_v1 *toplevel, bool maximized);
+void wlr_foreign_toplevel_handle_v1_set_minimized(
+    struct wlr_foreign_toplevel_handle_v1 *toplevel, bool minimized);
+void wlr_foreign_toplevel_handle_v1_set_activated(
+    struct wlr_foreign_toplevel_handle_v1 *toplevel, bool activated);
+void wlr_foreign_toplevel_handle_v1_set_fullscreen(
+    struct wlr_foreign_toplevel_handle_v1* toplevel, bool fullscreen);
+void wlr_foreign_toplevel_handle_v1_set_parent(
+    struct wlr_foreign_toplevel_handle_v1 *toplevel,
+    struct wlr_foreign_toplevel_handle_v1 *parent);
+"""
+
 # types/wlr_gamma_control_v1.h
 CDEF += """
 struct wlr_gamma_control_manager_v1 {
@@ -1919,6 +2013,7 @@ SOURCE = """
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_input_inhibitor.h>
 #include <wlr/types/wlr_keyboard.h>
