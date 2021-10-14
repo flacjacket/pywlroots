@@ -7,6 +7,7 @@ from pywayland.server import Display, Signal
 from pywayland.protocol.wayland import WlSeat
 
 from wlroots import ffi, PtrHasData, lib, Ptr
+from .data_device_manager import Drag
 from .input_device import ButtonState, InputDevice
 from .keyboard import Keyboard, KeyboardModifiers, KeyboardKeyEvent
 from .pointer import AxisSource, AxisOrientation
@@ -86,7 +87,10 @@ class Seat(PtrHasData):
             ptr=ffi.addressof(self._ptr.events.request_start_drag),
             data_wrapper=RequestStartDragEvent,
         )
-        self.start_drag_event = Signal(ptr=ffi.addressof(self._ptr.events.start_drag))
+        self.start_drag_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.start_drag),
+            data_wrapper=Drag,
+        )
 
     @property
     def pointer_state(self) -> "SeatPointerState":
@@ -141,8 +145,20 @@ class Seat(PtrHasData):
         return lib.wlr_seat_pointer_surface_has_focus(self._ptr, surface._ptr)
 
     def pointer_clear_focus(self) -> None:
-        """Clear the focused surface for the pointer and leave all entered surfaces"""
+        """Clear the focused surface for the pointer and leave all entered surfaces.
+
+        This function does not respect pointer grabs: you probably want
+        `pointer_notify_clear_focus()` instead.
+        """
+
         return lib.wlr_seat_pointer_clear_focus(self._ptr)
+
+    def pointer_notify_clear_focus(self) -> None:
+        """Notify the seat of a pointer leave event to the currently-focused surface.
+
+        Defers to any grab of the pointer.
+        """
+        return lib.wlr_seat_pointer_notify_clear_focus(self._ptr)
 
     def pointer_notify_enter(
         self, surface: Surface, surface_x: float, surface_y: float
@@ -271,6 +287,17 @@ class Seat(PtrHasData):
             # TODO: wrap source in a data source
             lib.wlr_seat_set_selection(self._ptr, source, serial)
 
+    def validate_pointer_grab_serial(self, origin: Surface, serial: int) -> bool:
+        """Check whether this serial is valid to start a pointer grab action."""
+        return lib.wlr_seat_validate_pointer_grab_serial(self._ptr, origin._ptr, serial)
+
+    def start_pointer_drag(self, drag: Drag, serial: int) -> None:
+        """
+        Starts a pointer drag on the seat. This starts implicit keyboard and pointer
+        grabs.
+        """
+        lib.wlr_seat_start_pointer_drag(self._ptr, drag._ptr, serial)
+
     def __enter__(self) -> "Seat":
         """Context manager to clean up the seat"""
         return self
@@ -326,7 +353,17 @@ class RequestStartDragEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_seat_request_start_drag_event *", ptr)
 
-    # TODO
+    @property
+    def drag(self) -> Drag:
+        return Drag(self._ptr.drag)
+
+    @property
+    def origin(self) -> Surface:
+        return Surface(self._ptr.origin)
+
+    @property
+    def serial(self) -> int:
+        return self._ptr.serial
 
 
 class PointerFocusChangeEvent(Ptr):

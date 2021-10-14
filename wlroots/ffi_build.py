@@ -256,6 +256,77 @@ struct wlr_data_device_manager *wlr_data_device_manager_create(
 
 void wlr_seat_set_selection(struct wlr_seat *seat,
     struct wlr_data_source *source, uint32_t serial);
+
+void wlr_seat_start_pointer_drag(struct wlr_seat *seat, struct wlr_drag *drag,
+    uint32_t serial);
+
+struct wlr_drag_icon {
+    struct wlr_drag *drag;
+    struct wlr_surface *surface;
+    bool mapped;
+    struct {
+        struct wl_signal map;
+        struct wl_signal unmap;
+        struct wl_signal destroy;
+    } events;
+    struct wl_listener surface_destroy;
+    void *data;
+    ...;
+};
+
+struct wlr_drag {
+    enum wlr_drag_grab_type grab_type;
+    struct wlr_seat_keyboard_grab keyboard_grab;
+    struct wlr_seat_pointer_grab pointer_grab;
+    struct wlr_seat_touch_grab touch_grab;
+    struct wlr_seat *seat;
+    struct wlr_seat_client *seat_client;
+    struct wlr_seat_client *focus_client;
+    struct wlr_drag_icon *icon; // can be NULL
+    struct wlr_surface *focus; // can be NULL
+    struct wlr_data_source *source; // can be NULL
+    bool started, dropped, cancelling;
+    int32_t grab_touch_id, touch_id; // if WLR_DRAG_GRAB_TOUCH
+    struct {
+        struct wl_signal focus;
+        struct wl_signal motion; // wlr_drag_motion_event
+        struct wl_signal drop; // wlr_drag_drop_event
+        struct wl_signal destroy;
+    } events;
+    struct wl_listener source_destroy;
+    struct wl_listener seat_client_destroy;
+    struct wl_listener icon_destroy;
+    void *data;
+    ...;
+};
+
+struct wlr_drag_motion_event {
+    struct wlr_drag *drag;
+    uint32_t time;
+    double sx, sy;
+    ...;
+};
+
+struct wlr_drag_drop_event {
+    struct wlr_drag *drag;
+    uint32_t time;
+    ...;
+};
+
+struct wlr_data_source {
+    const struct wlr_data_source_impl *impl;
+    struct wl_array mime_types;
+    int32_t actions;
+    bool accepted;
+    enum wl_data_device_manager_dnd_action current_dnd_action;
+    uint32_t compositor_action;
+    struct {
+        struct wl_signal destroy;
+    } events;
+    ...;
+};
+
+void wlr_data_source_destroy(struct wlr_data_source *source);
 """
 
 # types/wlr_gamma_control_v1.h
@@ -1024,6 +1095,25 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp);
 
 #define WLR_POINTER_BUTTONS_CAP 16
 
+struct wlr_seat_touch_grab {
+    const struct wlr_touch_grab_interface *interface;
+    struct wlr_seat *seat;
+    void *data;
+    ...;
+};
+struct wlr_seat_keyboard_grab {
+    const struct wlr_keyboard_grab_interface *interface;
+    struct wlr_seat *seat;
+    void *data;
+    ...;
+};
+struct wlr_seat_pointer_grab {
+    const struct wlr_pointer_grab_interface *interface;
+    struct wlr_seat *seat;
+    void *data;
+    ...;
+};
+
 struct wlr_seat_pointer_state {
     struct wlr_seat *seat;
     struct wlr_seat_client *focused_client;
@@ -1200,7 +1290,10 @@ void wlr_seat_keyboard_notify_enter(struct wlr_seat *seat,
     struct wlr_surface *surface, uint32_t keycodes[], size_t num_keycodes,
     struct wlr_keyboard_modifiers *modifiers);
 void wlr_seat_keyboard_clear_focus(struct wlr_seat *wlr_seat);
+void wlr_seat_pointer_notify_clear_focus(struct wlr_seat *wlr_seat);
 bool wlr_seat_keyboard_has_grab(struct wlr_seat *seat);
+bool wlr_seat_validate_pointer_grab_serial(struct wlr_seat *seat,
+    struct wlr_surface *origin, uint32_t serial);
 """
 
 # types/wlr_server_decoration.h
