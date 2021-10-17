@@ -21,6 +21,12 @@ from .pointer import (
     PointerEventSwipeUpdate,
 )
 from .surface import Surface
+from .touch import (
+    TouchEventUp,
+    TouchEventDown,
+    TouchEventMotion,
+    TouchEventCancel,
+)
 
 
 class WarpMode(enum.Enum):
@@ -82,6 +88,23 @@ class Cursor(PtrHasData):
         self.pinch_end = Signal(
             ptr=ffi.addressof(self._ptr.events.pinch_end),
             data_wrapper=PointerEventPinchEnd,
+        )
+
+        self.touch_up_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.touch_up),
+            data_wrapper=TouchEventUp,
+        )
+        self.touch_down_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.touch_down),
+            data_wrapper=TouchEventDown,
+        )
+        self.touch_motion_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.touch_motion),
+            data_wrapper=TouchEventMotion,
+        )
+        self.touch_cancel_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.touch_cancel),
+            data_wrapper=TouchEventCancel,
         )
 
     @property
