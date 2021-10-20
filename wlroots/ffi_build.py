@@ -1279,6 +1279,14 @@ bool wlr_seat_pointer_has_grab(struct wlr_seat *seat);
 void wlr_seat_set_keyboard(struct wlr_seat *seat, struct wlr_input_device *dev);
 struct wlr_keyboard *wlr_seat_get_keyboard(struct wlr_seat *seat);
 
+uint32_t wlr_seat_touch_notify_down(struct wlr_seat *seat,
+    struct wlr_surface *surface, uint32_t time_msec,
+    int32_t touch_id, double sx, double sy);
+void wlr_seat_touch_notify_up(struct wlr_seat *seat, uint32_t time_msec,
+    int32_t touch_id);
+void wlr_seat_touch_notify_motion(struct wlr_seat *seat, uint32_t time_msec,
+    int32_t touch_id, double sx, double sy);
+
 void wlr_seat_keyboard_start_grab(struct wlr_seat *wlr_seat,
     struct wlr_seat_keyboard_grab *grab);
 void wlr_seat_keyboard_end_grab(struct wlr_seat *wlr_seat);

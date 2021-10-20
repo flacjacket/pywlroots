@@ -58,6 +58,13 @@ class Seat(PtrHasData):
             ptr=ffi.addressof(self._ptr.events.keyboard_grab_end)
         )
 
+        self.touch_grab_begin_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.touch_grab_begin)
+        )
+        self.touch_grab_end_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.touch_grab_end)
+        )
+
         self.request_set_cursor_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_set_cursor),
             data_wrapper=PointerRequestSetCursorEvent,
@@ -273,6 +280,41 @@ class Seat(PtrHasData):
     def keyboard_has_grab(self) -> bool:
         """Whether or not the keyboard has a grab other than the default grab"""
         return lib.wlr_seat_keyboard_has_grab(self._ptr)
+
+    def touch_notify_down(
+        self,
+        surface: Surface,
+        time_msec: int,
+        touch_id: int,
+        surface_x: float,
+        surface_y: float,
+    ) -> None:
+        """
+        Notify the seat of a touch down on the given surface. Defers to any grab of the
+        touch device.
+        """
+        lib.wlr_seat_touch_notify_down(
+            self._ptr, surface._ptr, time_msec, touch_id, surface_x, surface_y
+        )
+
+    def touch_notify_up(self, time_msec: int, touch_id: int) -> None:
+        """
+        Notify the seat that the touch point given by `touch_id` is up. Defers to any
+        grab of the touch device.
+        """
+        lib.wlr_seat_touch_notify_up(self._ptr, time_msec, touch_id)
+
+    def touch_notify_motion(
+        self, time_msec: int, touch_id: int, surface_x: float, surface_y: float
+    ) -> None:
+        """
+        Notify the seat that the touch point given by `touch_id` has moved. Defers to
+        any grab of the touch device. The seat should be notified of touch motion even
+        if the surface is not the owner of the touch point for processing by grabs.
+        """
+        lib.wlr_seat_touch_notify_motion(
+            self._ptr, time_msec, touch_id, surface_x, surface_y
+        )
 
     def set_selection(self, source, serial: int) -> None:
         """Sets the current selection for the seat
