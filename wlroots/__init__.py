@@ -59,5 +59,5 @@ def str_or_none(member: ffi.CData) -> Optional[str]:
     array, returning a string.
     """
     if member:
-        return ffi.string(member).decode()
+        return ffi.string(member).decode(errors="backslashreplace")
     return None
