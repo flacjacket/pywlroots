@@ -130,14 +130,8 @@ class LayerSurfaceV1(PtrHasData):
         return self._ptr.mapped
 
     @property
-    def client_pending(self) -> LayerSurfaceV1State:
-        state_ptr = self._ptr.client_pending
-        _weakkeydict[state_ptr] = self._ptr
-        return LayerSurfaceV1State(state_ptr)
-
-    @property
-    def server_pending(self) -> LayerSurfaceV1State:
-        state_ptr = self._ptr.server_pending
+    def pending(self) -> LayerSurfaceV1State:
+        state_ptr = self._ptr.pending
         _weakkeydict[state_ptr] = self._ptr
         return LayerSurfaceV1State(state_ptr)
 

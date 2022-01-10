@@ -65,7 +65,6 @@ struct wlr_backend *wlr_backend_autocreate(struct wl_display *display);
 
 bool wlr_backend_start(struct wlr_backend *backend);
 void wlr_backend_destroy(struct wlr_backend *backend);
-struct wlr_renderer *wlr_backend_get_renderer(struct wlr_backend *backend);
 struct wlr_session *wlr_backend_get_session(struct wlr_backend *backend);
 """
 
@@ -484,8 +483,6 @@ struct wlr_input_device {
     } events;
 
     void *data;
-
-    struct wl_list link;
     ...;
 };
 """
@@ -661,7 +658,8 @@ struct wlr_output {
     struct wl_global *global;
     struct wl_list resources;
 
-    char name[24];
+    char *name;
+    char *description; // may be NULL
     char make[56];
     char model[16];
     char serial[16];
@@ -1033,11 +1031,13 @@ CDEF += """
 enum wlr_pointer_constraint_v1_type {
     WLR_POINTER_CONSTRAINT_V1_LOCKED,
     WLR_POINTER_CONSTRAINT_V1_CONFINED,
+    ...
 };
 
 enum wlr_pointer_constraint_v1_state_field {
     WLR_POINTER_CONSTRAINT_V1_STATE_REGION = 1 << 0,
     WLR_POINTER_CONSTRAINT_V1_STATE_CURSOR_HINT = 1 << 1,
+    ...
 };
 
 struct wlr_pointer_constraint_v1_state {
@@ -1115,6 +1115,7 @@ struct wlr_primary_selection_v1_device_manager {
     } events;
 
     void *data;
+    ...;
 };
 struct wlr_primary_selection_v1_device_manager *
     wlr_primary_selection_v1_device_manager_create(struct wl_display *display);
@@ -1319,28 +1320,33 @@ struct wlr_seat_pointer_request_set_cursor_event {
     struct wlr_surface *surface;
     uint32_t serial;
     int32_t hotspot_x, hotspot_y;
+    ...;
 };
 
 struct wlr_seat_request_set_selection_event {
     struct wlr_data_source *source;
     uint32_t serial;
+    ...;
 };
 
 struct wlr_seat_request_start_drag_event {
     struct wlr_drag *drag;
     struct wlr_surface *origin;
     uint32_t serial;
+    ...;
 };
 
 struct wlr_seat_pointer_focus_change_event {
     struct wlr_seat *seat;
     struct wlr_surface *old_surface, *new_surface;
     double sx, sy;
+    ...;
 };
 
 struct wlr_seat_keyboard_focus_change_event {
     struct wlr_seat *seat;
     struct wlr_surface *old_surface, *new_surface;
+    ...;
 };
 
 struct wlr_seat *wlr_seat_create(struct wl_display *display, const char *name);
@@ -1415,6 +1421,7 @@ struct wlr_server_decoration_manager {
         struct wl_signal destroy;
     } events;
     void *data;
+    ...;
 };
 struct wlr_server_decoration_manager *wlr_server_decoration_manager_create(
     struct wl_display *display);
@@ -1640,6 +1647,12 @@ struct wlr_xdg_toplevel_decoration_v1_configure {
     struct wl_list link; // wlr_xdg_toplevel_decoration::configure_list
     struct wlr_xdg_surface_configure *surface_configure;
     enum wlr_xdg_toplevel_decoration_v1_mode mode;
+    ...;
+};
+
+struct wlr_xdg_toplevel_decoration_v1_state {
+    enum wlr_xdg_toplevel_decoration_v1_mode mode;
+    ...;
 };
 
 struct wlr_xdg_toplevel_decoration_v1 {
@@ -1648,10 +1661,12 @@ struct wlr_xdg_toplevel_decoration_v1 {
     struct wlr_xdg_decoration_manager_v1 *manager;
     struct wl_list link; // wlr_xdg_decoration_manager_v1::link
 
+    struct wlr_xdg_toplevel_decoration_v1_state current, pending;
+
+    enum wlr_xdg_toplevel_decoration_v1_mode scheduled_mode;
+    enum wlr_xdg_toplevel_decoration_v1_mode requested_mode;
+
     bool added;
-    enum wlr_xdg_toplevel_decoration_v1_mode current_mode;
-    enum wlr_xdg_toplevel_decoration_v1_mode client_pending_mode;
-    enum wlr_xdg_toplevel_decoration_v1_mode server_pending_mode;
 
     struct wl_list configure_list; // wlr_xdg_toplevel_decoration_v1_configure::link
 
@@ -1729,6 +1744,7 @@ struct wlr_xdg_client {
 
     uint32_t ping_serial;
     struct wl_event_source *ping_timer;
+    ...;
 };
 
 struct wlr_xdg_positioner {
@@ -1768,11 +1784,22 @@ struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
 
 struct wlr_xdg_toplevel_state {
     bool maximized, fullscreen, resizing, activated;
-    uint32_t tiled;
+    uint32_t tiled; // enum wlr_edges
     uint32_t width, height;
     uint32_t max_width, max_height;
     uint32_t min_width, min_height;
+    ...;
+};
 
+struct wlr_xdg_toplevel_configure {
+    bool maximized, fullscreen, resizing, activated;
+    uint32_t tiled; // enum wlr_edges
+    uint32_t width, height;
+    ...;
+};
+
+struct wlr_xdg_toplevel_requested {
+    bool maximized, minimized, fullscreen;
     struct wlr_output *fullscreen_output;
     struct wl_listener fullscreen_output_destroy;
     ...;
@@ -1786,9 +1813,11 @@ struct wlr_xdg_toplevel {
     struct wlr_xdg_surface *parent;
     struct wl_listener parent_unmap;
 
-    struct wlr_xdg_toplevel_state client_pending;
-    struct wlr_xdg_toplevel_state server_pending;
-    struct wlr_xdg_toplevel_state current;
+    struct wlr_xdg_toplevel_state current, pending;
+
+    struct wlr_xdg_toplevel_configure scheduled;
+
+    struct wlr_xdg_toplevel_requested requested;
 
     char *title;
     char *app_id;
@@ -1829,14 +1858,11 @@ struct wlr_xdg_surface {
     struct wl_list popups; // wlr_xdg_popup::link
 
     bool added, configured, mapped;
-    uint32_t configure_serial;
     struct wl_event_source *configure_idle;
-    uint32_t configure_next_serial;
+    uint32_t scheduled_serial;
     struct wl_list configure_list;
 
-    bool has_next_geometry;
-    struct wlr_box next_geometry;
-    struct wlr_box geometry;
+    struct wlr_xdg_surface_state current, pending;
 
     struct wl_listener surface_destroy;
     struct wl_listener surface_commit;
@@ -1861,7 +1887,14 @@ struct wlr_xdg_surface_configure {
     struct wl_list link; // wlr_xdg_surface::configure_list
     uint32_t serial;
 
-    struct wlr_xdg_toplevel_state *toplevel_state;
+    struct wlr_xdg_toplevel_configure *toplevel_configure;
+    ...;
+};
+
+struct wlr_xdg_surface_state {
+    uint32_t configure_serial;
+    struct wlr_box geometry;
+    ...;
 };
 
 struct wlr_xdg_toplevel_move_event {
@@ -1971,9 +2004,6 @@ void wlr_region_transform(struct pixman_region32 *dst, struct pixman_region32 *s
 # backend/headless.h
 CDEF += """
 struct wlr_backend *wlr_headless_backend_create(struct wl_display *display);
-
-struct wlr_backend *wlr_headless_backend_create_with_renderer(
-    struct wl_display *display, struct wlr_renderer *renderer);
 
 struct wlr_output *wlr_headless_add_output(struct wlr_backend *backend,
     unsigned int width, unsigned int height);
@@ -2101,13 +2131,8 @@ struct wlr_layer_surface_v1 {
     struct wl_list popups; // wlr_xdg_popup::link
     char *namespace;
     bool added, configured, mapped;
-    uint32_t configure_serial;
-    uint32_t configure_next_serial;
     struct wl_list configure_list;
-    struct wlr_layer_surface_v1_configure *acked_configure;
-    struct wlr_layer_surface_v1_state client_pending;
-    struct wlr_layer_surface_v1_state server_pending;
-    struct wlr_layer_surface_v1_state current;
+    struct wlr_layer_surface_v1_state current, pending;
     struct wl_listener surface_destroy;
     struct {
         struct wl_signal destroy;
