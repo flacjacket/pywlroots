@@ -143,8 +143,6 @@ bool wlr_box_empty(const struct wlr_box *box);
 
 void wlr_box_transform(struct wlr_box *dest, const struct wlr_box *box,
     enum wl_output_transform transform, int width, int height);
-
-void wlr_box_rotated_bounds(struct wlr_box *dest, const struct wlr_box *box, float rotation);
 """
 
 # types/wlr_cursor.h
@@ -170,6 +168,7 @@ struct wlr_cursor {
         struct wl_signal touch_down;
         struct wl_signal touch_motion;
         struct wl_signal touch_cancel;
+        struct wl_signal touch_frame;
 
         struct wl_signal tablet_tool_axis;
         struct wl_signal tablet_tool_proximity;
@@ -760,7 +759,7 @@ struct wlr_output_damage {
     struct pixman_region32 previous[WLR_OUTPUT_DAMAGE_PREVIOUS_LEN];
     size_t previous_idx;
 
-    enum wlr_output_state_buffer_type pending_buffer_type;
+    bool pending_attach_render;
 
     struct {
         struct wl_signal frame;
@@ -1429,7 +1428,7 @@ struct wlr_surface_state {
     uint32_t committed;
     uint32_t seq;
 
-    struct wl_resource *buffer_resource;
+    struct wlr_buffer *buffer;
     int32_t dx, dy;
     struct pixman_region32 surface_damage, buffer_damage;
     struct pixman_region32 opaque, input;
@@ -1440,6 +1439,8 @@ struct wlr_surface_state {
     int width, height;
     int buffer_width, buffer_height;
 
+    struct wl_list subsurfaces_below;
+    struct wl_list subsurfaces_above;
     ...;
 };
 
@@ -1467,7 +1468,7 @@ struct wlr_surface {
     struct pixman_region32 buffer_damage;
     struct pixman_region32 opaque_region;
     struct pixman_region32 input_region;
-    struct wlr_surface_state current, pending, previous;
+    struct wlr_surface_state current, pending;
 
     struct wl_list cached;
 
@@ -1480,18 +1481,14 @@ struct wlr_surface {
         struct wl_signal destroy;
     } events;
 
-    struct wl_list subsurfaces_below;
-    struct wl_list subsurfaces_above;
-    struct wl_list subsurfaces_pending_below;
-    struct wl_list subsurfaces_pending_above;
     struct wl_list current_outputs;
+    void *data;
     struct wl_listener renderer_destroy;
 
-    void *data;
     ...;
 };
 
-struct wlr_subsurface_state {
+struct wlr_subsurface_parent_state {
     int32_t x, y;
     ...;
 };
@@ -1501,7 +1498,7 @@ struct wlr_subsurface {
     struct wlr_surface *surface;
     struct wlr_surface *parent;
 
-    struct wlr_subsurface_state current, pending;
+    struct wlr_subsurface_parent_state current, pending;
 
     uint32_t cached_seq;
     bool has_cache;
@@ -1509,9 +1506,6 @@ struct wlr_subsurface {
     bool synchronized;
     bool reordered;
     bool mapped;
-
-    struct wl_list parent_link;
-    struct wl_list parent_pending_link;
 
     struct wl_listener surface_destroy;
     struct wl_listener parent_destroy;
@@ -1536,10 +1530,6 @@ bool wlr_surface_set_role(struct wlr_surface *surface,
 bool wlr_surface_has_buffer(struct wlr_surface *surface);
 
 struct wlr_texture *wlr_surface_get_texture(struct wlr_surface *surface);
-
-struct wlr_subsurface *wlr_subsurface_create(struct wlr_surface *surface,
-    struct wlr_surface *parent, uint32_t version, uint32_t id,
-    struct wl_list *resource_list);
 
 struct wlr_surface *wlr_surface_get_root_surface(struct wlr_surface *surface);
 
@@ -2110,7 +2100,7 @@ struct wlr_layer_surface_v1 {
     struct wlr_layer_shell_v1 *shell;
     struct wl_list popups; // wlr_xdg_popup::link
     char *namespace;
-    bool added, configured, mapped, closed;
+    bool added, configured, mapped;
     uint32_t configure_serial;
     uint32_t configure_next_serial;
     struct wl_list configure_list;
@@ -2135,7 +2125,7 @@ struct wlr_layer_shell_v1 *wlr_layer_shell_v1_create(struct wl_display *display)
 void wlr_layer_surface_v1_configure(struct wlr_layer_surface_v1 *surface,
     uint32_t width, uint32_t height);
 
-void wlr_layer_surface_v1_close(struct wlr_layer_surface_v1 *surface);
+void wlr_layer_surface_v1_destroy(struct wlr_layer_surface_v1 *surface);
 
 bool wlr_surface_is_layer_surface(struct wlr_surface *surface);
 
