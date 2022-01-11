@@ -9,7 +9,6 @@ from . import ffi, lib, Ptr
 from wlroots.util.log import logger
 from wlroots.wlr_types.input_device import InputDevice
 from wlroots.wlr_types.output import Output
-from wlroots.renderer import Renderer
 
 
 class BackendType(enum.Enum):

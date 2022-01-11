@@ -10,37 +10,43 @@ from wlroots.util.edges import Edges
 from .cursor_mode import CursorMode
 
 if TYPE_CHECKING:
-    from wlroots.wlr_types import Surface
+    from wlroots.wlr_types import SceneNode, Surface
     from wlroots.wlr_types.xdg_shell import XdgSurface
     from .server import TinywlServer
 
 
 class View:
-    def __init__(self, xdg_surface: XdgSurface, tinywl_server: TinywlServer) -> None:
+    def __init__(
+        self,
+        xdg_surface: XdgSurface,
+        tinywl_server: TinywlServer,
+        scene_node: SceneNode,
+    ) -> None:
         self.xdg_surface = xdg_surface
         self.tinywl_server = tinywl_server
+        self.scene_node = scene_node
         self.mapped = False
         self.x = 0.0
         self.y = 0.0
 
-        xdg_surface.map_event.add(Listener(self.xdg_surface_map))
-        xdg_surface.unmap_event.add(Listener(self.xdg_surface_unmap))
-        xdg_surface.destroy_event.add(Listener(self.xdg_surface_destroy))
+        xdg_surface.map_event.add(Listener(self.xdg_toplevel_map))
+        xdg_surface.unmap_event.add(Listener(self.xdg_toplevel_unmap))
+        xdg_surface.destroy_event.add(Listener(self.xdg_toplevel_destroy))
 
         toplevel = xdg_surface.toplevel
         toplevel.request_move_event.add(Listener(self.xdg_toplevel_request_move))
         toplevel.request_resize_event.add(Listener(self.xdg_toplevel_request_resize))
 
-    def xdg_surface_map(self, listener, data) -> None:
+    def xdg_toplevel_map(self, listener, data) -> None:
         logging.info("mapped new view")
         self.mapped = True
         self.tinywl_server.focus_view(self)
 
-    def xdg_surface_unmap(self, listener, data) -> None:
+    def xdg_toplevel_unmap(self, listener, data) -> None:
         logging.info("unmapped view")
         self.mapped = False
 
-    def xdg_surface_destroy(self, listener, data) -> None:
+    def xdg_toplevel_destroy(self, listener, data) -> None:
         logging.info("destroyed view")
         self.tinywl_server.views.remove(self)
 

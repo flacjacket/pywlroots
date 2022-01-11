@@ -17,6 +17,7 @@ from wlroots.wlr_types import (
     Cursor,
     DataDeviceManager,
     OutputLayout,
+    Scene,
     Seat,
     XCursorManager,
     XdgShell,
@@ -31,11 +32,11 @@ def sig_cb(display, sig_num, frame):
     display.terminate()
 
 
-def main(argv):
+def main(argv) -> None:
     with Display() as display:
         signal.signal(signal.SIGINT, partial(sig_cb, display))
 
-        compositor, backend = build_compositor(display)
+        compositor, allocator, renderer, backend = build_compositor(display)
         device_manager = DataDeviceManager(display)  # noqa: F841
         xdg_shell = XdgShell(display)
         with OutputLayout() as output_layout, Cursor(
@@ -43,9 +44,13 @@ def main(argv):
         ) as cursor, XCursorManager(24) as xcursor_manager, Seat(
             display, "seat0"
         ) as seat:
+            scene = Scene(output_layout)
             tinywl_server = TinywlServer(  # noqa: F841
                 display=display,
                 backend=backend,
+                allocator=allocator,
+                renderer=renderer,
+                scene=scene,
                 xdg_shell=xdg_shell,
                 cursor=cursor,
                 cursor_manager=xcursor_manager,

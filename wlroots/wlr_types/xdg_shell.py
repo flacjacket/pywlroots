@@ -108,9 +108,23 @@ class XdgSurface(PtrHasData):
 
         # the toplevel does not own the ptr data, ensure the underlying cdata
         # is kept alive
-        _weakkeydict[toplevel] = self._ptr
+        _weakkeydict[toplevel] = self
 
         return toplevel
+
+    @property
+    def popup(self) -> "XdgPopup":
+        """Return the popup xdg object
+
+        This shell must be a popup role.
+        """
+        if self.role != XdgSurfaceRole.POPUP:
+            raise ValueError(f"xdg surface must be popup, got: {self.role}")
+
+        popup = XdgPopup(self._ptr.popup)
+        _weakkeydict[popup] = self
+
+        return popup
 
     def get_geometry(self) -> Box:
         """Get the surface geometry
@@ -340,6 +354,13 @@ class XdgPopup(Ptr):
     def base(self) -> XdgSurface:
         """The xdg surface associated with the popup"""
         return XdgSurface(self._ptr.base)
+
+    @property
+    def parent(self) -> Surface:
+        """Parent Surface."""
+        parent = Surface(self.parent)
+        _weakkeydict[parent] = self
+        return parent
 
     def unconstrain_from_box(self, box: Box) -> None:
         """

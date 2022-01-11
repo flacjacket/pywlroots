@@ -10,5 +10,5 @@ from wlroots.util.box import *  # noqa: F401,F403
 warnings.warn(
     "wlroots.types.box has moved to wlroots.util.box and will be removed in the future.",
     DeprecationWarning,
-    stacklevel=1
+    stacklevel=1,
 )

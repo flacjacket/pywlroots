@@ -1,7 +1,7 @@
 # Copyright (c) Sean Vig 2019
 # Copyright (c) Matt Colligan 2021
 
-from typing import Tuple, Optional
+from typing import Tuple, Optional, TYPE_CHECKING
 
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
@@ -9,6 +9,10 @@ from pywayland.protocol.wayland import WlOutput
 from wlroots import ffi, PtrHasData, lib, Ptr, str_or_none
 from wlroots.util.region import PixmanRegion32
 from .matrix import Matrix
+
+if TYPE_CHECKING:
+    from wlroots.allocator import Allocator
+    from wlroots.renderer import Renderer
 
 
 class Output(PtrHasData):
@@ -143,6 +147,20 @@ class Output(PtrHasData):
             self.commit()
         else:
             self.rollback()
+
+    def init_render(self, allocator: "Allocator", renderer: "Renderer") -> None:
+        """Initialize the output's rendering subsystem with the provided allocator and renderer.
+
+        Can only be called once.
+
+        Call this function prior to any call to `attach_render`, `commit`, or
+        `cursor_create`. The buffer capabilities of the provided must match the
+        capabilities of the output's backend.  Raises error otherwise.
+        """
+        if not lib.wlr_output_init_render(self._ptr, allocator._ptr, renderer._ptr):
+            raise RuntimeError(
+                "Output capabilities must match the capabilities of the output's backend."
+            )
 
     def attach_render(self) -> None:
         """Attach the renderer's buffer to the output

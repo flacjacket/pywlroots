@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import cast, List, Optional, Tuple, TYPE_CHECKING
 
 from pywayland.server import Display, Listener
 from pywayland.protocol.wayland import WlKeyboard, WlSeat
 from xkbcommon import xkb
 
 from wlroots import ffi, lib
+from wlroots.allocator import Allocator
 from wlroots.backend import Backend
+from wlroots.renderer import Renderer
 from wlroots.util.edges import Edges
 from wlroots.wlr_types import (
     Box,
@@ -16,6 +18,8 @@ from wlroots.wlr_types import (
     Matrix,
     Output,
     OutputLayout,
+    Scene,
+    SceneNode,
     Seat,
     Surface,
     XCursorManager,
@@ -60,6 +64,9 @@ class TinywlServer:
         *,
         display: Display,
         backend: Backend,
+        allocator: Allocator,
+        renderer: Renderer,
+        scene: Scene,
         xdg_shell: XdgShell,
         cursor: Cursor,
         cursor_manager: XCursorManager,
@@ -69,6 +76,9 @@ class TinywlServer:
         # elements that we need to hold on to
         self._display = display
         self._backend = backend
+        self._allocator = allocator
+        self._renderer = renderer
+        self._scene = scene
 
         # the xdg shell will generate new surfaces
         self._xdg_shell = xdg_shell
@@ -118,8 +128,9 @@ class TinywlServer:
     def _process_cursor_move(self) -> None:
         # Move the grabbed view to the new position
         assert self.grabbed_view is not None
-        self.grabbed_view.x = self._cursor.x - self.grab_x
-        self.grabbed_view.y = self._cursor.y - self.grab_y
+        x = self.grabbed_view.x = self._cursor.x - self.grab_x
+        y = self.grabbed_view.y = self._cursor.y - self.grab_y
+        self.grabbed_view.scene_node.set_position(int(x), int(y))
 
     def _process_cursor_resize(self) -> None:
         assert self.grabbed_view is not None
@@ -155,26 +166,26 @@ class TinywlServer:
     def process_cursor_motion(self, time) -> None:
         if self.cursor_mode == CursorMode.MOVE:
             self._process_cursor_move()
+            return
         elif self.cursor_mode == CursorMode.RESIZE:
             print("RESIZING")
             self._process_cursor_resize()
+            return
+
+        view, surface, sx, sy = self.view_at(self._cursor.x, self._cursor.y)
+        logging.debug("Processing cursor motion: %s, %s", sx, sy)
+
+        if view is None:
+            self._cursor_manager.set_cursor_image("left_ptr", self._cursor)
+
+        if surface is None:
+            # Clear pointer focus so future button events and such are not sent
+            # to the last client to have the cursor over it.
+            self._seat.pointer_clear_focus()
         else:
-            view, surface, sx, sy = self.view_at(self._cursor.x, self._cursor.y)
-            logging.debug(f"Processing cursor motion: {sx} {sy}")
-
-            if view is None or surface is None:
-                self._cursor_manager.set_cursor_image("left_ptr", self._cursor)
-                self._seat.pointer_clear_focus()
-            else:
-                focus_changed = self._seat.pointer_state.focused_surface != surface
-
-                # "Enter" the surface if necessary. This lets the client know
-                # that the cursor has entered one of its surfaces
-                self._seat.pointer_notify_enter(surface, sx, sy)
-                if not focus_changed:
-                    # The enter event contains coordinates, so we only need to
-                    # notify on motion if the focus did not change
-                    self._seat.pointer_notify_motion(time, sx, sy)
+            # Send pointer enter and motion events.
+            self._seat.pointer_notify_enter(surface, sx, sy)
+            self._seat.pointer_notify_motion(time, sx, sy)
 
     def send_modifiers(
         self, modifiers: KeyboardModifiers, input_device: InputDevice
@@ -242,6 +253,7 @@ class TinywlServer:
             previous_xdg_surface = XdgSurface.from_surface(previous_surface)
             previous_xdg_surface.set_activated(False)
 
+        view.scene_node.raise_to_top()
         # roll the given surface to the front of the list, copy and modify the
         # list, then save back to prevent any race conditions on list
         # modification
@@ -264,17 +276,30 @@ class TinywlServer:
     def server_new_xdg_surface(self, listener, xdg_surface: XdgSurface) -> None:
         logger.info("new surface")
 
-        if xdg_surface.role != XdgSurfaceRole.TOPLEVEL:
-            logger.info("Surface is not top level")
+        if xdg_surface.role == XdgSurfaceRole.POPUP:
+            # We must add xdg popups to the scene graph so they get rendered.
+            # The wlroots scene graph provides a helper for this, but to use it
+            # we must provide the proper parent scene node of the xdg popup. To
+            # enable this, we always set the user data field of xdg_surfaces to
+            # the corresponding scene node.
+            parent_xdg_surface = XdgSurface.from_surface(xdg_surface.popup.parent)
+            parent_scene_node = cast(SceneNode, parent_xdg_surface.data)
+            scene_node = SceneNode.xdg_surface_create(parent_scene_node, xdg_surface)
+            xdg_surface.data = scene_node
             return
 
-        view = View(xdg_surface, self)
+        assert xdg_surface.role == XdgSurfaceRole.TOPLEVEL
+
+        scene_node = SceneNode.xdg_surface_create(self._scene.node, xdg_surface)
+        view = View(xdg_surface, self, scene_node)
         self.views.append(view)
 
     # #############################################################
     # output and frame handling callbacks
 
     def server_new_output(self, listener, output: Output) -> None:
+        output.init_render(self._allocator, self._renderer)
+
         if output.modes != []:
             mode = output.preferred_mode()
             if mode is None:
@@ -290,49 +315,12 @@ class TinywlServer:
         output.frame_event.add(Listener(self.output_frame))
 
     def output_frame(self, listener, data) -> None:
-        now = Timespec.get_monotonic_time()
-
         output = self.outputs[0]
-        width, height = output.effective_resolution()
-        output.attach_render()
-        with output, self._backend.renderer.render(width, height) as renderer:
-            renderer.clear([0.3, 0.3, 0.3, 1.0])
+        scene_output = self._scene.get_scene_output(output)
+        scene_output.commit()
 
-            for view in self.views:
-                if not view.mapped:
-                    continue
-
-                data = output, view, now
-                view.xdg_surface.for_each_surface(self._render_surface, data)
-
-            output.render_software_cursors()
-
-    def _render_surface(
-        self, surface: Surface, sx: int, sy: int, data: Tuple[Output, View, Timespec]
-    ) -> None:
-        output, view, now = data
-
-        texture = surface.get_texture()
-        if texture is None:
-            return
-
-        ox, oy = self._output_layout.output_coords(output)
-        ox += view.x + sx
-        oy += view.y + sy
-        box = Box(
-            int(ox * output.scale),
-            int(oy * output.scale),
-            int(surface.current.width * output.scale),
-            int(surface.current.height * output.scale),
-        )
-
-        transform = surface.current.transform
-        inverse = Output.transform_invert(transform)
-
-        matrix = Matrix.project_box(box, inverse, 0, output.transform_matrix)
-
-        self._backend.renderer.render_texture_with_matrix(texture, matrix, 1)
-        surface.send_frame_done(now)
+        now = Timespec.get_monotonic_time()
+        scene_output.send_frame_done(now)
 
     # #############################################################
     # input handling callbacks
@@ -347,8 +335,8 @@ class TinywlServer:
         if len(self.keyboards) > 0:
             capabilities |= WlSeat.capability.keyboard
 
-        logging.info(f"new input {str(input_device.device_type)}")
-        logging.info(f"capabilities {str(capabilities)}")
+        logging.info("new input %s", input_device.device_type)
+        logging.info("capabilities %s", capabilities)
 
         self._seat.set_capabilities(capabilities)
 
@@ -393,7 +381,7 @@ class TinywlServer:
         self.process_cursor_motion(event_motion_absolute.time_msec)
 
     def server_cursor_button(self, listener, event: PointerEventButton) -> None:
-        logging.info(f"Got button click event {event.button_state}")
+        logging.info("Got button click event %s", event.button_state)
         self._seat.pointer_notify_button(
             event.time_msec, event.button, event.button_state
         )

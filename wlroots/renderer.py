@@ -6,6 +6,7 @@ from typing import Iterator, List, Optional, Tuple, Union
 from pywayland.server import Display
 
 from wlroots import ffi, lib, Ptr
+from wlroots.backend import Backend
 from wlroots.util.box import Box
 from wlroots.wlr_types import Matrix, Texture
 
@@ -19,6 +20,14 @@ class Renderer(Ptr):
         The renderer is automatically destroyed as the backend is destroyed.
         """
         self._ptr = ptr
+
+    @classmethod
+    def autocreate(cls, backend: Backend) -> "Renderer":
+        """Creates a suitable renderer for a backend."""
+        ret = lib.wlr_renderer_autocreate(backend._ptr)
+        if not ret:
+            raise RuntimeError("Unable to create a renderer.")
+        return Renderer(ret)
 
     def init_display(self, display: Display) -> None:
         """Creates necessary shm and invokes the initialization of the implementation

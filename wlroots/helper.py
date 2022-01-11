@@ -4,13 +4,15 @@ from typing import Tuple
 
 from pywayland.server import Display
 
+from wlroots.allocator import Allocator
 from wlroots.backend import Backend, BackendType
+from wlroots.renderer import Renderer
 from wlroots.wlr_types import Compositor
 
 
 def build_compositor(
     display: Display, *, backend_type=BackendType.AUTO
-) -> Tuple[Compositor, Backend]:
+) -> Tuple[Compositor, Allocator, Renderer, Backend]:
     """Build and run a compositor
 
     :param display:
@@ -20,11 +22,12 @@ def build_compositor(
         The type of the backend to setup the compositor for, by default use the
         auto-detected backend.
     :return:
-        The compositor and the backend.
+        The compositor, allocator, renderer, and the backend.
     """
     backend = Backend(display, backend_type=backend_type)
-    renderer = backend.renderer
+    renderer = Renderer.autocreate(backend)
     renderer.init_display(display)
+    allocator = Allocator.autocreate(backend, renderer)
     compositor = Compositor(display, renderer)
 
-    return compositor, backend
+    return compositor, allocator, renderer, backend

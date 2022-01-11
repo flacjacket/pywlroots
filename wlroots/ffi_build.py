@@ -79,8 +79,20 @@ CDEF += """
 bool wlr_session_change_vt(struct wlr_session *session, unsigned vt);
 """
 
+# render/allocator.h
+CDEF += """
+struct wlr_allocator {
+    ...;
+};
+
+struct wlr_allocator *wlr_allocator_autocreate(struct wlr_backend *backend,
+    struct wlr_renderer *renderer);
+"""
+
 # render/wlr_renderer.h
 CDEF += """
+struct wlr_renderer *wlr_renderer_autocreate(struct wlr_backend *backend);
+
 void wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
 void wlr_renderer_end(struct wlr_renderer *r);
 void wlr_renderer_clear(struct wlr_renderer *r, const float color[static 4]);
@@ -162,6 +174,8 @@ struct wlr_cursor {
         struct wl_signal pinch_begin;
         struct wl_signal pinch_update;
         struct wl_signal pinch_end;
+        struct wl_signal hold_begin;
+        struct wl_signal hold_end;
 
         struct wl_signal touch_up;
         struct wl_signal touch_down;
@@ -715,6 +729,9 @@ void wlr_output_enable(struct wlr_output *output, bool enable);
 void wlr_output_create_global(struct wlr_output *output);
 void wlr_output_destroy_global(struct wlr_output *output);
 
+bool wlr_output_init_render(struct wlr_output *output,
+    struct wlr_allocator *allocator, struct wlr_renderer *renderer);
+
 struct wlr_output_mode *wlr_output_preferred_mode(struct wlr_output *output);
 
 void wlr_output_set_mode(struct wlr_output *output,
@@ -1153,6 +1170,57 @@ void wlr_relative_pointer_manager_v1_send_relative_motion(
     struct wlr_relative_pointer_manager_v1 *manager, struct wlr_seat *seat,
     uint64_t time_usec, double dx, double dy,
     double dx_unaccel, double dy_unaccel);
+"""
+
+# types/wlr_scene.h
+CDEF += """
+struct wlr_scene_node_state {
+    struct wl_list link; // wlr_scene_node_state.children
+    struct wl_list children; // wlr_scene_node_state.link
+
+    bool enabled;
+    int x, y; // relative to parent
+};
+
+struct wlr_scene_node {
+    enum wlr_scene_node_type type;
+    struct wlr_scene_node *parent;
+    struct wlr_scene_node_state state;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_scene {
+    struct wlr_scene_node node;
+
+    struct wl_list outputs; // wlr_scene_output.link
+
+    ...;
+};
+
+void wlr_scene_node_set_position(struct wlr_scene_node *node, int x, int y);
+
+void wlr_scene_node_place_above(struct wlr_scene_node *node, struct wlr_scene_node *sibling);
+void wlr_scene_node_place_below(struct wlr_scene_node *node, struct wlr_scene_node *sibling);
+void wlr_scene_node_raise_to_top(struct wlr_scene_node *node);
+void wlr_scene_node_lower_to_bottom(struct wlr_scene_node *node);
+
+struct wlr_scene_node *wlr_scene_xdg_surface_create(
+    struct wlr_scene_node *parent, struct wlr_xdg_surface *xdg_surface);
+
+bool wlr_scene_output_commit(struct wlr_scene_output *scene_output);
+void wlr_scene_output_send_frame_done(struct wlr_scene_output *scene_output, struct timespec *now);
+struct wlr_scene_output *wlr_scene_get_scene_output(struct wlr_scene *scene, struct wlr_output *output);
+
+struct wlr_scene *wlr_scene_create(void);
+
+bool wlr_scene_attach_output_layout(struct wlr_scene *scene,
+    struct wlr_output_layout *output_layout);
 """
 
 # types/wlr_screencopy_v1.h
@@ -2028,6 +2096,7 @@ SOURCE = """
 #include <wlr/backend.h>
 #include <wlr/backend/headless.h>
 #include <wlr/backend/libinput.h>
+#include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_compositor.h>
@@ -2047,6 +2116,7 @@ SOURCE = """
 #include <wlr/types/wlr_pointer_constraints_v1.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
 #include <wlr/types/wlr_relative_pointer_v1.h>
+#include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_surface.h>
 #include <wlr/types/wlr_seat.h>

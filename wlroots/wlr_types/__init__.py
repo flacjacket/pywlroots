@@ -20,9 +20,13 @@ from .pointer import (  # noqa: F401
     PointerEventMotion,
     PointerEventMotionAbsolute,
 )
-from .pointer_constraints_v1 import PointerConstraintsV1, PointerConstraintV1  # noqa: F401
+from .pointer_constraints_v1 import (  # noqa: F401
+    PointerConstraintsV1,
+    PointerConstraintV1,
+)
 from .primary_selection_v1 import PrimarySelectionV1DeviceManager  # noqa: F401
 from .relative_pointer_manager_v1 import RelativePointerManagerV1  # noqa: F401
+from .scene import Scene, SceneNode  # noqa: F401
 from .screencopy_v1 import ScreencopyManagerV1  # noqa: F401
 from .seat import Seat  # noqa: F401
 from .surface import Surface, SurfaceState  # noqa: F401
