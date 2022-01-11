@@ -1,7 +1,7 @@
 # Copyright (c) Sean Vig 2019
+from __future__ import annotations
 
 import enum
-from typing import Optional, Tuple
 
 from pywayland.server import Signal
 
@@ -151,7 +151,7 @@ class Cursor(PtrHasData):
         delta_x: float,
         delta_y: float,
         *,
-        input_device: Optional[InputDevice] = None,
+        input_device: InputDevice | None = None,
     ) -> None:
         """Move the cursor in the direction of the given x and y layout coordinates
 
@@ -170,10 +170,10 @@ class Cursor(PtrHasData):
     def warp(
         self,
         warp_mode: WarpMode,
-        x: Optional[float],
-        y: Optional[float],
+        x: float | None,
+        y: float | None,
         *,
-        input_device: Optional[InputDevice] = None,
+        input_device: InputDevice | None = None,
     ) -> bool:
         """Warp the cursor to the given x and y in location
 
@@ -213,8 +213,8 @@ class Cursor(PtrHasData):
             raise ValueError("Invalid warp mode")
 
     def absolute_to_layout_coords(
-        self, input_device: Optional[InputDevice], x: float, y: float
-    ) -> Tuple[float, float]:
+        self, input_device: InputDevice | None, x: float, y: float
+    ) -> tuple[float, float]:
         """Convert absolute 0..1 coordinates to layout coordinates
 
         The `input_device` may be passed to respect device mapping constraints.
@@ -233,7 +233,7 @@ class Cursor(PtrHasData):
 
         return xy_ptr[0], xy_ptr[1]
 
-    def set_surface(self, surface: Optional[Surface], hotspot: Tuple[int, int]) -> None:
+    def set_surface(self, surface: Surface | None, hotspot: tuple[int, int]) -> None:
         """Set the cursor surface
 
         The surface can be committed to update the cursor image. The surface
@@ -247,7 +247,7 @@ class Cursor(PtrHasData):
 
         lib.wlr_cursor_set_surface(self._ptr, surface_ptr, hotspot[0], hotspot[1])
 
-    def __enter__(self) -> "Cursor":
+    def __enter__(self) -> Cursor:
         """Context manager to clean up the cursor"""
         return self
 

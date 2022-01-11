@@ -3,6 +3,8 @@
 # This protocol is obsolete and will be removed in a future version. The recommended
 # replacement is xdg-decoration.
 
+from __future__ import annotations
+
 import enum
 from typing import TYPE_CHECKING
 
@@ -27,7 +29,7 @@ class ServerDecorationManager(PtrHasData):
         self._ptr = ptr
 
     @classmethod
-    def create(cls, display: "Display") -> "ServerDecorationManager":
+    def create(cls, display: Display) -> ServerDecorationManager:
         """Create a wlr_server_decoration_manager for the given display."""
         ptr = lib.wlr_server_decoration_manager_create(display._ptr)
         return cls(ptr)

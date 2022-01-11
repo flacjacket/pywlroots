@@ -1,7 +1,9 @@
 # Copyright (c) Sean Vig 2019
 # Copyright (c) Matt Colligan 2021
 
-from typing import Tuple, Optional, TYPE_CHECKING
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
@@ -48,29 +50,29 @@ class Output(PtrHasData):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         """The name of the output"""
         return str_or_none(self._ptr.name)
 
     @property
-    def description(self) -> Optional[str]:
+    def description(self) -> str | None:
         """The description of the output"""
         return str_or_none(self._ptr.description)
 
     @property
-    def make(self) -> Optional[str]:
+    def make(self) -> str | None:
         return str_or_none(self._ptr.make)
 
     @property
-    def model(self) -> Optional[str]:
+    def model(self) -> str | None:
         return str_or_none(self._ptr.model)
 
     @property
-    def serial(self) -> Optional[str]:
+    def serial(self) -> str | None:
         return str_or_none(self._ptr.serial)
 
     @property
-    def physical_size_mm(self) -> Tuple[int, int]:
+    def physical_size_mm(self) -> tuple[int, int]:
         """Returns the width and height of the output, in millimeters"""
         return self._ptr.phys_width, self._ptr.phys_height
 
@@ -84,7 +86,7 @@ class Output(PtrHasData):
         return self._ptr.enabled
 
     @property
-    def current_mode(self) -> "OutputMode":
+    def current_mode(self) -> OutputMode:
         return OutputMode(self._ptr.current_mode)
 
     @property
@@ -107,7 +109,7 @@ class Output(PtrHasData):
         """
         lib.wlr_output_enable(self._ptr, enable)
 
-    def preferred_mode(self) -> Optional["OutputMode"]:
+    def preferred_mode(self) -> OutputMode | None:
         """Returns the preferred mode for this output
 
         If the output doesn't support modes, returns None.
@@ -118,7 +120,7 @@ class Output(PtrHasData):
 
         return OutputMode(output_mode_ptr)
 
-    def set_mode(self, mode: "OutputMode") -> None:
+    def set_mode(self, mode: OutputMode) -> None:
         """Sets the output mode
 
         The output needs to be enabled.
@@ -137,7 +139,7 @@ class Output(PtrHasData):
         """Create the global corresponding to the output"""
         lib.wlr_output_create_global(self._ptr)
 
-    def __enter__(self) -> "Output":
+    def __enter__(self) -> Output:
         """Start rendering frame"""
         return self
 
@@ -148,7 +150,7 @@ class Output(PtrHasData):
         else:
             self.rollback()
 
-    def init_render(self, allocator: "Allocator", renderer: "Renderer") -> None:
+    def init_render(self, allocator: Allocator, renderer: Renderer) -> None:
         """Initialize the output's rendering subsystem with the provided allocator and renderer.
 
         Can only be called once.
@@ -187,7 +189,7 @@ class Output(PtrHasData):
         """Discard the pending output state"""
         lib.wlr_output_rollback(self._ptr)
 
-    def effective_resolution(self) -> Tuple[int, int]:
+    def effective_resolution(self) -> tuple[int, int]:
         """Computes the transformed and scaled output resolution"""
         width_ptr = ffi.new("int *")
         height_ptr = ffi.new("int *")
@@ -196,7 +198,7 @@ class Output(PtrHasData):
         height = height_ptr[0]
         return width, height
 
-    def transformed_resolution(self) -> Tuple[int, int]:
+    def transformed_resolution(self) -> tuple[int, int]:
         """Computes the transformed output resolution"""
         width_ptr = ffi.new("int *")
         height_ptr = ffi.new("int *")
@@ -205,7 +207,7 @@ class Output(PtrHasData):
         height = height_ptr[0]
         return width, height
 
-    def render_software_cursors(self, damage: Optional[PixmanRegion32] = None) -> None:
+    def render_software_cursors(self, damage: PixmanRegion32 | None = None) -> None:
         """Renders software cursors
 
         This is a utility function that can be called when compositors render.

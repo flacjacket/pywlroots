@@ -1,7 +1,7 @@
 # Copyright Sean Vig (c) 2020
 # Copyright Matt Colligan (c) 2021
 
-from typing import Optional, Tuple
+from __future__ import annotations
 
 from wlroots import ffi, lib
 
@@ -23,10 +23,10 @@ def _int_setter(attr):
 class Box:
     def __init__(
         self,
-        x: Optional[int] = None,
-        y: Optional[int] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
+        x: int | None = None,
+        y: int | None = None,
+        width: int | None = None,
+        height: int | None = None,
         ptr=None,
     ) -> None:
         """A simple box structure, represented by a coordinate and dimensions"""
@@ -49,10 +49,10 @@ class Box:
     width = property(_int_getter("width"), _int_setter("width"))
     height = property(_int_getter("height"), _int_setter("height"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Box(%s, %s, %s, %s)" % (self.x, self.y, self.width, self.height)
 
-    def closest_point(self, x: float, y: float) -> Tuple[float, float]:
+    def closest_point(self, x: float, y: float) -> tuple[float, float]:
         xy_ptr = ffi.new("double[2]")
         lib.wlr_box_closest_point(self._ptr, x, y, xy_ptr, xy_ptr + 1)
         return xy_ptr[0], xy_ptr[1]

@@ -1,8 +1,10 @@
 # Copyright (c) Sean Vig 2019
 
+from __future__ import annotations
+
 import enum
 import weakref
-from typing import Callable, Optional, Tuple, TypeVar
+from typing import Callable, TypeVar
 
 from pywayland.server import Display, Signal
 
@@ -78,7 +80,7 @@ class XdgSurface(PtrHasData):
         )
 
     @classmethod
-    def from_surface(cls, surface: Surface) -> "XdgSurface":
+    def from_surface(cls, surface: Surface) -> XdgSurface:
         """Get the xdg surface associated with the given surface"""
         if not surface.is_xdg_surface:
             raise RuntimeError("Surface is not XDG surface")
@@ -96,7 +98,7 @@ class XdgSurface(PtrHasData):
         return XdgSurfaceRole(self._ptr.role)
 
     @property
-    def toplevel(self) -> "XdgTopLevel":
+    def toplevel(self) -> XdgTopLevel:
         """Return the top level xdg object
 
         This shell must be a top level role
@@ -113,7 +115,7 @@ class XdgSurface(PtrHasData):
         return toplevel
 
     @property
-    def popup(self) -> "XdgPopup":
+    def popup(self) -> XdgPopup:
         """Return the popup xdg object
 
         This shell must be a popup role.
@@ -158,7 +160,7 @@ class XdgSurface(PtrHasData):
 
     def surface_at(
         self, surface_x: float, surface_y: float
-    ) -> Tuple[Optional[Surface], float, float]:
+    ) -> tuple[Surface | None, float, float]:
         """Find a surface within this xdg-surface tree at the given surface-local coordinates
 
         Returns the surface and coordinates in the leaf surface coordinate
@@ -175,7 +177,7 @@ class XdgSurface(PtrHasData):
         return Surface(surface_ptr), sub_x_data[0], sub_y_data[0]
 
     def for_each_surface(
-        self, iterator: SurfaceCallback[T], data: Optional[T] = None
+        self, iterator: SurfaceCallback[T], data: T | None = None
     ) -> None:
         """Call iterator on each surface and popup in the xdg-surface tree
 
@@ -245,7 +247,7 @@ class XdgTopLevel(Ptr):
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
 
     @property
-    def parent(self) -> Optional[XdgSurface]:
+    def parent(self) -> XdgSurface | None:
         """The surface of the parent of this toplevel"""
         parent_ptr = self._ptr.parent
         if parent_ptr is None:
@@ -253,12 +255,12 @@ class XdgTopLevel(Ptr):
         return XdgSurface(parent_ptr)
 
     @property
-    def title(self) -> Optional[str]:
+    def title(self) -> str | None:
         """The title of the toplevel object"""
         return str_or_none(self._ptr.title)
 
     @property
-    def app_id(self) -> Optional[str]:
+    def app_id(self) -> str | None:
         """The app id of the toplevel object"""
         return str_or_none(self._ptr.app_id)
 

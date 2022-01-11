@@ -1,6 +1,6 @@
 # Copyright (c) Sean Vig 2019
 
-from typing import Optional, Tuple
+from __future__ import annotations
 
 from pywayland.server import Signal
 
@@ -44,7 +44,7 @@ class OutputLayout(Ptr):
         """
         lib.wlr_output_layout_add_auto(self._ptr, output._ptr)
 
-    def output_coords(self, output: Output) -> Tuple[float, float]:
+    def output_coords(self, output: Output) -> tuple[float, float]:
         """Determine coordinates of the output in the layout
 
         Given x and y in layout coordinates, adjusts them to local output
@@ -56,7 +56,7 @@ class OutputLayout(Ptr):
 
         return ox[0], oy[0]
 
-    def __enter__(self) -> "OutputLayout":
+    def __enter__(self) -> OutputLayout:
         """Use the output layout in a context manager"""
         return self
 
@@ -64,7 +64,7 @@ class OutputLayout(Ptr):
         """Clean up the output layout when exiting the context"""
         self.destroy()
 
-    def output_at(self, x: float, y: float) -> Optional[Output]:
+    def output_at(self, x: float, y: float) -> Output | None:
         """
         Get the output at the specified layout coordinates. Returns None if no output
         matches the coordinates.
@@ -89,7 +89,7 @@ class OutputLayout(Ptr):
         """Remove an output from the layout."""
         lib.wlr_output_layout_remove(self._ptr, output._ptr)
 
-    def get_box(self, reference: Optional[Output] = None) -> Box:
+    def get_box(self, reference: Output | None = None) -> Box:
         """
         Get the box of the layout for the given reference output in layout
         coordinates. If `reference` is None, the box will be for the extents of the
@@ -102,8 +102,8 @@ class OutputLayout(Ptr):
         return Box(ptr=box_ptr)
 
     def closest_point(
-        self, lx: float, ly: float, reference: Optional[Output] = None
-    ) -> Tuple[float, float]:
+        self, lx: float, ly: float, reference: Output | None = None
+    ) -> tuple[float, float]:
         """
         Get the closest point on this layout from the given point from the reference
         output. If reference is NULL, gets the closest point from the entire layout.

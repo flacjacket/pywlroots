@@ -1,5 +1,7 @@
 # Copyright Sean Vig (c) 2020
 
+from __future__ import annotations
+
 from pywayland.protocol.wayland import WlOutput
 
 from wlroots import ffi, lib, Ptr
@@ -12,7 +14,7 @@ class Matrix(Ptr):
         self._ptr = ptr
 
     @classmethod
-    def identity(cls) -> "Matrix":
+    def identity(cls) -> Matrix:
         """An identity matrix"""
         mat_ptr = cls._build_matrix_ptr()
         lib.wlr_matrix_identity(mat_ptr)
@@ -21,7 +23,7 @@ class Matrix(Ptr):
     @classmethod
     def projection(
         cls, width: int, height: int, transform: WlOutput.transform
-    ) -> "Matrix":
+    ) -> Matrix:
         """A 2d orthographic projection matrix of (width, height) with specified transform"""
         mat_ptr = cls._build_matrix_ptr()
         lib.wlr_matrix_projection(mat_ptr, width, height, transform)
@@ -33,8 +35,8 @@ class Matrix(Ptr):
         box: Box,
         transform: WlOutput.transform,
         rotation: float,
-        projection: "Matrix",
-    ) -> "Matrix":
+        projection: Matrix,
+    ) -> Matrix:
         """Project the specified box onto a orthographic projection with a rotation"""
         mat_ptr = cls._build_matrix_ptr()
         lib.wlr_matrix_project_box(
@@ -42,7 +44,7 @@ class Matrix(Ptr):
         )
         return Matrix(mat_ptr)
 
-    def transpose(self) -> "Matrix":
+    def transpose(self) -> Matrix:
         """Transpose the matrix"""
         mat_ptr = self._build_matrix_ptr()
         lib.wlr_matrix_transpose(mat_ptr, self._ptr)
@@ -64,7 +66,7 @@ class Matrix(Ptr):
         """Apply the given transformation to the matrix"""
         lib.wlr_matrix_transform(self._ptr, transform)
 
-    def __matmul__(self, other: "Matrix") -> "Matrix":
+    def __matmul__(self, other: Matrix) -> Matrix:
         """Perform matrix multiplication with given matrix"""
         mat_ptr = self._build_matrix_ptr()
         lib.wlr_matrix_multiply(mat_ptr, self._ptr, other._ptr)

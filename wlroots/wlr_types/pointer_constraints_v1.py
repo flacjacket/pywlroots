@@ -1,7 +1,9 @@
 # Copyright (c) Matt Colligan 2021
 
+from __future__ import annotations
+
 import enum
-import typing
+from typing import TYPE_CHECKING
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
@@ -10,7 +12,7 @@ from wlroots import ffi, lib, Ptr
 from .surface import Surface
 from wlroots.util.region import PixmanRegion32
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from pywayland.server import Display
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
@@ -27,7 +29,7 @@ class PointerConstraintV1StateField(enum.IntEnum):
 
 
 class PointerConstraintsV1(Ptr):
-    def __init__(self, display: "Display") -> None:
+    def __init__(self, display: Display) -> None:
         """Manager to handle pointer constraint requests.
 
         :param display:
@@ -67,20 +69,20 @@ class PointerConstraintV1(Ptr):
         return Surface(surface_ptr)
 
     @property
-    def type(self) -> "PointerConstraintV1Type":
+    def type(self) -> PointerConstraintV1Type:
         return PointerConstraintV1Type(self._ptr.type)
 
     @property
-    def region(self) -> "PixmanRegion32":
+    def region(self) -> PixmanRegion32:
         region_ptr = ffi.addressof(self._ptr, "region")
         return PixmanRegion32(region_ptr)
 
     @property
-    def current(self) -> "PointerConstraintV1State":
+    def current(self) -> PointerConstraintV1State:
         return PointerConstraintV1State(self._ptr.current)
 
     @property
-    def pending(self) -> "PointerConstraintV1State":
+    def pending(self) -> PointerConstraintV1State:
         return PointerConstraintV1State(self._ptr.pending)
 
 
@@ -89,13 +91,13 @@ class PointerConstraintV1State(Ptr):
         self._ptr = ptr
 
     @property
-    def committed(self) -> "PointerConstraintV1StateField":
+    def committed(self) -> PointerConstraintV1StateField:
         return PointerConstraintV1StateField(self._ptr.committed)
 
     @property
-    def region(self) -> "PixmanRegion32":
+    def region(self) -> PixmanRegion32:
         return PixmanRegion32(self._ptr.region)
 
     @property
-    def cursor_hint(self) -> typing.Tuple[float, float]:
+    def cursor_hint(self) -> tuple[float, float]:
         return self._ptr.cursor_hint.x, self._ptr.cursor_hint.y

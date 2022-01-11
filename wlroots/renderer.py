@@ -1,7 +1,9 @@
 # Copyright (c) 2019 Sean Vig
 
+from __future__ import annotations
+
 import contextlib
-from typing import Iterator, List, Optional, Tuple, Union
+from typing import Iterator, Union
 
 from pywayland.server import Display
 
@@ -10,7 +12,7 @@ from wlroots.backend import Backend
 from wlroots.util.box import Box
 from wlroots.wlr_types import Matrix, Texture
 
-ColorType = Union[List, Tuple, ffi.CData]
+ColorType = Union[list, tuple, ffi.CData]
 
 
 class Renderer(Ptr):
@@ -22,7 +24,7 @@ class Renderer(Ptr):
         self._ptr = ptr
 
     @classmethod
-    def autocreate(cls, backend: Backend) -> "Renderer":
+    def autocreate(cls, backend: Backend) -> Renderer:
         """Creates a suitable renderer for a backend."""
         ret = lib.wlr_renderer_autocreate(backend._ptr)
         if not ret:
@@ -40,7 +42,7 @@ class Renderer(Ptr):
             raise RuntimeError("Unable to initialize renderer for display")
 
     @contextlib.contextmanager
-    def render(self, width: int, height: int) -> Iterator["Renderer"]:
+    def render(self, width: int, height: int) -> Iterator[Renderer]:
         """Render within the generated context"""
         self.begin(width, height)
         try:
@@ -90,7 +92,7 @@ class Renderer(Ptr):
             color = ffi.new("float[4]", color)
         lib.wlr_render_rect(self._ptr, box._ptr, color, projection._ptr)
 
-    def scissor(self, box: Optional[Box]) -> None:
+    def scissor(self, box: Box | None) -> None:
         """
         Defines a scissor box. Only pixels that lie within the scissor box can be
         modified by drawing functions. Providing a NULL `box` disables the scissor

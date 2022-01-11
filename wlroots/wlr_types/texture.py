@@ -1,6 +1,7 @@
 # Copyright (c) Sean Vig 2020
 # Copyright (c) Matt Colligan 2021
 
+from __future__ import annotations
 
 import typing
 
@@ -17,13 +18,13 @@ class Texture(Ptr):
     @classmethod
     def from_pixels(
         cls,
-        renderer: "Renderer",
+        renderer: Renderer,
         fmt: int,
         stride: int,
         width: int,
         height: int,
         data: ffi.CData,
-    ) -> "Texture":
+    ) -> Texture:
         """
         Create a new texture from raw pixel data. `stride` is in bytes. The returned
         texture is mutable.

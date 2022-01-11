@@ -1,5 +1,7 @@
 # Copyright (c) 2019 Sean Vig
 
+from __future__ import annotations
+
 from pywayland.server import Display
 from typing import TYPE_CHECKING
 
@@ -10,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class Compositor(Ptr):
-    def __init__(self, display: Display, renderer: "Renderer") -> None:
+    def __init__(self, display: Display, renderer: Renderer) -> None:
         """A compositor for clients to be able to allocate surfaces
 
         :param display:

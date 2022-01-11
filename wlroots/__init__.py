@@ -1,6 +1,8 @@
 # Copyright (c) Sean Vig 2018
 
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 from ._ffi import ffi, lib  # noqa: F401
 from .version import version as _version
@@ -40,7 +42,7 @@ class PtrHasData(Ptr):
     """
 
     @property
-    def data(self) -> Optional[Any]:
+    def data(self) -> Any | None:
         """Return any data that has been stored on the object"""
         if self._ptr.data == ffi.NULL:
             return None
@@ -53,7 +55,7 @@ class PtrHasData(Ptr):
         self._ptr.data = self._data_handle
 
 
-def str_or_none(member: ffi.CData) -> Optional[str]:
+def str_or_none(member: ffi.CData) -> str | None:
     """
     Helper function to check struct members for ffi.NULL, returning None, or a char
     array, returning a string.

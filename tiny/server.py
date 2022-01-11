@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import cast, List, Optional, Tuple, TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 
 from pywayland.server import Display, Listener
 from pywayland.protocol.wayland import WlKeyboard, WlSeat
@@ -81,7 +81,7 @@ class TinywlServer:
 
         # the xdg shell will generate new surfaces
         self._xdg_shell = xdg_shell
-        self.views: List[View] = []
+        self.views: list[View] = []
 
         # new pointing devices are attached to the cursor, and rendered with the manager
         self._cursor = cursor
@@ -89,16 +89,16 @@ class TinywlServer:
 
         # the seat manages the keyboard focus information
         self._seat = seat
-        self.keyboards: List[KeyboardHandler] = []
+        self.keyboards: list[KeyboardHandler] = []
         self.cursor_mode = CursorMode.PASSTHROUGH
-        self.grabbed_view: Optional[View] = None
+        self.grabbed_view: View | None = None
         self.grab_x = 0.0
         self.grab_y = 0.0
-        self.grab_geobox: Optional[Box] = None
+        self.grab_geobox: Box | None = None
         self.resize_edges: Edges = Edges.NONE
 
         self._output_layout = output_layout
-        self.outputs: List[Output] = []
+        self.outputs: list[Output] = []
 
         xdg_shell.new_surface_event.add(Listener(self.server_new_xdg_surface))
 
@@ -117,7 +117,7 @@ class TinywlServer:
 
     def view_at(
         self, layout_x, layout_y
-    ) -> Tuple[Optional[View], Optional[Surface], float, float]:
+    ) -> tuple[View | None, Surface | None, float, float]:
         for view in self.views[::-1]:
             surface, x, y = view.view_at(layout_x, layout_y)
             if surface is not None:
@@ -230,7 +230,7 @@ class TinywlServer:
             return False
         return True
 
-    def focus_view(self, view: View, surface: Optional[Surface] = None) -> None:
+    def focus_view(self, view: View, surface: Surface | None = None) -> None:
         """Focus a given XDG surface
 
         Moves the surface to the front of the list for rendering.  Sets the

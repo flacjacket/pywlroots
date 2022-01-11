@@ -1,5 +1,7 @@
 # Copyright (c) Matt Colligan 2021
 
+from __future__ import annotations
+
 import typing
 
 from pywayland.server import Signal
@@ -13,7 +15,7 @@ if typing.TYPE_CHECKING:
 
 
 class RelativePointerManagerV1(Ptr):
-    def __init__(self, display: "Display") -> None:
+    def __init__(self, display: Display) -> None:
         """A global interface used for getting the relative pointer object for a given
         pointer.
 
@@ -32,7 +34,7 @@ class RelativePointerManagerV1(Ptr):
 
     def send_relative_motion(
         self,
-        seat: "Seat",
+        seat: Seat,
         time_usec: int,
         dx: float,
         dy: float,
