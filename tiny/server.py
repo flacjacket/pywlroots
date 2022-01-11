@@ -15,7 +15,6 @@ from wlroots.util.edges import Edges
 from wlroots.wlr_types import (
     Box,
     Cursor,
-    Matrix,
     Output,
     OutputLayout,
     Scene,
