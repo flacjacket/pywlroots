@@ -1,5 +1,7 @@
 # Copyright (c) 2021 Sean Vig
 
+from __future__ import annotations
+
 from pywayland.server import Display
 
 from wlroots.allocator import Allocator
