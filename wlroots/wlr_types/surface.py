@@ -48,6 +48,15 @@ class Surface(PtrHasData):
         return lib.wlr_surface_is_layer_surface(self._ptr)
 
     @property
+    def is_xwayland_surface(self) -> bool:
+        """
+        True if the current surface is an XWayland surface.
+
+        Requires that pywlroots was built with XWayland support.
+        """
+        return lib.wlr_surface_is_xwayland_surface(self._ptr)
+
+    @property
     def sx(self) -> int:
         """Surface local buffer x position"""
         return self._ptr.sx

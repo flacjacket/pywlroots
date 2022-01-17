@@ -29,12 +29,15 @@ jobs:
             libxcb-dri3-dev \
             libxcb-icccm4-dev \
             libxcb-image0-dev \
+            libxcb-present-dev \
             libxcb-render0-dev \
+            libxcb-res0-dev \
             libxcb-xfixes0-dev \
             libxcb-xinput-dev \
             libxcb1-dev \
             libxkbcommon-dev \
-            ninja-build
+            ninja-build \
+            xwayland
           sudo pip install meson
       - name: Set environment variables
         run: |
@@ -91,7 +94,7 @@ jobs:
       - name: Build wlroots
         working-directory: wlroots-${{ matrix.wlroots-version }}
         run: |
-          meson build --prefix=/usr
+          meson build --prefix=/usr -Dxwayland=enabled
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
       - name: Create artifact
@@ -141,6 +144,7 @@ jobs:
             libxcb-icccm4-dev \
             libxcb-image0-dev \
             libxcb-render0-dev \
+            libxcb-res0-dev \
             libxcb-xfixes0-dev \
             libxcb-xinput-dev \
             libxcb1-dev \

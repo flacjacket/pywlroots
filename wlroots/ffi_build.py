@@ -5,9 +5,12 @@ import importlib.util
 import os
 import sys
 
-from cffi import FFI
+from cffi import FFI, VerificationError
 from pywayland.ffi_build import ffi_builder as pywayland_ffi
 from xkbcommon.ffi_build import ffibuilder as xkb_ffi
+
+include_dir = (Path(__file__).parent.parent / "include").resolve()
+assert include_dir.is_dir(), f"missing {include_dir}"
 
 
 def load_version():
@@ -43,6 +46,26 @@ def check_version():
             f"Installing wlroots v{version} requires wlroots v{major}.{minor}.x, found v{wlroots_version}",
             file=sys.stderr,
         )
+
+
+def has_xwayland() -> bool:
+    """
+    Check for XWayland headers. If present, wlroots was built with XWayland support, so
+    pywlroots can be too.
+    """
+    try:
+        FFI().verify(
+            "#include <wlr/xwayland.h>",
+            define_macros=[("WLR_USE_UNSTABLE", 1)],
+            include_dirs=["/usr/include/pixman-1", include_dir.as_posix()],
+        )
+        return True
+    except VerificationError:
+        print("If XWayland support is not required, ignore the above error message.")
+        print(
+            "If support is required, ensure wlroots was built with -Dxwayland=enabled."
+        )
+        return False
 
 
 # backend.h
@@ -2237,8 +2260,255 @@ struct wlr_surface *wlr_layer_surface_v1_surface_at(
 
 check_version()
 
-include_dir = (Path(__file__).parent.parent / "include").resolve()
-assert include_dir.is_dir(), f"missing {include_dir}"
+if has_xwayland():
+    # xwayland.h
+    print("Built with support for XWayland helpers.")
+
+    SOURCE += """
+    #include <wlr/xwayland.h>
+    """
+
+    CDEF += """
+    typedef int... time_t;
+    typedef struct {
+        ...;
+    } xcb_generic_event_t;
+    typedef uint32_t xcb_pixmap_t;
+    typedef uint32_t xcb_window_t;
+    typedef uint32_t xcb_atom_t;
+
+    struct wlr_xwm;
+    struct wlr_xwayland_cursor;
+    struct wlr_xwayland_server_options {
+        bool lazy;
+        bool enable_wm;
+        bool no_touch_pointer_emulation;
+        ...;
+    };
+    struct wlr_xwayland_server {
+        pid_t pid;
+        struct wl_client *client;
+        struct wl_event_source *pipe_source;
+        int wm_fd[2], wl_fd[2];
+        time_t server_start;
+        int display;
+        char display_name[16];
+        int x_fd[2];
+        struct wl_event_source *x_fd_read_event[2];
+        struct wlr_xwayland_server_options options;
+        struct wl_display *wl_display;
+        struct {
+            struct wl_signal ready;
+            struct wl_signal destroy;
+        } events;
+        struct wl_listener client_destroy;
+        struct wl_listener display_destroy;
+        void *data;
+        ...;
+    };
+    struct wlr_xwayland {
+        struct wlr_xwayland_server *server;
+        struct wlr_xwm *xwm;
+        struct wlr_xwayland_cursor *cursor;
+        const char *display_name;
+        struct wl_display *wl_display;
+        struct wlr_compositor *compositor;
+        struct wlr_seat *seat;
+        struct {
+            struct wl_signal ready;
+            struct wl_signal new_surface;
+            struct wl_signal remove_startup_info;
+        } events;
+        int (*user_event_handler)(struct wlr_xwm *xwm, xcb_generic_event_t *event);
+        struct wl_listener server_ready;
+        struct wl_listener server_destroy;
+        struct wl_listener seat_destroy;
+        void *data;
+        ...;
+    };
+    enum wlr_xwayland_surface_decorations {
+        WLR_XWAYLAND_SURFACE_DECORATIONS_ALL = 0,
+        WLR_XWAYLAND_SURFACE_DECORATIONS_NO_BORDER = 1,
+        WLR_XWAYLAND_SURFACE_DECORATIONS_NO_TITLE = 2,
+    };
+    struct wlr_xwayland_surface_hints {
+        uint32_t flags;
+        uint32_t input;
+        int32_t initial_state;
+        xcb_pixmap_t icon_pixmap;
+        xcb_window_t icon_window;
+        int32_t icon_x, icon_y;
+        xcb_pixmap_t icon_mask;
+        xcb_window_t window_group;
+        ...;
+    };
+    struct wlr_xwayland_surface_size_hints {
+        uint32_t flags;
+        int32_t x, y;
+        int32_t width, height;
+        int32_t min_width, min_height;
+        int32_t max_width, max_height;
+        int32_t width_inc, height_inc;
+        int32_t base_width, base_height;
+        int32_t min_aspect_num, min_aspect_den;
+        int32_t max_aspect_num, max_aspect_den;
+        uint32_t win_gravity;
+        ...;
+    };
+    enum wlr_xwayland_icccm_input_model {
+        WLR_ICCCM_INPUT_MODEL_NONE = 0,
+        WLR_ICCCM_INPUT_MODEL_PASSIVE = 1,
+        WLR_ICCCM_INPUT_MODEL_LOCAL = 2,
+        WLR_ICCCM_INPUT_MODEL_GLOBAL = 3,
+    };
+    struct wlr_xwayland_surface {
+        xcb_window_t window_id;
+        struct wlr_xwm *xwm;
+        uint32_t surface_id;
+        struct wl_list link;
+        struct wl_list stack_link;
+        struct wl_list unpaired_link;
+        struct wlr_surface *surface;
+        int16_t x, y;
+        uint16_t width, height;
+        uint16_t saved_width, saved_height;
+        bool override_redirect;
+        bool mapped;
+        char *title;
+        char *class;
+        char *instance;
+        char *role;
+        char *startup_id;
+        pid_t pid;
+        bool has_utf8_title;
+        struct wl_list children; // wlr_xwayland_surface::parent_link
+        struct wlr_xwayland_surface *parent;
+        struct wl_list parent_link; // wlr_xwayland_surface::children
+        xcb_atom_t *window_type;
+        size_t window_type_len;
+        xcb_atom_t *protocols;
+        size_t protocols_len;
+        uint32_t decorations;
+        struct wlr_xwayland_surface_hints *hints;
+        uint32_t hints_urgency;
+        struct wlr_xwayland_surface_size_hints *size_hints;
+        bool pinging;
+        struct wl_event_source *ping_timer;
+        // _NET_WM_STATE
+        bool modal;
+        bool fullscreen;
+        bool maximized_vert, maximized_horz;
+        bool minimized;
+        bool has_alpha;
+        struct {
+            struct wl_signal destroy;
+            struct wl_signal request_configure;
+            struct wl_signal request_move;
+            struct wl_signal request_resize;
+            struct wl_signal request_minimize;
+            struct wl_signal request_maximize;
+            struct wl_signal request_fullscreen;
+            struct wl_signal request_activate;
+            struct wl_signal map;
+            struct wl_signal unmap;
+            struct wl_signal set_title;
+            struct wl_signal set_class;
+            struct wl_signal set_role;
+            struct wl_signal set_parent;
+            struct wl_signal set_pid;
+            struct wl_signal set_startup_id;
+            struct wl_signal set_window_type;
+            struct wl_signal set_hints;
+            struct wl_signal set_decorations;
+            struct wl_signal set_override_redirect;
+            struct wl_signal set_geometry;
+            struct wl_signal ping_timeout;
+        } events;
+        struct wl_listener surface_destroy;
+        void *data;
+        ...;
+    };
+    struct wlr_xwayland_surface_configure_event {
+        struct wlr_xwayland_surface *surface;
+        int16_t x, y;
+        uint16_t width, height;
+        uint16_t mask; // xcb_config_window_t
+        ...;
+    };
+    struct wlr_xwayland_move_event {
+        struct wlr_xwayland_surface *surface;
+        ...;
+    };
+    struct wlr_xwayland_remove_startup_info_event  {
+        const char *id;
+        xcb_window_t window;
+        ...;
+    };
+    struct wlr_xwayland_resize_event {
+        struct wlr_xwayland_surface *surface;
+        uint32_t edges;
+        ...;
+    };
+    struct wlr_xwayland_minimize_event {
+        struct wlr_xwayland_surface *surface;
+        bool minimize;
+        ...;
+    };
+    struct wlr_xwayland_server *wlr_xwayland_server_create(
+        struct wl_display *display, struct wlr_xwayland_server_options *options);
+    void wlr_xwayland_server_destroy(struct wlr_xwayland_server *server);
+    struct wlr_xwayland *wlr_xwayland_create(struct wl_display *wl_display,
+        struct wlr_compositor *compositor, bool lazy);
+    void wlr_xwayland_destroy(struct wlr_xwayland *wlr_xwayland);
+    void wlr_xwayland_set_cursor(struct wlr_xwayland *wlr_xwayland,
+        uint8_t *pixels, uint32_t stride, uint32_t width, uint32_t height,
+        int32_t hotspot_x, int32_t hotspot_y);
+    void wlr_xwayland_surface_activate(struct wlr_xwayland_surface *surface,
+        bool activated);
+    void wlr_xwayland_surface_restack(struct wlr_xwayland_surface *surface,
+        struct wlr_xwayland_surface *sibling, enum xcb_stack_mode_t mode);
+    void wlr_xwayland_surface_configure(struct wlr_xwayland_surface *surface,
+        int16_t x, int16_t y, uint16_t width, uint16_t height);
+    void wlr_xwayland_surface_close(struct wlr_xwayland_surface *surface);
+    void wlr_xwayland_surface_set_minimized(struct wlr_xwayland_surface *surface,
+        bool minimized);
+    void wlr_xwayland_surface_set_maximized(struct wlr_xwayland_surface *surface,
+        bool maximized);
+    void wlr_xwayland_surface_set_fullscreen(struct wlr_xwayland_surface *surface,
+        bool fullscreen);
+    void wlr_xwayland_set_seat(struct wlr_xwayland *xwayland,
+        struct wlr_seat *seat);
+    bool wlr_surface_is_xwayland_surface(struct wlr_surface *surface);
+    struct wlr_xwayland_surface *wlr_xwayland_surface_from_wlr_surface(
+        struct wlr_surface *surface);
+    void wlr_xwayland_surface_ping(struct wlr_xwayland_surface *surface);
+    bool wlr_xwayland_or_surface_wants_focus(
+        const struct wlr_xwayland_surface *xsurface);
+    enum wlr_xwayland_icccm_input_model wlr_xwayland_icccm_input_model(
+        const struct wlr_xwayland_surface *xsurface);
+
+    typedef struct xcb_intern_atom_cookie_t {
+        ...;
+    } xcb_intern_atom_cookie_t;
+    typedef ... xcb_connection_t;
+    typedef struct xcb_intern_atom_reply_t {
+        uint8_t    response_type;
+        uint8_t    pad0;
+        uint16_t   sequence;
+        uint32_t   length;
+        xcb_atom_t atom;
+        ...;
+    } xcb_intern_atom_reply_t;
+    typedef ... xcb_generic_error_t;
+
+    int xcb_connection_has_error(xcb_connection_t *c);
+    xcb_connection_t *xcb_connect(const char *displayname, int *screenp);
+    void xcb_disconnect(xcb_connection_t *c);
+    xcb_intern_atom_cookie_t xcb_intern_atom(xcb_connection_t *conn, uint8_t only_if_exists,
+        uint16_t name_len, const char *name);
+    xcb_intern_atom_reply_t *xcb_intern_atom_reply(xcb_connection_t *conn,
+        xcb_intern_atom_cookie_t cookie, xcb_generic_error_t **e);
+    """
 
 ffi_builder = FFI()
 ffi_builder.set_source(
