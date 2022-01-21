@@ -94,6 +94,11 @@ class XWayland(PtrHasData):
     def display_name(self) -> str | None:
         return str_or_none(self._ptr.display_name)
 
+    def destroy(self) -> None:
+        if self._ptr is not None:
+            ffi.release(self._ptr)
+            self._ptr = None
+
     def set_seat(self, seat: Seat) -> None:
         lib.wlr_xwayland_set_seat(self._ptr, seat._ptr)
 
