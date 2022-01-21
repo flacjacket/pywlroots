@@ -19,6 +19,8 @@ def load_version():
     spec = importlib.util.spec_from_file_location(
         "wlroots.version", os.path.join(dirname, "version.py")
     )
+    assert spec is not None
+    assert spec.loader is not None
     version_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(version_module)
     return version_module.version
