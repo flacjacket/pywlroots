@@ -9,7 +9,7 @@ from cffi import FFI, VerificationError
 from pywayland.ffi_build import ffi_builder as pywayland_ffi
 from xkbcommon.ffi_build import ffibuilder as xkb_ffi
 
-include_dir = (Path(__file__).parent.parent / "include").resolve()
+include_dir = (Path(__file__).parent / "include").resolve()
 assert include_dir.is_dir(), f"missing {include_dir}"
 
 
