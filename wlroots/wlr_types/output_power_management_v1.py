@@ -20,9 +20,6 @@ class OutputPowerV1(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_output_power_v1 *", ptr)
 
-        self.set_mode_event = Signal(ptr=ffi.addressof(self._ptr.events.set_mode))
-        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-
     @property
     def output(self) -> Output:
         return Output(self._ptr.output)
