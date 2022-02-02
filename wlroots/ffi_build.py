@@ -479,6 +479,73 @@ struct wlr_gamma_control_manager_v1 *wlr_gamma_control_manager_v1_create(
     struct wl_display *display);
 """
 
+# types/wlr_idle.h
+CDEF += """
+struct wlr_idle {
+    struct wl_global *global;
+    struct wl_list idle_timers; // wlr_idle_timeout::link
+    struct wl_event_loop *event_loop;
+    bool enabled;
+
+    struct wl_listener display_destroy;
+    struct {
+        struct wl_signal activity_notify;
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_idle_timeout {
+    struct wl_resource *resource;
+    struct wl_list link;
+    struct wlr_seat *seat;
+
+    struct wl_event_source *idle_source;
+    bool idle_state;
+    bool enabled;
+    uint32_t timeout; // milliseconds
+
+    struct {
+        struct wl_signal idle;
+        struct wl_signal resume;
+        struct wl_signal destroy;
+    } events;
+
+    struct wl_listener input_listener;
+    struct wl_listener seat_destroy;
+
+    void *data;
+    ...;
+};
+
+struct wlr_idle *wlr_idle_create(struct wl_display *display);
+
+/**
+ * Send notification to restart all timers for the given seat. Called by
+ * compositor when there is an user activity event on that seat.
+ */
+void wlr_idle_notify_activity(struct wlr_idle *idle, struct wlr_seat *seat);
+
+/**
+ * Enable or disable timers for a given idle resource by seat.
+ * Passing a NULL seat means update timers for all seats.
+ */
+void wlr_idle_set_enabled(struct wlr_idle *idle, struct wlr_seat *seat,
+    bool enabled);
+
+/**
+ * Create a new timer on the given seat. The idle event will be called after
+ * the given amount of milliseconds of inactivity, and the resumed event will
+ * be sent at the first user activity after the fired event.
+ */
+struct wlr_idle_timeout *wlr_idle_timeout_create(struct wlr_idle *idle,
+    struct wlr_seat *seat, uint32_t timeout);
+
+void wlr_idle_timeout_destroy(struct wlr_idle_timeout *timeout);
+"""
+
 # types/wlr_input_device.h
 CDEF += """
 enum wlr_button_state {
@@ -964,6 +1031,7 @@ struct wlr_output_power_manager_v1 {
     } events;
 
     void *data;
+    ...;
 };
 
 struct wlr_output_power_v1 {
@@ -976,11 +1044,13 @@ struct wlr_output_power_v1 {
     struct wl_listener output_commit_listener;
 
     void *data;
+    ...;
 };
 
 struct wlr_output_power_v1_set_mode_event {
     struct wlr_output *output;
     enum zwlr_output_power_v1_mode mode;
+    ...;
 };
 
 struct wlr_output_power_manager_v1 *wlr_output_power_manager_v1_create(
@@ -2166,6 +2236,7 @@ SOURCE = """
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
+#include <wlr/types/wlr_idle.h>
 #include <wlr/types/wlr_input_inhibitor.h>
 #include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
