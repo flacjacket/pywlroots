@@ -494,6 +494,7 @@ struct wlr_idle {
     } events;
 
     void *data;
+    ...;
 };
 
 struct wlr_idle_timeout {
@@ -516,6 +517,7 @@ struct wlr_idle_timeout {
     struct wl_listener seat_destroy;
 
     void *data;
+    ...;
 };
 
 struct wlr_idle *wlr_idle_create(struct wl_display *display);
@@ -1029,6 +1031,7 @@ struct wlr_output_power_manager_v1 {
     } events;
 
     void *data;
+    ...;
 };
 
 struct wlr_output_power_v1 {
@@ -1041,11 +1044,13 @@ struct wlr_output_power_v1 {
     struct wl_listener output_commit_listener;
 
     void *data;
+    ...;
 };
 
 struct wlr_output_power_v1_set_mode_event {
     struct wlr_output *output;
     enum zwlr_output_power_v1_mode mode;
+    ...;
 };
 
 struct wlr_output_power_manager_v1 *wlr_output_power_manager_v1_create(
