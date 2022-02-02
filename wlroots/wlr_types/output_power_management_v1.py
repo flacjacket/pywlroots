@@ -37,7 +37,8 @@ class OutputPowerManagerV1(Ptr):
         self._ptr = lib.wlr_output_power_manager_v1_create(display._ptr)
 
         self.set_mode_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.set_mode), data_wrapper=OutputPowerV1SetModeEvent
+            ptr=ffi.addressof(self._ptr.events.set_mode),
+            data_wrapper=OutputPowerV1SetModeEvent,
         )
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
