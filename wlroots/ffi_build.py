@@ -546,6 +546,41 @@ struct wlr_idle_timeout *wlr_idle_timeout_create(struct wlr_idle *idle,
 void wlr_idle_timeout_destroy(struct wlr_idle_timeout *timeout);
 """
 
+# types/wlr_input_inhibit_v1.h
+CDEF += """
+struct wlr_idle_inhibit_manager_v1 {
+    struct wl_list inhibitors; // wlr_idle_inhibit_inhibitor_v1::link
+    struct wl_global *global;
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal new_inhibitor;
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_idle_inhibitor_v1 {
+    struct wlr_surface *surface;
+    struct wl_resource *resource;
+    struct wl_listener surface_destroy;
+
+    struct wl_list link; // wlr_idle_inhibit_manager_v1::inhibitors;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_idle_inhibit_manager_v1 *wlr_idle_inhibit_v1_create(struct wl_display *display);
+"""
+
 # types/wlr_input_device.h
 CDEF += """
 enum wlr_button_state {
@@ -2237,6 +2272,7 @@ SOURCE = """
 #include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_idle.h>
+#include <wlr/types/wlr_idle_inhibit_v1.h>
 #include <wlr/types/wlr_input_inhibitor.h>
 #include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
