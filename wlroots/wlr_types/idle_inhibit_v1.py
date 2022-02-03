@@ -1,7 +1,7 @@
 # Copyright (c) Antonin Riha 2022
 from pywayland.server import Display, Signal
 
-from wlroots import Ptr, ffi, lib
+from wlroots import Ptr, ffi, lib, PtrHasData
 
 from .surface import Surface
 
@@ -17,7 +17,7 @@ class IdleInhibitorManagerV1(Ptr):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
 
-class IdleInhibitorV1(Ptr):
+class IdleInhibitorV1(PtrHasData):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_idle_inhibitor_v1 *", ptr)
 
