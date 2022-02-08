@@ -35,7 +35,9 @@ class Idle(Ptr):
     def __init__(self, display: Display) -> None:
         self._ptr = lib.wlr_idle_create(display._ptr)
 
-        self.activity_notify_event = Signal(ptr=ffi.addressof(self._ptr.events.activity_notify))
+        self.activity_notify_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.activity_notify)
+        )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
