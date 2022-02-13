@@ -40,14 +40,23 @@ def load_wlroots_version():
 
 def check_version():
     """Check for wlroots version compatibility"""
+    # When importing a system-level installed package, we may not be able to
+    # create neighboring files, which is done by the `.verify` step.  If this
+    # error is hit, just continue. We could check with the compiled
+    # `wlroots.lib`, but for now just trust that we are on the correct version
+    # of wlroots.
     version = load_version()
-    wlroots_version = load_wlroots_version()
-    if version.split(".")[:2] != wlroots_version.split(".")[:2]:
-        major, minor = list(map(int, version.split(".")[:2]))
-        print(
-            f"Installing wlroots v{version} requires wlroots v{major}.{minor}.x, found v{wlroots_version}",
-            file=sys.stderr,
-        )
+    try:
+        wlroots_version = load_wlroots_version()
+    except PermissionError:
+        pass
+    else:
+        if version.split(".")[:2] != wlroots_version.split(".")[:2]:
+            major, minor = list(map(int, version.split(".")[:2]))
+            print(
+                f"Installing wlroots v{version} requires wlroots v{major}.{minor}.x, found v{wlroots_version}",
+                file=sys.stderr,
+            )
 
 
 def has_xwayland() -> bool:
