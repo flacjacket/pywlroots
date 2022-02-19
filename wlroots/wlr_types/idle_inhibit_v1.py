@@ -21,9 +21,7 @@ class IdleInhibitorV1(PtrHasData):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_idle_inhibitor_v1 *", ptr)
 
-        self.destroy_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.destroy), data_wrapper=Surface
-        )
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
     def surface(self) -> Surface:
