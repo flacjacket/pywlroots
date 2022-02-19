@@ -33,7 +33,11 @@ def load_wlroots_version():
     """
     ffi = FFI()
     ffi.cdef(CDEF_VERSION)
-    lib = ffi.verify("#include <wlr/version.h>")
+
+    try:
+        lib = ffi.verify("#include <wlr/version.h>")
+    except PermissionError:
+        lib = importlib.import_module("wlroots").lib
 
     return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"
 
@@ -42,21 +46,16 @@ def check_version():
     """Check for wlroots version compatibility"""
     # When importing a system-level installed package, we may not be able to
     # create neighboring files, which is done by the `.verify` step.  If this
-    # error is hit, just continue. We could check with the compiled
-    # `wlroots.lib`, but for now just trust that we are on the correct version
-    # of wlroots.
+    # error is hit, we check with the compiled `wlroots.lib`.
     version = load_version()
-    try:
-        wlroots_version = load_wlroots_version()
-    except PermissionError:
-        pass
-    else:
-        if version.split(".")[:2] != wlroots_version.split(".")[:2]:
-            major, minor = list(map(int, version.split(".")[:2]))
-            print(
-                f"Installing wlroots v{version} requires wlroots v{major}.{minor}.x, found v{wlroots_version}",
-                file=sys.stderr,
-            )
+    wlroots_version = load_wlroots_version()
+
+    if version.split(".")[:2] != wlroots_version.split(".")[:2]:
+        major, minor = list(map(int, version.split(".")[:2]))
+        print(
+            f"Installing wlroots v{version} requires wlroots v{major}.{minor}.x, found v{wlroots_version}",
+            file=sys.stderr,
+        )
 
 
 def has_xwayland() -> bool:
@@ -65,18 +64,28 @@ def has_xwayland() -> bool:
     pywlroots can be too.
     """
     try:
+        return importlib.import_module("wlroots._build").has_xwayland
+    except ModuleNotFoundError:
+        pass
+
+    try:
         FFI().verify(
             "#include <wlr/xwayland.h>",
             define_macros=[("WLR_USE_UNSTABLE", 1)],
             include_dirs=["/usr/include/pixman-1", include_dir.as_posix()],
         )
-        return True
+        has_xwayland = True
     except VerificationError:
         print("If XWayland support is not required, ignore the above error message.")
         print(
             "If support is required, ensure wlroots was built with -Dxwayland=enabled."
         )
-        return False
+        has_xwayland = False
+
+    with (Path(__file__).parent / "_build.py").open("w") as f:
+        f.write(f"has_xwayland = {has_xwayland}\n")
+
+    return has_xwayland
 
 
 # backend.h

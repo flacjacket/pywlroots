@@ -4,6 +4,7 @@
 *.so
 *.o
 *.c
+_build.py
 
 # Test output
 .coverage
