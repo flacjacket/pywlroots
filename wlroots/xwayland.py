@@ -202,8 +202,11 @@ class Surface(PtrHasData):
     def activate(self, activated: bool) -> None:
         lib.wlr_xwayland_surface_activate(self._ptr, activated)
 
-    def restack(self, sibling: Surface, mode: int) -> None:
-        lib.wlr_xwayland_surface_restack(self._ptr, sibling._ptr, mode)
+    def restack(self, sibling: Surface | None, mode: int) -> None:
+        if sibling:
+            lib.wlr_xwayland_surface_restack(self._ptr, sibling._ptr, mode)
+        else:
+            lib.wlr_xwayland_surface_restack(self._ptr, ffi.NULL, mode)
 
     def configure(self, x: int, y: int, width: int, height: int) -> None:
         lib.wlr_xwayland_surface_configure(self._ptr, x, y, width, height)
