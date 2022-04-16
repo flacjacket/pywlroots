@@ -1871,6 +1871,26 @@ int wlr_xcursor_manager_load(struct wlr_xcursor_manager *manager,
     float scale);
 void wlr_xcursor_manager_set_cursor_image(struct wlr_xcursor_manager *manager,
     const char *name, struct wlr_cursor *cursor);
+struct wlr_xcursor *wlr_xcursor_manager_get_xcursor(
+    struct wlr_xcursor_manager *manager, const char *name, float scale);
+"""
+
+# xcursor.h
+CDEF += """
+struct wlr_xcursor_image {
+    uint32_t width;
+    uint32_t height;
+    uint32_t hotspot_x;
+    uint32_t hotspot_y;
+    uint32_t delay;
+    uint8_t *buffer;
+};
+struct wlr_xcursor {
+    unsigned int image_count;
+    struct wlr_xcursor_image **images;
+    char *name;
+    uint32_t total_delay;
+};
 """
 
 # types/wlr_xdg_decoration_v1.h
