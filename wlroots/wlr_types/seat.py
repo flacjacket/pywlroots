@@ -330,6 +330,19 @@ class Seat(PtrHasData):
             # TODO: wrap source in a data source
             lib.wlr_seat_set_selection(self._ptr, source, serial)
 
+    def set_primary_selection(self, source, serial: int) -> None:
+        """Sets the current selection for the seat
+
+        None can be provided to clear it.  This removes the previous one if
+        there was any. In case the selection doesn't come from a client,
+        Display.next_serial() can be used to generate a serial.
+        """
+        if source is None:
+            lib.wlr_seat_set_primary_selection(self._ptr, ffi.NULL, serial)
+        else:
+            # TODO: wrap source in a data source
+            lib.wlr_seat_set_primary_selection(self._ptr, source, serial)
+
     def validate_pointer_grab_serial(self, origin: Surface, serial: int) -> bool:
         """Check whether this serial is valid to start a pointer grab action."""
         return lib.wlr_seat_validate_pointer_grab_serial(self._ptr, origin._ptr, serial)
