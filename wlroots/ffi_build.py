@@ -1582,6 +1582,12 @@ struct wlr_seat_request_set_selection_event {
     ...;
 };
 
+struct wlr_seat_request_set_primary_selection_event {
+    struct wlr_primary_selection_source *source;
+    uint32_t serial;
+    ...;
+};
+
 struct wlr_seat_request_start_drag_event {
     struct wlr_drag *drag;
     struct wlr_surface *origin;
