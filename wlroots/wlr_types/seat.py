@@ -396,7 +396,9 @@ class RequestSetSelectionEvent(Ptr):
 
 class RequestSetPrimarySelectionEvent(Ptr):
     def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_seat_request_set_primary_selection_event *", ptr)
+        self._ptr = ffi.cast(
+            "struct wlr_seat_request_set_primary_selection_event *", ptr
+        )
 
     # TODO: source
 
