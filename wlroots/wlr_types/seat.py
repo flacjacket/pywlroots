@@ -333,9 +333,9 @@ class Seat(PtrHasData):
             lib.wlr_seat_set_selection(self._ptr, source, serial)
 
     def set_primary_selection(self, source, serial: int) -> None:
-        """Sets the current selection for the seat
+        """Sets the current primary selection for the seat.
 
-        None can be provided to clear it.  This removes the previous one if
+        None can be provided to clear it. This removes the previous one if
         there was any. In case the selection doesn't come from a client,
         Display.next_serial() can be used to generate a serial.
         """
