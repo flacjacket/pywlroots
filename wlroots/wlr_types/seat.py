@@ -84,11 +84,13 @@ class Seat(PtrHasData):
 
         # Called when an application _wants_ to set the primary selection (user selects some data)
         self.request_set_primary_selection_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_set_primary_selection)
+            ptr=ffi.addressof(self._ptr.events.request_set_primary_selection),
+            data_wrapper=RequestSetPrimarySelectionEvent,
         )
         # Called after the primary selection source object is set
         self.set_primary_selection_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.set_primary_selection)
+            ptr=ffi.addressof(self._ptr.events.set_primary_selection),
+            data_wrapper=RequestSetSelectionEvent,
         )
 
         self.request_start_drag_event = Signal(
