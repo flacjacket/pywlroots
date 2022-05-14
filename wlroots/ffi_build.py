@@ -1323,6 +1323,14 @@ struct wlr_primary_selection_v1_device_manager *
     wlr_primary_selection_v1_device_manager_create(struct wl_display *display);
 """
 
+# types/wlr_primary_selection.h
+CDEF += """
+void wlr_seat_request_set_primary_selection(
+    struct wlr_seat *seat,
+    struct wlr_seat_client *client,
+    struct wlr_primary_selection_source *source, uint32_t serial);
+"""
+
 # types/wlr_relative_pointer_v1.h
 CDEF += """
 struct wlr_relative_pointer_manager_v1 {
