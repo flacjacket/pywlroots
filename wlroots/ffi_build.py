@@ -1325,9 +1325,7 @@ struct wlr_primary_selection_v1_device_manager *
 
 # types/wlr_primary_selection.h
 CDEF += """
-void wlr_seat_request_set_primary_selection(
-    struct wlr_seat *seat,
-    struct wlr_seat_client *client,
+void wlr_seat_set_primary_selection(struct wlr_seat *seat,
     struct wlr_primary_selection_source *source, uint32_t serial);
 """
 
