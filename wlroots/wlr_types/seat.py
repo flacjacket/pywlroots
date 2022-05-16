@@ -78,13 +78,13 @@ class Seat(PtrHasData):
         )
         # Called after the data source is set for the selection
         self.set_selection_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.set_selection),
-            data_wrapper=RequestSetPrimarySelectionEvent,
+            ptr=ffi.addressof(self._ptr.events.set_selection)
         )
 
         # Called when an application _wants_ to set the primary selection (user selects some data)
         self.request_set_primary_selection_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.request_set_primary_selection)
+            ptr=ffi.addressof(self._ptr.events.request_set_primary_selection),
+            data_wrapper=RequestSetPrimarySelectionEvent,
         )
         # Called after the primary selection source object is set
         self.set_primary_selection_event = Signal(
@@ -330,6 +330,19 @@ class Seat(PtrHasData):
             # TODO: wrap source in a data source
             lib.wlr_seat_set_selection(self._ptr, source, serial)
 
+    def set_primary_selection(self, source, serial: int) -> None:
+        """Sets the current primary selection for the seat.
+
+        None can be provided to clear it. This removes the previous one if
+        there was any. In case the selection doesn't come from a client,
+        Display.next_serial() can be used to generate a serial.
+        """
+        if source is None:
+            lib.wlr_seat_set_primary_selection(self._ptr, ffi.NULL, serial)
+        else:
+            # TODO: wrap source in a data source
+            lib.wlr_seat_set_primary_selection(self._ptr, source, serial)
+
     def validate_pointer_grab_serial(self, origin: Surface, serial: int) -> bool:
         """Check whether this serial is valid to start a pointer grab action."""
         return lib.wlr_seat_validate_pointer_grab_serial(self._ptr, origin._ptr, serial)
@@ -383,7 +396,9 @@ class RequestSetSelectionEvent(Ptr):
 
 class RequestSetPrimarySelectionEvent(Ptr):
     def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_seat_request_set_selection_event *", ptr)
+        self._ptr = ffi.cast(
+            "struct wlr_seat_request_set_primary_selection_event *", ptr
+        )
 
     # TODO: source
 

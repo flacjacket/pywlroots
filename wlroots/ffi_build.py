@@ -1323,6 +1323,12 @@ struct wlr_primary_selection_v1_device_manager *
     wlr_primary_selection_v1_device_manager_create(struct wl_display *display);
 """
 
+# types/wlr_primary_selection.h
+CDEF += """
+void wlr_seat_set_primary_selection(struct wlr_seat *seat,
+    struct wlr_primary_selection_source *source, uint32_t serial);
+"""
+
 # types/wlr_relative_pointer_v1.h
 CDEF += """
 struct wlr_relative_pointer_manager_v1 {
@@ -1578,6 +1584,12 @@ struct wlr_seat_pointer_request_set_cursor_event {
 
 struct wlr_seat_request_set_selection_event {
     struct wlr_data_source *source;
+    uint32_t serial;
+    ...;
+};
+
+struct wlr_seat_request_set_primary_selection_event {
+    struct wlr_primary_selection_source *source;
     uint32_t serial;
     ...;
 };
@@ -2322,6 +2334,7 @@ SOURCE = """
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_output_power_management_v1.h>
 #include <wlr/types/wlr_pointer_constraints_v1.h>
+#include <wlr/types/wlr_primary_selection.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
 #include <wlr/types/wlr_relative_pointer_v1.h>
 #include <wlr/types/wlr_scene.h>
