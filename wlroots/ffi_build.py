@@ -1873,6 +1873,43 @@ struct wlr_virtual_keyboard_manager_v1* wlr_virtual_keyboard_manager_v1_create(
     struct wl_display *display);
 """
 
+# types/wlr_virtual_pointer_v1.h
+CDEF += """
+struct wlr_virtual_pointer_manager_v1 {
+    struct wl_global *global;
+    struct wl_list virtual_pointers;
+    struct wl_listener display_destroy;
+    struct {
+        struct wl_signal new_virtual_pointer;
+        struct wl_signal destroy;
+    } events;
+    ...;
+};
+
+struct wlr_virtual_pointer_v1 {
+    struct wlr_input_device input_device;
+    struct wl_resource *resource;
+    struct wlr_event_pointer_axis axis_event[2];
+    enum wl_pointer_axis axis;
+    bool axis_valid[2];
+    struct wl_list link;
+    struct {
+        struct wl_signal destroy;
+    } events;
+    ...;
+};
+
+struct wlr_virtual_pointer_v1_new_pointer_event {
+    struct wlr_virtual_pointer_v1 *new_pointer;
+    struct wlr_seat *suggested_seat;
+    struct wlr_output *suggested_output;
+    ...;
+};
+
+struct wlr_virtual_pointer_manager_v1* wlr_virtual_pointer_manager_v1_create(
+    struct wl_display *display);
+"""
+
 # types/wlr_xcursor_manager.h
 CDEF += """
 struct wlr_xcursor_manager *wlr_xcursor_manager_create(const char *name,
@@ -2343,6 +2380,7 @@ SOURCE = """
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_server_decoration.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
+#include <wlr/types/wlr_virtual_pointer_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_decoration_v1.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
