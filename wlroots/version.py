@@ -1,3 +1,3 @@
 # Copyright (c) Sean Vig 2021
 
-version = "0.15.14"
+version = "0.15.15"
