@@ -1,9 +1,9 @@
 # Copyright (c) 2018 Sean Vig
 
-from pathlib import Path
 import importlib.util
 import os
 import sys
+from pathlib import Path
 
 from cffi import FFI, VerificationError
 from pywayland.ffi_build import ffi_builder as pywayland_ffi
@@ -382,6 +382,37 @@ struct wlr_data_source {
 };
 
 void wlr_data_source_destroy(struct wlr_data_source *source);
+"""
+
+# types/wlr_export_dmabuf_v1.h
+CDEF += """
+struct wlr_export_dmabuf_manager_v1 {
+    struct wl_global *global;
+    struct wl_list frames; // wlr_export_dmabuf_frame_v1::link
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+    ...;
+};
+
+struct wlr_export_dmabuf_frame_v1 {
+	struct wl_resource *resource;
+	struct wlr_export_dmabuf_manager_v1 *manager;
+	struct wl_list link; // wlr_export_dmabuf_manager_v1::frames
+
+	struct wlr_output *output;
+
+	bool cursor_locked;
+
+	struct wl_listener output_commit;
+    ...;
+};
+
+struct wlr_export_dmabuf_manager_v1 *wlr_export_dmabuf_manager_v1_create(
+	struct wl_display *display);
 """
 
 # types/wlr_foreign_toplevel_management_v1.h
@@ -2352,10 +2383,11 @@ SOURCE = """
 #include <wlr/backend/libinput.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
-#include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_compositor.h>
+#include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_export_dmabuf_v1.h>
 #include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_idle.h>
