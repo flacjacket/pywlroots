@@ -399,20 +399,20 @@ struct wlr_export_dmabuf_manager_v1 {
 };
 
 struct wlr_export_dmabuf_frame_v1 {
-	struct wl_resource *resource;
-	struct wlr_export_dmabuf_manager_v1 *manager;
-	struct wl_list link; // wlr_export_dmabuf_manager_v1::frames
+    struct wl_resource *resource;
+    struct wlr_export_dmabuf_manager_v1 *manager;
+    struct wl_list link; // wlr_export_dmabuf_manager_v1::frames
 
-	struct wlr_output *output;
+    struct wlr_output *output;
 
-	bool cursor_locked;
+    bool cursor_locked;
 
-	struct wl_listener output_commit;
+    struct wl_listener output_commit;
     ...;
 };
 
 struct wlr_export_dmabuf_manager_v1 *wlr_export_dmabuf_manager_v1_create(
-	struct wl_display *display);
+    struct wl_display *display);
 """
 
 # types/wlr_foreign_toplevel_management_v1.h
