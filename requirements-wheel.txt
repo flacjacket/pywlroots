@@ -1,0 +1,4 @@
+auditwheel
+pywayland>=0.1.1
+wheel
+xkbcommon>=0.2
