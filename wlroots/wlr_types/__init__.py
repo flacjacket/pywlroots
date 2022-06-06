@@ -4,6 +4,7 @@ from .compositor import Compositor  # noqa: F401
 from .cursor import Cursor  # noqa: F401
 from .data_control_v1 import DataControlManagerV1  # noqa: F401
 from .data_device_manager import DataDeviceManager  # noqa: F401
+from .export_dmabuf_v1 import ExportDmabufManagerV1  # noqa: F401
 from .foreign_toplevel_management_v1 import ForeignToplevelManagerV1  # noqa: F401
 from .gamma_control_v1 import GammaControlManagerV1  # noqa: F401
 from .input_device import InputDevice  # noqa: F401
@@ -32,6 +33,7 @@ from .seat import Seat  # noqa: F401
 from .surface import Surface, SurfaceState  # noqa: F401
 from .texture import Texture  # noqa: F401
 from .virtual_keyboard_v1 import VirtualKeyboardManagerV1  # noqa: F401
+from .virtual_pointer_v1 import VirtualPointerManagerV1  # noqa: F401
 from .xcursor_manager import XCursorManager  # noqa: F401
 from .xdg_decoration_v1 import XdgDecorationManagerV1  # noqa: F401
 from .xdg_output_v1 import XdgOutputManagerV1  # noqa: F401
