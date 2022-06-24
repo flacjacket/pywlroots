@@ -6,13 +6,11 @@ bindings (`python wlroots/ffi_build.py`), and launch the main (`python -m tiny`)
 from __future__ import annotations
 
 import logging
-import signal
 import sys
-from functools import partial
 
 from pywayland.server import Display
-
 from wlroots.helper import build_compositor
+from wlroots.util.log import log_init
 from wlroots.wlr_types import (
     Cursor,
     DataDeviceManager,
@@ -22,20 +20,12 @@ from wlroots.wlr_types import (
     XCursorManager,
     XdgShell,
 )
-from wlroots.util.log import log_init
 
 from .server import TinywlServer
 
 
-def sig_cb(display, sig_num, frame):
-    print("shutdown on terminate")
-    display.terminate()
-
-
 def main(argv) -> None:
     with Display() as display:
-        signal.signal(signal.SIGINT, partial(sig_cb, display))
-
         compositor, allocator, renderer, backend = build_compositor(display)
         device_manager = DataDeviceManager(display)  # noqa: F841
         xdg_shell = XdgShell(display)

@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import logging
-from typing import cast, TYPE_CHECKING
+import signal
+from typing import TYPE_CHECKING, cast
 
-from pywayland.server import Display, Listener
 from pywayland.protocol.wayland import WlKeyboard, WlSeat
-from xkbcommon import xkb
-
+from pywayland.server import Display, Listener
 from wlroots import ffi, lib
 from wlroots.allocator import Allocator
 from wlroots.backend import Backend
 from wlroots.renderer import Renderer
+from wlroots.util.clock import Timespec
 from wlroots.util.edges import Edges
+from wlroots.util.log import logger
 from wlroots.wlr_types import (
     Box,
     Cursor,
@@ -34,8 +35,7 @@ from wlroots.wlr_types.pointer import (
 )
 from wlroots.wlr_types.seat import RequestSetSelectionEvent
 from wlroots.wlr_types.xdg_shell import XdgSurface, XdgSurfaceRole
-from wlroots.util.log import logger
-from wlroots.util.clock import Timespec
+from xkbcommon import xkb
 
 from .cursor_mode import CursorMode
 from .keyboard_handler import KeyboardHandler
@@ -79,6 +79,11 @@ class TinywlServer:
         self._renderer = renderer
         self._scene = scene
 
+        self._event_loop = self._display.get_event_loop()
+        self._event_loop.add_signal(
+            signal.SIGINT, self._terminate_signal_callback, self._display
+        )
+
         # the xdg shell will generate new surfaces
         self._xdg_shell = xdg_shell
         self.views: list[View] = []
@@ -114,6 +119,10 @@ class TinywlServer:
         seat.request_set_selection_event.add(Listener(self.seat_request_set_selection))
 
         backend.new_input_event.add(Listener(self.server_new_input))
+
+    def _terminate_signal_callback(self, sig_num: int, display: Display):
+        logging.info("Terminating event loop.")
+        display.terminate()
 
     def view_at(
         self, layout_x, layout_y

@@ -4,14 +4,15 @@ import logging
 from typing import TYPE_CHECKING
 
 from pywayland.server import Listener
-
 from wlroots.util.box import Box
 from wlroots.util.edges import Edges
+
 from .cursor_mode import CursorMode
 
 if TYPE_CHECKING:
     from wlroots.wlr_types import SceneNode, Surface
     from wlroots.wlr_types.xdg_shell import XdgSurface
+
     from .server import TinywlServer
 
 
