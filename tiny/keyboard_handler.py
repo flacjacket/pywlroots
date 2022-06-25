@@ -7,6 +7,7 @@ from pywayland.server import Listener
 if TYPE_CHECKING:
     from wlroots.wlr_types import InputDevice, Keyboard
     from wlroots.wlr_types.keyboard import KeyboardKeyEvent
+
     from .server import TinywlServer
 
 
