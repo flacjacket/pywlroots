@@ -10,6 +10,8 @@ class InputInhibitManager(Ptr):
         """Creates a wlr_input_inhibit_manager"""
         self._ptr = lib.wlr_input_inhibit_manager_create(display._ptr)
 
+        self.activate_event = Signal(ptr=ffi.addressof(self._ptr.events.activate))
+        self.deactivate_event = Signal(ptr=ffi.addressof(self._ptr.events.deactivate))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     def is_inactive(self) -> bool:
