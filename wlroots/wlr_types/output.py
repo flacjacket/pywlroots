@@ -5,11 +5,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
-
-from wlroots import ffi, PtrHasData, lib, Ptr, str_or_none
+from pywayland.server import Signal
+from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 from wlroots.util.region import PixmanRegion32
+
 from .matrix import Matrix
 
 if TYPE_CHECKING:
@@ -42,7 +42,10 @@ class Output(PtrHasData):
         self.needs_frame_event = Signal(ptr=ffi.addressof(self._ptr.events.needs_frame))
         self.precommit_event = Signal(ptr=ffi.addressof(self._ptr.events.precommit))
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
-        self.present_event = Signal(ptr=ffi.addressof(self._ptr.events.present))
+        self.present_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.present),
+            DataWrapper=OutputEventPresent,
+        )
         self.bind_event = Signal(ptr=ffi.addressof(self._ptr.events.bind))
         self.enable_event = Signal(ptr=ffi.addressof(self._ptr.events.enable))
         self.mode_event = Signal(ptr=ffi.addressof(self._ptr.events.mode))
@@ -286,3 +289,8 @@ class OutputMode(Ptr):
     @property
     def preferred(self) -> int:
         return self._ptr.preferred
+
+
+class OutputEventPresent(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ptr

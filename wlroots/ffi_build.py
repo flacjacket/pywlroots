@@ -780,6 +780,63 @@ void wlr_keyboard_set_repeat_info(struct wlr_keyboard *kb, int32_t rate,
 uint32_t wlr_keyboard_get_modifiers(struct wlr_keyboard *keyboard);
 """
 
+# types/wlr_presentation_time.h
+CDEF += """
+struct wlr_surface;
+
+struct wlr_output;
+struct wlr_output_event_present;
+
+typedef int32_t clockid_t;
+struct wlr_presentation {
+    struct wl_global *global;
+    clockid_t clock;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    struct wl_listener display_destroy;
+};
+
+struct wlr_presentation_feedback {
+    struct wl_list resources;
+    struct wlr_output *output;
+    bool output_committed;
+    uint32_t output_commit_seq;
+
+    struct wl_listener output_commit;
+    struct wl_listener output_present;
+    struct wl_listener output_destroy;
+};
+
+struct wlr_presentation_event {
+    struct wlr_output *output;
+    uint64_t tv_sec;
+    uint32_t tv_nsec;
+    uint32_t refresh;
+    uint64_t seq;
+    uint32_t flags;
+};
+
+struct wlr_backend;
+
+struct wlr_presentation *wlr_presentation_create(struct wl_display *display,
+    struct wlr_backend *backend);
+struct wlr_presentation_feedback *wlr_presentation_surface_sampled(
+    struct wlr_presentation *presentation, struct wlr_surface *surface);
+void wlr_presentation_feedback_send_presented(
+    struct wlr_presentation_feedback *feedback,
+    struct wlr_presentation_event *event);
+void wlr_presentation_feedback_destroy(
+    struct wlr_presentation_feedback *feedback);
+void wlr_presentation_event_from_output(struct wlr_presentation_event *event,
+        const struct wlr_output_event_present *output_event);
+void wlr_presentation_surface_sampled_on_output(
+    struct wlr_presentation *presentation, struct wlr_surface *surface,
+    struct wlr_output *output);
+"""
+
 # types/wlr_linux_dmabuf_v1.h
 CDEF += """
 struct wlr_linux_dmabuf_v1 *wlr_linux_dmabuf_v1_create(struct wl_display *display,
@@ -934,6 +991,17 @@ void wlr_output_render_software_cursors(struct wlr_output *output,
 
 enum wl_output_transform wlr_output_transform_invert(
     enum wl_output_transform tr);
+
+struct wlr_output_event_present {
+    struct wlr_output *output;
+    uint32_t commit_seq;
+    bool presented;
+    struct timespec *when;
+    unsigned seq;
+    int refresh; // nsec
+    uint32_t flags; // enum wlr_output_present_flag
+    ...;
+};
 """
 
 # types/wlr_output_damage.h
@@ -2413,6 +2481,7 @@ SOURCE = """
 #include <wlr/types/wlr_server_decoration.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_virtual_pointer_v1.h>
+#include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_decoration_v1.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
