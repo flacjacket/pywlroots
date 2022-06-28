@@ -1,4 +1,5 @@
 # Copyright (c) 2018 Sean Vig
+# Copyright (c) 2022 Aakash Sen Sharma
 
 import importlib.util
 import os
@@ -413,6 +414,22 @@ struct wlr_export_dmabuf_frame_v1 {
 
 struct wlr_export_dmabuf_manager_v1 *wlr_export_dmabuf_manager_v1_create(
     struct wl_display *display);
+"""
+
+# types/wlr_viewporter.h
+CDEF += """
+struct wlr_viewporter {
+    struct wl_global *global;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    struct wl_listener display_destroy;
+    ...;
+};
+
+struct wlr_viewporter *wlr_viewporter_create(struct wl_display *display);
 """
 
 # types/wlr_foreign_toplevel_management_v1.h
@@ -2388,6 +2405,7 @@ SOURCE = """
 #include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_export_dmabuf_v1.h>
+#include <wlr/types/wlr_viewporter.h>
 #include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_idle.h>
