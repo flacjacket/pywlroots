@@ -101,7 +101,7 @@ jobs:
       - name: Create artifact
         run: tar czf ~/wayland.tar.gz -C ${HOME}/wayland/ .
       - name: Upload built libraries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: wlroots-${{ matrix.wlroots-version }}
           path: ~/wayland.tar.gz
@@ -114,22 +114,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["pypy-3.7", "3.7", "3.8", "3.9", "3.10"]
+        python-version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11-dev"
+          - "pypy-3.7"
+          - "pypy-3.8"
+          - "pypy-3.9"
         wlroots-version: ["0.15.1"]
         include:
-          - python-version: "3.10"
+          - python-version: "3.11-dev"
             wlroots-version: master
     steps:
       - name: Download wayland libraries
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: wlroots-${{ matrix.wlroots-version }}
       - name: Unpack wayland artifact
         run: sudo tar xf wayland.tar.gz -C /
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -176,9 +184,9 @@ jobs:
       python-version: "3.10"
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.python-version }}
       - name: Install Python dependencies
@@ -190,7 +198,7 @@ jobs:
     name: mypy tests
     runs-on: ubuntu-latest
     env:
-      python-version: "3.10"
+      python-version: "3.11-dev"
     steps:
       - name: Install dependencies
         run: |
@@ -198,9 +206,9 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             libxkbcommon-dev \
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.python-version }}
       - name: Install Python dependencies
@@ -217,12 +225,12 @@ jobs:
     name: black tests
     runs-on: ubuntu-latest
     env:
-      python-version: "3.10"
+      python-version: "3.11-dev"
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.python-version }}
       - name: Install Python dependencies
@@ -236,11 +244,11 @@ jobs:
     needs: build-wayland
     if: ${{ success() || failure() }}
     env:
-      python-version: "3.10"
+      python-version: "3.11-dev"
       wlroots-version: "0.15.1"
     steps:
       - name: Download wayland libraries
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: wlroots-${{ env.wlroots-version }}
       - name: Unpack wayland artifact
@@ -251,9 +259,9 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             libxkbcommon-dev \
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.python-version }}
       - name: Install Python dependencies
@@ -273,19 +281,19 @@ jobs:
     needs: build-wayland
     if: ${{ success() || failure() }}
     env:
-      python-version: "3.10"
+      python-version: "3.11-dev"
       wlroots-version: "0.15.1"
     steps:
       - name: Download wayland libraries
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: wlroots-${{ env.wlroots-version }}
       - name: Unpack wayland artifact
         run: sudo tar xf wayland.tar.gz -C /
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.python-version }}
       - name: Download and unpack Wlroots source
