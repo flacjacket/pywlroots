@@ -1,6 +1,6 @@
 # Copyright (c) 2021 Graeme Holliday
 
-from pywayland.server import Display, Signal
+from pywayland.server import Client, Display, Signal
 
 from wlroots import ffi, Ptr, lib
 
@@ -16,3 +16,7 @@ class InputInhibitManager(Ptr):
 
     def is_inactive(self) -> bool:
         return not self._ptr.active_inhibitor
+
+    @property
+    def active_client(self) -> Client:
+        return Client(ptr=self._ptr.active_client)
