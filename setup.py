@@ -25,7 +25,7 @@ def keywords_with_side_effects(argv):
         return {"cmdclass": {"build": DummyBuild, "install": DummyInstall}}
     else:
         return {
-            "setup_requires": ["cffi>=1.12.0", "pywayland>=0.1.1", "xkbcommon>=0.2"],
+            "setup_requires": ["cffi>=1.12.0", "pywayland>=0.4.14", "xkbcommon>=0.2"],
             "cffi_modules": ["wlroots/ffi_build.py:ffi_builder"],
         }
 
