@@ -23,7 +23,7 @@ class PointerConstraintV1Type(enum.IntEnum):
     CONFINED = lib.WLR_POINTER_CONSTRAINT_V1_CONFINED
 
 
-class PointerConstraintV1StateField(enum.IntEnum):
+class PointerConstraintV1StateField(enum.IntFlag):
     REGION = lib.WLR_POINTER_CONSTRAINT_V1_STATE_REGION
     CURSOR_HINT = lib.WLR_POINTER_CONSTRAINT_V1_STATE_CURSOR_HINT
 
