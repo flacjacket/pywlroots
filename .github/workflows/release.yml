@@ -12,7 +12,7 @@ jobs:
     env:
       libdrm-version: "2.4.112"
       seatd-version: "0.6.3"
-      wayland-protocols-version: "1.25"
+      wayland-protocols-version: "1.26"
       wayland-version: "1.21.0"
       wlroots-version: "0.15.1"
     steps:
