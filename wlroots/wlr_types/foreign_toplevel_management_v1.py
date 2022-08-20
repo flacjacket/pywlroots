@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
-class ForeignToplevelHandleV1State(enum.IntEnum):
+class ForeignToplevelHandleV1State(enum.IntFlag):
     MAXIMIZED = 1 << 0
     MINIMIZED = 1 << 1
     ACTIVATED = 1 << 2
