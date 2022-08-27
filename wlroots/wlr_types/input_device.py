@@ -4,6 +4,8 @@ from __future__ import annotations
 import enum
 import weakref
 
+from pywayland.server import Signal
+
 from .keyboard import Keyboard
 from wlroots import ffi, PtrHasData, lib
 
@@ -34,6 +36,8 @@ class InputDevice(PtrHasData):
             The wlr_input_device for the given input device
         """
         self._ptr = ffi.cast("struct wlr_input_device *", ptr)
+
+        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
     def device_type(self) -> InputDeviceType:
