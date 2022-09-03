@@ -7,12 +7,15 @@ from typing import TYPE_CHECKING
 
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
+from pywayland.utils import wl_list_for_each
 
 from wlroots import ffi, PtrHasData, lib, Ptr, str_or_none
 from wlroots.util.region import PixmanRegion32
 from .matrix import Matrix
 
 if TYPE_CHECKING:
+    from typing import Iterator
+
     from wlroots.allocator import Allocator
     from wlroots.renderer import Renderer
 
@@ -77,16 +80,23 @@ class Output(PtrHasData):
         return self._ptr.phys_width, self._ptr.phys_height
 
     @property
-    def modes(self):
-        if lib.wl_list_empty(ffi.addressof(self._ptr.modes)) == 1:
-            return []
+    def modes(self) -> Iterator[OutputMode]:
+        for ptr in wl_list_for_each(
+            "struct wlr_output_mode *",
+            self._ptr.modes,
+            "link",
+            ffi=ffi,
+        ):
+            yield OutputMode(ptr)
 
     @property
     def enabled(self) -> bool:
         return self._ptr.enabled
 
     @property
-    def current_mode(self) -> OutputMode:
+    def current_mode(self) -> OutputMode | None:
+        if self._ptr.current_mode == ffi.NULL:
+            return None
         return OutputMode(self._ptr.current_mode)
 
     @property
@@ -120,12 +130,15 @@ class Output(PtrHasData):
 
         return OutputMode(output_mode_ptr)
 
-    def set_mode(self, mode: OutputMode) -> None:
+    def set_mode(self, mode: OutputMode | None) -> None:
         """Sets the output mode
 
         The output needs to be enabled.
         """
-        lib.wlr_output_set_mode(self._ptr, mode._ptr)
+        if mode is None:
+            lib.wlr_output_set_mode(self._ptr, ffi.NULL)
+        else:
+            lib.wlr_output_set_mode(self._ptr, mode._ptr)
 
     def set_custom_mode(self, width: int, height: int, refresh: int) -> None:
         """
