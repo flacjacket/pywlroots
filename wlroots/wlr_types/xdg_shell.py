@@ -196,6 +196,13 @@ class XdgSurface(PtrHasData):
             self._ptr, lib.surface_iterator_callback, handle
         )
 
+    def schedule_configure(self) -> int:
+        """
+        Schedule a surface configuration. This should only be called by protocols
+        extending the shell.
+        """
+        return lib.wlr_xdg_surface_schedule_configure(self._ptr)
+
 
 class XdgSurfaceConfigure(Ptr):
     def __init__(self, ptr) -> None:

@@ -2334,6 +2334,8 @@ void wlr_xdg_surface_for_each_surface(struct wlr_xdg_surface *surface,
 
 void wlr_xdg_surface_for_each_popup_surface(struct wlr_xdg_surface *surface,
     wlr_surface_iterator_func_t iterator, void *user_data);
+
+uint32_t wlr_xdg_surface_schedule_configure(struct wlr_xdg_surface *surface);
 """
 
 # util/edges.h
