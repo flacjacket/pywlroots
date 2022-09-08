@@ -89,7 +89,7 @@ class OutputLayout(Ptr):
         """Remove an output from the layout."""
         lib.wlr_output_layout_remove(self._ptr, output._ptr)
 
-    def get_box(self, reference: Output | None = None) -> Box:
+    def get_box(self, reference: Output | None = None) -> Box | None:
         """
         Get the box of the layout for the given reference output in layout
         coordinates. If `reference` is None, the box will be for the extents of the
@@ -97,6 +97,8 @@ class OutputLayout(Ptr):
         """
         if reference:
             box_ptr = lib.wlr_output_layout_get_box(self._ptr, reference._ptr)
+            if box_ptr == ffi.NULL:
+                return None
         else:
             box_ptr = lib.wlr_output_layout_get_box(self._ptr, ffi.NULL)
         return Box(ptr=box_ptr)

@@ -853,6 +853,14 @@ bool pixman_region32_not_empty(struct pixman_region32 *region);
 
 # types/wlr_output.h
 CDEF += """
+struct wlr_output_mode {
+    int32_t width, height;
+    int32_t refresh; // mHz
+    bool preferred;
+    struct wl_list link;
+    ...;
+};
+
 struct wlr_output_state {
     ...;
 };

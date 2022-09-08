@@ -63,12 +63,17 @@ class OutputHeadV1State(Ptr):
         return Output(self._ptr.output)
 
     @property
-    def mode(self) -> OutputMode:
+    def mode(self) -> OutputMode | None:
+        if self._ptr.mode == ffi.NULL:
+            return None
         return OutputMode(self._ptr.mode)
 
     @mode.setter
-    def mode(self, value: OutputMode) -> None:
-        self._ptr.mode = value._ptr
+    def mode(self, mode: OutputMode | None) -> None:
+        if mode is None:
+            self._ptr.mode = ffi.NULL
+        else:
+            self._ptr.mode = mode._ptr
 
     @property
     def custom_mode(self):

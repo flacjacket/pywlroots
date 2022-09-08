@@ -308,14 +308,9 @@ class TinywlServer:
     def server_new_output(self, listener, output: Output) -> None:
         output.init_render(self._allocator, self._renderer)
 
-        if output.modes != []:
-            mode = output.preferred_mode()
-            if mode is None:
-                logger.error("Got no output mode")
-                return
-            output.set_mode(mode)
-            output.enable()
-            output.commit()
+        output.set_mode(output.preferred_mode())
+        output.enable()
+        output.commit()
 
         self.outputs.append(output)
         self._output_layout.add_auto(output)
