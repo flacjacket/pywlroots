@@ -59,6 +59,12 @@ class XCursorManager(Ptr):
         """Clean-up the X cursor manager on contex manager exit"""
         self.destroy()
 
+    def load(self, scale: float) -> bool:
+        """
+        Ensures an xcursor theme at the given scale factor is loaded in the manager.
+        """
+        return bool(lib.wlr_xcursor_manager_load(self._ptr, scale))
+
 
 class XCursor(Ptr):
     """struct wlr_xcursor"""
