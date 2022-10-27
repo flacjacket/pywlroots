@@ -151,11 +151,35 @@ class PointerEventSwipeBegin(Ptr):
         ptr = ffi.cast("struct wlr_event_pointer_swipe_begin *", ptr)
         self._ptr = ptr
 
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def fingers(self) -> int:
+        return self._ptr.fingers
+
 
 class PointerEventSwipeUpdate(Ptr):
     def __init__(self, ptr) -> None:
         ptr = ffi.cast("struct wlr_event_pointer_swipe_update *", ptr)
         self._ptr = ptr
+
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def fingers(self) -> int:
+        return self._ptr.fingers
+
+    @property
+    def dx(self) -> float:
+        return self._ptr.dx
+
+    @property
+    def dy(self) -> float:
+        return self._ptr.dy
 
 
 class PointerEventSwipeEnd(Ptr):
@@ -163,11 +187,27 @@ class PointerEventSwipeEnd(Ptr):
         ptr = ffi.cast("struct wlr_event_pointer_swipe_end *", ptr)
         self._ptr = ptr
 
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def cancelled(self) -> bool:
+        return self._ptr.cancelled
+
 
 class PointerEventPinchBegin(Ptr):
     def __init__(self, ptr) -> None:
         ptr = ffi.cast("struct wlr_event_pointer_pinch_begin *", ptr)
         self._ptr = ptr
+
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def fingers(self) -> int:
+        return self._ptr.fingers
 
 
 class PointerEventPinchUpdate(Ptr):
@@ -175,8 +215,68 @@ class PointerEventPinchUpdate(Ptr):
         ptr = ffi.cast("struct wlr_event_pointer_pinch_update *", ptr)
         self._ptr = ptr
 
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def fingers(self) -> int:
+        return self._ptr.fingers
+
+    @property
+    def dx(self) -> float:
+        return self._ptr.dx
+
+    @property
+    def dy(self) -> float:
+        return self._ptr.dy
+
+    @property
+    def scale(self) -> float:
+        return self._ptr.scale
+
+    @property
+    def rotation(self) -> float:
+        return self._ptr.rotation
+
 
 class PointerEventPinchEnd(Ptr):
     def __init__(self, ptr) -> None:
         ptr = ffi.cast("struct wlr_event_pointer_pinch_end *", ptr)
         self._ptr = ptr
+
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def cancelled(self) -> bool:
+        return self._ptr.cancelled
+
+
+class PointerEventHoldBegin(Ptr):
+    def __init__(self, ptr) -> None:
+        ptr = ffi.cast("struct wlr_event_pointer_hold_begin *", ptr)
+        self._ptr = ptr
+
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def fingers(self) -> int:
+        return self._ptr.fingers
+
+
+class PointerEventHoldEnd(Ptr):
+    def __init__(self, ptr) -> None:
+        ptr = ffi.cast("struct wlr_event_pointer_hold_end *", ptr)
+        self._ptr = ptr
+
+    @property
+    def time_msec(self) -> int:
+        return self._ptr.time_msec
+
+    @property
+    def cancelled(self) -> bool:
+        return self._ptr.cancelled

@@ -1282,6 +1282,19 @@ struct wlr_event_pointer_pinch_end {
     bool cancelled;
     ...;
 };
+
+struct wlr_event_pointer_hold_begin {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    uint32_t fingers;
+    ...;
+};
+struct wlr_event_pointer_hold_end {
+    struct wlr_input_device *device;
+    uint32_t time_msec;
+    bool cancelled;
+    ...;
+};
 """
 
 # types/wlr_pointer_constraints_v1.h
@@ -1358,6 +1371,75 @@ void wlr_pointer_constraint_v1_send_activated(
     struct wlr_pointer_constraint_v1 *constraint);
 void wlr_pointer_constraint_v1_send_deactivated(
     struct wlr_pointer_constraint_v1 *constraint);
+"""
+
+# types/wlr_pointer_gestures_v1.h
+CDEF += """
+struct wlr_pointer_gestures_v1 {
+    struct wl_global *global;
+    struct wl_list swipes;
+    struct wl_list pinches;
+    struct wl_list holds;
+
+    struct wl_listener display_destroy;
+
+    struct {
+        struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_pointer_gestures_v1 *wlr_pointer_gestures_v1_create(
+    struct wl_display *display);
+
+void wlr_pointer_gestures_v1_send_swipe_begin(
+    struct wlr_pointer_gestures_v1 *gestures,
+    struct wlr_seat *seat,
+    uint32_t time_msec,
+    uint32_t fingers);
+void wlr_pointer_gestures_v1_send_swipe_update(
+    struct wlr_pointer_gestures_v1 *gestures,
+    struct wlr_seat *seat,
+    uint32_t time_msec,
+    double dx,
+    double dy);
+void wlr_pointer_gestures_v1_send_swipe_end(
+    struct wlr_pointer_gestures_v1 *gestures,
+    struct wlr_seat *seat,
+    uint32_t time_msec,
+    bool cancelled);
+
+void wlr_pointer_gestures_v1_send_pinch_begin(
+    struct wlr_pointer_gestures_v1 *gestures,
+    struct wlr_seat *seat,
+    uint32_t time_msec,
+    uint32_t fingers);
+void wlr_pointer_gestures_v1_send_pinch_update(
+    struct wlr_pointer_gestures_v1 *gestures,
+    struct wlr_seat *seat,
+    uint32_t time_msec,
+    double dx,
+    double dy,
+    double scale,
+    double rotation);
+void wlr_pointer_gestures_v1_send_pinch_end(
+    struct wlr_pointer_gestures_v1 *gestures,
+    struct wlr_seat *seat,
+    uint32_t time_msec,
+    bool cancelled);
+
+void wlr_pointer_gestures_v1_send_hold_begin(
+    struct wlr_pointer_gestures_v1 *gestures,
+    struct wlr_seat *seat,
+    uint32_t time_msec,
+    uint32_t fingers);
+void wlr_pointer_gestures_v1_send_hold_end(
+    struct wlr_pointer_gestures_v1 *gestures,
+    struct wlr_seat *seat,
+    uint32_t time_msec,
+    bool cancelled);
 """
 
 # types/wlr_primary_selection_v1.h
@@ -2431,6 +2513,7 @@ SOURCE = """
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_output_power_management_v1.h>
 #include <wlr/types/wlr_pointer_constraints_v1.h>
+#include <wlr/types/wlr_pointer_gestures_v1.h>
 #include <wlr/types/wlr_primary_selection.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
 #include <wlr/types/wlr_relative_pointer_v1.h>
