@@ -19,6 +19,8 @@ from .pointer import (
     PointerEventSwipeBegin,
     PointerEventSwipeEnd,
     PointerEventSwipeUpdate,
+    PointerEventHoldBegin,
+    PointerEventHoldEnd,
 )
 from .surface import Surface
 from .touch import (
@@ -88,6 +90,14 @@ class Cursor(PtrHasData):
         self.pinch_end = Signal(
             ptr=ffi.addressof(self._ptr.events.pinch_end),
             data_wrapper=PointerEventPinchEnd,
+        )
+        self.hold_begin = Signal(
+            ptr=ffi.addressof(self._ptr.events.hold_begin),
+            data_wrapper=PointerEventHoldBegin,
+        )
+        self.hold_end = Signal(
+            ptr=ffi.addressof(self._ptr.events.hold_end),
+            data_wrapper=PointerEventHoldEnd,
         )
 
         self.touch_up_event = Signal(
