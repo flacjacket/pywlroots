@@ -49,7 +49,9 @@ def check(protocols: list[pathlib.Path]) -> None:
     expected_protocol_files = {
         header_filename(protocol_xml) for protocol_xml in protocols
     }
-    protocol_files = {path.name for path in INCLUDE_PATH.iterdir()}
+    protocol_files = {
+        path.name for path in INCLUDE_PATH.iterdir() if path.name != "README.rst"
+    }
 
     if expected_protocol_files != protocol_files:
         unexpected_files = list(expected_protocol_files - protocol_files)
