@@ -60,7 +60,7 @@ jobs:
           tar -xzf wlroots.tar.gz
         env:
           WAYLAND_URL: https://gitlab.freedesktop.org/wayland/wayland/-/releases/${{ env.wayland-version }}/downloads/wayland-${{ env.wayland-version }}.tar.xz
-          WAYLAND_PROTOCOLS_URL: https://wayland.freedesktop.org/releases/wayland-protocols-${{ env.wayland-protocols-version }}.tar.xz
+          WAYLAND_PROTOCOLS_URL: https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/${{ env.wayland-protocols-version }}/downloads/wayland-protocols-${{ env.wayland-protocols-version }}.tar.xz
           LIBDRM_URL: https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-${{ env.libdrm-version }}/drm-libdrm-${{ env.libdrm-version }}.tar.gz
           SEATD_URL: https://git.sr.ht/~kennylevinsen/seatd/archive/${{ env.seatd-version }}.tar.gz
           WLROOTS_URL: https://gitlab.freedesktop.org/wlroots/wlroots/-/archive/${{ matrix.wlroots-version }}/wlroots-${{ matrix.wlroots-version }}.tar.gz
