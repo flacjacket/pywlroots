@@ -11,7 +11,7 @@ jobs:
       libdrm-version: "2.4.113"
       seatd-version: "0.6.3"
       wayland-version: "1.21.0"
-      wayland-protocols-version: "1.26"
+      wayland-protocols-version: "1.27"
     strategy:
       fail-fast: false
       matrix:
