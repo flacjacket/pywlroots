@@ -37,8 +37,10 @@ class Drag(Ptr):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
-    def icon(self) -> "DragIcon":
+    def icon(self) -> "DragIcon | None":
         icon_ptr = self._ptr.icon
+        if icon_ptr == ffi.NULL:
+            return None
         _weakkeydict[icon_ptr] = self._ptr
         return DragIcon(icon_ptr)
 
