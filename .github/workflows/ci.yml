@@ -119,13 +119,13 @@ jobs:
           - "3.8"
           - "3.9"
           - "3.10"
-          - "3.11-dev"
+          - "3.11"
           - "pypy-3.7"
           - "pypy-3.8"
           - "pypy-3.9"
         wlroots-version: ["0.15.1"]
         include:
-          - python-version: "3.11-dev"
+          - python-version: "3.11"
             wlroots-version: master
     steps:
       - name: Download wayland libraries
@@ -198,7 +198,7 @@ jobs:
     name: mypy tests
     runs-on: ubuntu-latest
     env:
-      python-version: "3.11-dev"
+      python-version: "3.11"
     steps:
       - name: Install dependencies
         run: |
@@ -225,7 +225,7 @@ jobs:
     name: black tests
     runs-on: ubuntu-latest
     env:
-      python-version: "3.11-dev"
+      python-version: "3.11"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -244,7 +244,7 @@ jobs:
     needs: build-wayland
     if: ${{ success() || failure() }}
     env:
-      python-version: "3.11-dev"
+      python-version: "3.11"
       wlroots-version: "0.15.1"
     steps:
       - name: Download wayland libraries
@@ -281,7 +281,7 @@ jobs:
     needs: build-wayland
     if: ${{ success() || failure() }}
     env:
-      python-version: "3.11-dev"
+      python-version: "3.11"
       wlroots-version: "0.15.1"
     steps:
       - name: Download wayland libraries
