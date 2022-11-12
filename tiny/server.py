@@ -29,9 +29,9 @@ from wlroots.wlr_types.cursor import WarpMode
 from wlroots.wlr_types.input_device import ButtonState, InputDeviceType
 from wlroots.wlr_types.keyboard import KeyboardModifier
 from wlroots.wlr_types.pointer import (
-    PointerEventButton,
-    PointerEventMotion,
-    PointerEventMotionAbsolute,
+    PointerButtonEvent,
+    PointerMotionEvent,
+    PointerMotionAbsoluteEvent,
 )
 from wlroots.wlr_types.seat import RequestSetSelectionEvent
 from wlroots.wlr_types.xdg_shell import XdgSurface, XdgSurfaceRole
@@ -329,16 +329,16 @@ class TinywlServer:
     # input handling callbacks
 
     def server_new_input(self, listener, input_device: InputDevice) -> None:
-        if input_device.device_type == InputDeviceType.POINTER:
+        if input_device.type == InputDeviceType.POINTER:
             self._server_new_pointer(input_device)
-        elif input_device.device_type == InputDeviceType.KEYBOARD:
+        elif input_device.type == InputDeviceType.KEYBOARD:
             self._server_new_keyboard(input_device)
 
         capabilities = WlSeat.capability.pointer
         if len(self.keyboards) > 0:
             capabilities |= WlSeat.capability.keyboard
 
-        logging.info("new input %s", input_device.device_type)
+        logging.info("new input %s", input_device.type)
         logging.info("capabilities %s", capabilities)
 
         self._seat.set_capabilities(capabilities)
@@ -363,27 +363,28 @@ class TinywlServer:
     # #############################################################
     # cursor motion callbacks
 
-    def server_cursor_motion(self, listener, event_motion: PointerEventMotion) -> None:
+    def server_cursor_motion(self, listener, event_motion: PointerMotionEvent) -> None:
         logging.debug("cursor motion")
-        # self._cursor.move(event_motion_absolute.device
         self._cursor.move(
-            event_motion.delta_x, event_motion.delta_y, input_device=event_motion.device
+            event_motion.delta_x,
+            event_motion.delta_y,
+            input_device=event_motion.pointer.base,
         )
         self.process_cursor_motion(event_motion.time_msec)
 
     def server_cursor_motion_absolute(
-        self, listener, event_motion_absolute: PointerEventMotionAbsolute
+        self, listener, event_motion_absolute: PointerMotionAbsoluteEvent
     ) -> None:
         logging.debug("cursor abs motion")
         self._cursor.warp(
             WarpMode.AbsoluteClosest,
             event_motion_absolute.x,
             event_motion_absolute.y,
-            input_device=event_motion_absolute.device,
+            input_device=event_motion_absolute.pointer.base,
         )
         self.process_cursor_motion(event_motion_absolute.time_msec)
 
-    def server_cursor_button(self, listener, event: PointerEventButton) -> None:
+    def server_cursor_button(self, listener, event: PointerButtonEvent) -> None:
         logging.info("Got button click event %s", event.button_state)
         self._seat.pointer_notify_button(
             event.time_msec, event.button, event.button_state

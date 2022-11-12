@@ -39,7 +39,7 @@ class KeyboardKeyEvent(Ptr):
         This event is emitted before the xkb state of the keyboard has been
         updated (including modifiers).
         """
-        self._ptr = ffi.cast("struct wlr_event_keyboard_key *", ptr)
+        self._ptr = ffi.cast("struct wlr_keyboard_key_event *", ptr)
 
     @property
     def time_msec(self) -> int:
@@ -81,7 +81,6 @@ class Keyboard(PtrHasData):
         self.modifiers_event = Signal(ptr=ffi.addressof(self._ptr.events.modifiers))
         self.keymap_event = Signal(ptr=ffi.addressof(self._ptr.events.keymap))
         self.repeat_info_event = Signal(ptr=ffi.addressof(self._ptr.events.repeat_info))
-        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     def set_keymap(self, keymap) -> None:
         """Set the keymap associated with the keyboard"""

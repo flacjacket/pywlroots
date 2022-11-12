@@ -4,8 +4,8 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Display, Signal
 
-from .input_device import InputDevice
 from wlroots import ffi, lib, Ptr
+from wlroots.wlr_types.keyboard import Keyboard
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
@@ -32,10 +32,10 @@ class VirtualKeyboardV1(Ptr):
         )
 
     @property
-    def input_device(self) -> InputDevice:
-        device_ptr = ffi.addressof(self._ptr.input_device)
-        _weakkeydict[device_ptr] = self._ptr
-        return InputDevice(device_ptr)
+    def Keyboard(self) -> Keyboard:
+        keyboard_ptr = ffi.addressof(self._ptr.keyboard)
+        _weakkeydict[keyboard_ptr] = self._ptr
+        return Keyboard(keyboard_ptr)
 
     @property
     def has_keymap(self) -> bool:

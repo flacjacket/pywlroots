@@ -18,10 +18,10 @@ from .output import Output  # noqa: F401
 from .output_damage import OutputDamage  # noqa: F401
 from .output_layout import OutputLayout  # noqa: F401
 from .pointer import (  # noqa: F401
-    PointerEventAxis,
-    PointerEventButton,
-    PointerEventMotion,
-    PointerEventMotionAbsolute,
+    PointerAxisEvent,
+    PointerButtonEvent,
+    PointerMotionEvent,
+    PointerMotionAbsoluteEvent,
 )
 from .pointer_constraints_v1 import (  # noqa: F401
     PointerConstraintsV1,

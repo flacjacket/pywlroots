@@ -854,24 +854,9 @@ enum wlr_input_device_type {
 };
 
 struct wlr_input_device {
-    const struct wlr_input_device_impl *impl;
-
     enum wlr_input_device_type type;
     unsigned int vendor, product;
     char *name;
-    double width_mm, height_mm;
-    char *output_name;
-
-    /* wlr_input_device.type determines which of these is valid */
-    union {
-        void *_device;
-        struct wlr_keyboard *keyboard;
-        struct wlr_pointer *pointer;
-        struct wlr_switch *switch_device;
-        struct wlr_touch *touch;
-        struct wlr_tablet *tablet;
-        struct wlr_tablet_pad *tablet_pad;
-    };
 
     struct {
         struct wl_signal destroy;
@@ -963,14 +948,13 @@ struct wlr_keyboard {
         struct wl_signal modifiers;
         struct wl_signal keymap;
         struct wl_signal repeat_info;
-        struct wl_signal destroy;
     } events;
 
     void *data;
     ...;
 };
 
-struct wlr_event_keyboard_key {
+struct wlr_keyboard_key_event {
     uint32_t time_msec;
     uint32_t keycode;
     bool update_state;
@@ -1356,7 +1340,9 @@ struct wlr_output_power_manager_v1 *wlr_output_power_manager_v1_create(
 # types/wlr_pointer.h
 CDEF += """
 struct wlr_pointer {
+    struct wlr_input_device base;
     const struct wlr_pointer_impl *impl;
+    char *output_name;
 
     struct {
         struct wl_signal motion;
@@ -1370,6 +1356,8 @@ struct wlr_pointer {
         struct wl_signal pinch_begin;
         struct wl_signal pinch_update;
         struct wl_signal pinch_end;
+        struct wl_signal hold_begin;
+        struct wl_signal hold_end;
     } events;
 
     void *data;
@@ -1377,23 +1365,23 @@ struct wlr_pointer {
     ...;
 };
 
-struct wlr_event_pointer_motion {
-    struct wlr_input_device *device;
+struct wlr_pointer_motion_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     double delta_x, delta_y;
     double unaccel_dx, unaccel_dy;
     ...;
 };
 
-struct wlr_event_pointer_motion_absolute {
-    struct wlr_input_device *device;
+struct wlr_pointer_motion_absolute_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     double x, y;
     ...;
 };
 
-struct wlr_event_pointer_button {
-    struct wlr_input_device *device;
+struct wlr_pointer_button_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     uint32_t button;
     enum wlr_button_state state;
@@ -1405,17 +1393,15 @@ enum wlr_axis_source {
     WLR_AXIS_SOURCE_FINGER,
     WLR_AXIS_SOURCE_CONTINUOUS,
     WLR_AXIS_SOURCE_WHEEL_TILT,
-    ...
 };
 
 enum wlr_axis_orientation {
     WLR_AXIS_ORIENTATION_VERTICAL,
     WLR_AXIS_ORIENTATION_HORIZONTAL,
-    ...
 };
 
-struct wlr_event_pointer_axis {
-    struct wlr_input_device *device;
+struct wlr_pointer_axis_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     enum wlr_axis_source source;
     enum wlr_axis_orientation orientation;
@@ -1424,37 +1410,37 @@ struct wlr_event_pointer_axis {
     ...;
 };
 
-struct wlr_event_pointer_swipe_begin {
-    struct wlr_input_device *device;
+struct wlr_pointer_swipe_begin_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     uint32_t fingers;
     ...;
 };
 
-struct wlr_event_pointer_swipe_update {
-    struct wlr_input_device *device;
+struct wlr_pointer_swipe_update_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     uint32_t fingers;
     double dx, dy;
     ...;
 };
 
-struct wlr_event_pointer_swipe_end {
-    struct wlr_input_device *device;
+struct wlr_pointer_swipe_end_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     bool cancelled;
     ...;
 };
 
-struct wlr_event_pointer_pinch_begin {
-    struct wlr_input_device *device;
+struct wlr_pointer_pinch_begin_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     uint32_t fingers;
     ...;
 };
 
-struct wlr_event_pointer_pinch_update {
-    struct wlr_input_device *device;
+struct wlr_pointer_pinch_update_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     uint32_t fingers;
     double dx, dy;
@@ -1463,25 +1449,29 @@ struct wlr_event_pointer_pinch_update {
     ...;
 };
 
-struct wlr_event_pointer_pinch_end {
-    struct wlr_input_device *device;
+struct wlr_pointer_pinch_end_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     bool cancelled;
     ...;
 };
 
-struct wlr_event_pointer_hold_begin {
-    struct wlr_input_device *device;
+struct wlr_pointer_hold_begin_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     uint32_t fingers;
     ...;
 };
-struct wlr_event_pointer_hold_end {
-    struct wlr_input_device *device;
+
+struct wlr_pointer_hold_end_event {
+    struct wlr_pointer *pointer;
     uint32_t time_msec;
     bool cancelled;
     ...;
 };
+
+struct wlr_pointer *wlr_pointer_from_input_device(
+    struct wlr_input_device *input_device);
 """
 
 # types/wlr_pointer_constraints_v1.h
@@ -2035,21 +2025,19 @@ struct wlr_virtual_keyboard_manager_v1 {
 };
 
 struct wlr_virtual_keyboard_v1 {
-    struct wlr_input_device input_device;
+    struct wlr_keyboard keyboard;
     struct wl_resource *resource;
     struct wlr_seat *seat;
     bool has_keymap;
 
     struct wl_list link;
-
-    struct {
-        struct wl_signal destroy; // struct wlr_virtual_keyboard_v1*
-    } events;
     ...;
 };
 
 struct wlr_virtual_keyboard_manager_v1* wlr_virtual_keyboard_manager_v1_create(
     struct wl_display *display);
+struct wlr_virtual_keyboard_v1 *wlr_input_device_get_virtual_keyboard(
+    struct wlr_input_device *wlr_dev);
 """
 
 # types/wlr_virtual_pointer_v1.h
@@ -2066,15 +2054,12 @@ struct wlr_virtual_pointer_manager_v1 {
 };
 
 struct wlr_virtual_pointer_v1 {
-    struct wlr_input_device input_device;
+    struct wlr_pointer pointer;
     struct wl_resource *resource;
-    struct wlr_event_pointer_axis axis_event[2];
+    struct wlr_pointer_axis_event axis_event[2];
     enum wl_pointer_axis axis;
     bool axis_valid[2];
     struct wl_list link;
-    struct {
-        struct wl_signal destroy;
-    } events;
     ...;
 };
 
@@ -2552,11 +2537,7 @@ struct wlr_backend *wlr_headless_backend_create(struct wl_display *display);
 struct wlr_output *wlr_headless_add_output(struct wlr_backend *backend,
     unsigned int width, unsigned int height);
 
-struct wlr_input_device *wlr_headless_add_input_device(
-    struct wlr_backend *backend, enum wlr_input_device_type type);
-
 bool wlr_backend_is_headless(struct wlr_backend *backend);
-bool wlr_input_device_is_headless(struct wlr_input_device *device);
 bool wlr_output_is_headless(struct wlr_output *output);
 """
 
@@ -2597,6 +2578,7 @@ SOURCE = """
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_output_power_management_v1.h>
+#include <wlr/types/wlr_pointer.h>
 #include <wlr/types/wlr_pointer_constraints_v1.h>
 #include <wlr/types/wlr_pointer_gestures_v1.h>
 #include <wlr/types/wlr_primary_selection.h>

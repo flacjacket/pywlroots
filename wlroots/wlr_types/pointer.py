@@ -1,4 +1,5 @@
 # Copyright (c) Sean Vig 2019
+# Copyright (c) Matt Colligan 2022
 
 import enum
 
@@ -20,23 +21,31 @@ class AxisOrientation(enum.IntEnum):
     HORIZONTAL = lib.WLR_AXIS_ORIENTATION_HORIZONTAL
 
 
-class PointerEventMotion(Ptr):
+class Pointer(Ptr):
     def __init__(self, ptr) -> None:
-        """A relative motion pointer event
-
-        Emitted by the cursor motion event.
-        """
-        ptr = ffi.cast("struct wlr_event_pointer_motion *", ptr)
         self._ptr = ptr
 
     @property
-    def device(self) -> InputDevice:
-        """Input device associated with the event"""
-        return InputDevice(self._ptr.device)
+    def base(self) -> InputDevice:
+        """The pointer associated with the event"""
+        return InputDevice(ffi.addressof(self._ptr.base))
+
+
+class _PointerEvent(Ptr):
+    @property
+    def pointer(self) -> Pointer:
+        """The pointer associated with the event"""
+        return Pointer(self._ptr.pointer)
 
     @property
     def time_msec(self) -> int:
         return self._ptr.time_msec
+
+
+class PointerMotionEvent(_PointerEvent):
+    def __init__(self, ptr) -> None:
+        """A relative motion pointer event"""
+        self._ptr = ffi.cast("struct wlr_pointer_motion_event *", ptr)
 
     @property
     def delta_x(self) -> float:
@@ -55,52 +64,24 @@ class PointerEventMotion(Ptr):
         return self._ptr.unaccel_dy
 
 
-class PointerEventMotionAbsolute(Ptr):
+class PointerMotionAbsoluteEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
-        """A absolute motion pointer event
-
-        Emitted by the cursor absolute motion event.
-        """
-        ptr = ffi.cast("struct wlr_event_pointer_motion_absolute *", ptr)
-        self._ptr = ptr
-
-    @property
-    def device(self) -> InputDevice:
-        """Input device associated with the event"""
-        return InputDevice(self._ptr.device)
-
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
+        """A absolute motion pointer event"""
+        self._ptr = ffi.cast("struct wlr_pointer_motion_absolute_event *", ptr)
 
     @property
     def x(self) -> float:
-        """The x position of the motion"""
         return self._ptr.x
 
     @property
     def y(self) -> float:
-        """The y position of the motion"""
         return self._ptr.y
 
 
-class PointerEventButton(Ptr):
+class PointerButtonEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
-        """A pointer button event
-
-        Emitted by the cursor button event.
-        """
-        ptr = ffi.cast("struct wlr_event_pointer_button *", ptr)
-        self._ptr = ptr
-
-    @property
-    def device(self) -> InputDevice:
-        """Input device associated with the event"""
-        return InputDevice(self._ptr.device)
-
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
+        """A pointer button event"""
+        self._ptr = ffi.cast("struct wlr_pointer_button_event *", ptr)
 
     @property
     def button(self) -> int:
@@ -111,23 +92,10 @@ class PointerEventButton(Ptr):
         return ButtonState(self._ptr.state)
 
 
-class PointerEventAxis(Ptr):
+class PointerAxisEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
-        """A pointer axis event
-
-        Emitted by the cursor axis event.
-        """
-        ptr = ffi.cast("struct wlr_event_pointer_axis *", ptr)
-        self._ptr = ptr
-
-    @property
-    def device(self) -> InputDevice:
-        """Input device associated with the event"""
-        return InputDevice(self._ptr.device)
-
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
+        """A pointer axis event"""
+        self._ptr = ffi.cast("struct wlr_pointer_axis_event *", ptr)
 
     @property
     def source(self) -> AxisSource:
@@ -146,24 +114,49 @@ class PointerEventAxis(Ptr):
         return self._ptr.delta_discrete
 
 
-class PointerEventSwipeBegin(Ptr):
+class PointerSwipeBeginEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
-        ptr = ffi.cast("struct wlr_event_pointer_swipe_begin *", ptr)
-        self._ptr = ptr
-
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
+        self._ptr = ffi.cast("struct wlr_pointer_swipe_begin_event *", ptr)
 
     @property
     def fingers(self) -> int:
         return self._ptr.fingers
 
 
-class PointerEventSwipeUpdate(Ptr):
+class PointerSwipeUpdateEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
-        ptr = ffi.cast("struct wlr_event_pointer_swipe_update *", ptr)
+        self._ptr = ffi.cast("struct wlr_pointer_swipe_update_event *", ptr)
+
+    @property
+    def fingers(self) -> int:
+        return self._ptr.fingers
+
+    @property
+    def dx(self) -> float:
+        return self._ptr.dx
+
+    @property
+    def dy(self) -> float:
+        return self._ptr.dy
+
+
+class PointerSwipeEndEvent(_PointerEvent):
+    def __init__(self, ptr) -> None:
+        ptr = ffi.cast("struct wlr_pointer_swipe_end_event *", ptr)
         self._ptr = ptr
+
+    @property
+    def cancelled(self) -> bool:
+        return self._ptr.cancelled
+
+
+class PointerPinchBeginEvent(_PointerEvent):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_pointer_pinch_begin_event *", ptr)
+
+    @property
+    def fingers(self) -> int:
+        return self._ptr.fingers
 
     @property
     def time_msec(self) -> int:
@@ -182,42 +175,9 @@ class PointerEventSwipeUpdate(Ptr):
         return self._ptr.dy
 
 
-class PointerEventSwipeEnd(Ptr):
+class PointerPinchUpdateEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
-        ptr = ffi.cast("struct wlr_event_pointer_swipe_end *", ptr)
-        self._ptr = ptr
-
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
-
-    @property
-    def cancelled(self) -> bool:
-        return self._ptr.cancelled
-
-
-class PointerEventPinchBegin(Ptr):
-    def __init__(self, ptr) -> None:
-        ptr = ffi.cast("struct wlr_event_pointer_pinch_begin *", ptr)
-        self._ptr = ptr
-
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
-
-    @property
-    def fingers(self) -> int:
-        return self._ptr.fingers
-
-
-class PointerEventPinchUpdate(Ptr):
-    def __init__(self, ptr) -> None:
-        ptr = ffi.cast("struct wlr_event_pointer_pinch_update *", ptr)
-        self._ptr = ptr
-
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
+        self._ptr = ffi.cast("struct wlr_pointer_pinch_update_event *", ptr)
 
     @property
     def fingers(self) -> int:
@@ -239,12 +199,6 @@ class PointerEventPinchUpdate(Ptr):
     def rotation(self) -> float:
         return self._ptr.rotation
 
-
-class PointerEventPinchEnd(Ptr):
-    def __init__(self, ptr) -> None:
-        ptr = ffi.cast("struct wlr_event_pointer_pinch_end *", ptr)
-        self._ptr = ptr
-
     @property
     def time_msec(self) -> int:
         return self._ptr.time_msec
@@ -254,28 +208,28 @@ class PointerEventPinchEnd(Ptr):
         return self._ptr.cancelled
 
 
-class PointerEventHoldBegin(Ptr):
+class PointerPinchEndEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
-        ptr = ffi.cast("struct wlr_event_pointer_hold_begin *", ptr)
+        ptr = ffi.cast("struct wlr_event_pointer_pinch_end *", ptr)
         self._ptr = ptr
 
     @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
+    def cancelled(self) -> bool:
+        return self._ptr.cancelled
+
+
+class PointerHoldBeginEvent(_PointerEvent):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_pointer_hold_begin_event *", ptr)
 
     @property
     def fingers(self) -> int:
         return self._ptr.fingers
 
 
-class PointerEventHoldEnd(Ptr):
+class PointerHoldEndEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
-        ptr = ffi.cast("struct wlr_event_pointer_hold_end *", ptr)
-        self._ptr = ptr
-
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
+        self._ptr = ffi.cast("struct wlr_pointer_hold_end_event *", ptr)
 
     @property
     def cancelled(self) -> bool:

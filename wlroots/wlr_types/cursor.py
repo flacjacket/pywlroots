@@ -9,18 +9,18 @@ from wlroots import ffi, PtrHasData, lib
 from .input_device import InputDevice, InputDeviceType
 from .output_layout import OutputLayout
 from .pointer import (
-    PointerEventAxis,
-    PointerEventButton,
-    PointerEventMotion,
-    PointerEventMotionAbsolute,
-    PointerEventPinchBegin,
-    PointerEventPinchEnd,
-    PointerEventPinchUpdate,
-    PointerEventSwipeBegin,
-    PointerEventSwipeEnd,
-    PointerEventSwipeUpdate,
-    PointerEventHoldBegin,
-    PointerEventHoldEnd,
+    PointerAxisEvent,
+    PointerButtonEvent,
+    PointerMotionEvent,
+    PointerMotionAbsoluteEvent,
+    PointerPinchBeginEvent,
+    PointerPinchEndEvent,
+    PointerPinchUpdateEvent,
+    PointerSwipeBeginEvent,
+    PointerSwipeEndEvent,
+    PointerSwipeUpdateEvent,
+    PointerHoldBeginEvent,
+    PointerHoldEndEvent,
 )
 from .surface import Surface
 from .touch import (
@@ -54,52 +54,51 @@ class Cursor(PtrHasData):
         lib.wlr_cursor_attach_output_layout(self._ptr, output_layout._ptr)
 
         self.motion_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.motion), data_wrapper=PointerEventMotion
+            ptr=ffi.addressof(self._ptr.events.motion), data_wrapper=PointerMotionEvent
         )
         self.motion_absolute_event = Signal(
             ptr=ffi.addressof(self._ptr.events.motion_absolute),
-            data_wrapper=PointerEventMotionAbsolute,
+            data_wrapper=PointerMotionAbsoluteEvent,
         )
         self.button_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.button), data_wrapper=PointerEventButton
+            ptr=ffi.addressof(self._ptr.events.button), data_wrapper=PointerButtonEvent
         )
         self.axis_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.axis), data_wrapper=PointerEventAxis
+            ptr=ffi.addressof(self._ptr.events.axis), data_wrapper=PointerAxisEvent
         )
         self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
         self.swipe_begin = Signal(
             ptr=ffi.addressof(self._ptr.events.swipe_begin),
-            data_wrapper=PointerEventSwipeBegin,
+            data_wrapper=PointerSwipeBeginEvent,
         )
         self.swipe_update = Signal(
             ptr=ffi.addressof(self._ptr.events.swipe_update),
-            data_wrapper=PointerEventSwipeUpdate,
+            data_wrapper=PointerSwipeUpdateEvent,
         )
         self.swipe_end = Signal(
             ptr=ffi.addressof(self._ptr.events.swipe_end),
-            data_wrapper=PointerEventSwipeEnd,
+            data_wrapper=PointerSwipeEndEvent,
         )
         self.pinch_begin = Signal(
             ptr=ffi.addressof(self._ptr.events.pinch_begin),
-            data_wrapper=PointerEventPinchBegin,
+            data_wrapper=PointerPinchBeginEvent,
         )
         self.pinch_update = Signal(
             ptr=ffi.addressof(self._ptr.events.pinch_update),
-            data_wrapper=PointerEventPinchUpdate,
+            data_wrapper=PointerPinchUpdateEvent,
         )
         self.pinch_end = Signal(
             ptr=ffi.addressof(self._ptr.events.pinch_end),
-            data_wrapper=PointerEventPinchEnd,
+            data_wrapper=PointerPinchEndEvent,
         )
         self.hold_begin = Signal(
             ptr=ffi.addressof(self._ptr.events.hold_begin),
-            data_wrapper=PointerEventHoldBegin,
+            data_wrapper=PointerHoldBeginEvent,
         )
         self.hold_end = Signal(
             ptr=ffi.addressof(self._ptr.events.hold_end),
-            data_wrapper=PointerEventHoldEnd,
+            data_wrapper=PointerHoldEndEvent,
         )
-
         self.touch_up_event = Signal(
             ptr=ffi.addressof(self._ptr.events.touch_up),
             data_wrapper=TouchEventUp,
@@ -149,9 +148,9 @@ class Cursor(PtrHasData):
             InputDeviceType.TOUCH,
             InputDeviceType.TABLET_TOOL,
         )
-        if input_device.device_type not in allowed_device_types:
+        if input_device.type not in allowed_device_types:
             raise ValueError(
-                f"Input device must be one of pointer, touch, or tablet tool, got: {input_device.device_type}"
+                f"Input device must be one of pointer, touch, or tablet tool, got: {input_device.type}"
             )
 
         lib.wlr_cursor_attach_input_device(self._ptr, input_device._ptr)

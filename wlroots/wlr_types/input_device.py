@@ -6,7 +6,6 @@ import weakref
 
 from pywayland.server import Signal
 
-from .keyboard import Keyboard
 from wlroots import ffi, PtrHasData, lib
 
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
@@ -40,7 +39,7 @@ class InputDevice(PtrHasData):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
-    def device_type(self) -> InputDeviceType:
+    def type(self) -> InputDeviceType:
         """The device type associated with the current device"""
         return InputDeviceType(self._ptr.type)
 
@@ -55,23 +54,6 @@ class InputDevice(PtrHasData):
     @property
     def name(self) -> str:
         return ffi.string(self._ptr.name).decode()
-
-    @property
-    def keyboard(self) -> Keyboard:
-        """Return the keyboard type associated with the input device
-
-        The device must be a keyboard, otherwise this throws a ValueError.
-        """
-        if self.device_type != InputDeviceType.KEYBOARD:
-            raise ValueError(
-                f"Expected keyborad input device type, got: {self.device_type}"
-            )
-
-        keyboard = Keyboard(self._ptr.keyboard)
-
-        _weakkeydict[keyboard] = self._ptr
-
-        return keyboard
 
     def libinput_get_device_handle(self) -> ffi.CData | None:
         """

@@ -9,7 +9,7 @@ from pywayland.protocol.wayland import WlSeat
 
 from wlroots import ffi, PtrHasData, lib, Ptr
 from .data_device_manager import Drag
-from .input_device import ButtonState, InputDevice
+from .input_device import ButtonState
 from .keyboard import Keyboard, KeyboardModifiers, KeyboardKeyEvent
 from .pointer import AxisSource, AxisOrientation
 from .surface import Surface
