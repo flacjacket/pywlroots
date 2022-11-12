@@ -1778,7 +1778,7 @@ void wlr_seat_pointer_notify_axis(struct wlr_seat *wlr_seat, uint32_t time_msec,
 void wlr_seat_pointer_notify_frame(struct wlr_seat *wlr_seat);
 bool wlr_seat_pointer_has_grab(struct wlr_seat *seat);
 
-void wlr_seat_set_keyboard(struct wlr_seat *seat, struct wlr_input_device *dev);
+void wlr_seat_set_keyboard(struct wlr_seat *seat, struct wlr_keyboard *keyboard);
 struct wlr_keyboard *wlr_seat_get_keyboard(struct wlr_seat *seat);
 
 uint32_t wlr_seat_touch_notify_down(struct wlr_seat *seat,
