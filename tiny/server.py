@@ -10,11 +10,11 @@ from wlroots import ffi, lib
 from wlroots.allocator import Allocator
 from wlroots.backend import Backend
 from wlroots.renderer import Renderer
+from wlroots.util.box import Box
 from wlroots.util.clock import Timespec
 from wlroots.util.edges import Edges
 from wlroots.util.log import logger
 from wlroots.wlr_types import (
-    Box,
     Cursor,
     Output,
     OutputLayout,

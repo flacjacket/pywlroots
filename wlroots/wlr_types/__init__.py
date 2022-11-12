@@ -40,14 +40,3 @@ from .xcursor_manager import XCursorManager  # noqa: F401
 from .xdg_decoration_v1 import XdgDecorationManagerV1  # noqa: F401
 from .xdg_output_v1 import XdgOutputManagerV1  # noqa: F401
 from .xdg_shell import XdgShell  # noqa: F401
-
-
-def __getattr__(name: str):
-    if name == "Box":
-        from .box import Box  # noqa: F401
-
-        return Box
-    try:
-        return globals()[name]
-    except KeyError:
-        raise ImportError(f"cannot import name '{name}' from wlroots.wlr_types")
