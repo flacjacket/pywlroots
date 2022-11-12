@@ -2451,7 +2451,7 @@ uint32_t wlr_xdg_toplevel_set_wm_capabilities(struct wlr_xdg_toplevel *toplevel,
         uint32_t caps);
 
 void wlr_xdg_toplevel_send_close(struct wlr_xdg_toplevel *toplevel);
-void wlr_xdg_popup_destroy(struct wlr_xdg_surface *surface);
+void wlr_xdg_popup_destroy(struct wlr_xdg_popup *popup);
 
 struct wlr_surface *wlr_xdg_surface_surface_at(
     struct wlr_xdg_surface *surface, double sx, double sy,

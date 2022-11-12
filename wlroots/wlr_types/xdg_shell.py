@@ -394,6 +394,10 @@ class XdgPopup(Ptr):
         """
         lib.wlr_xdg_popup_unconstrain_from_box(self._ptr, box._ptr)
 
+    def destroy(self) -> None:
+        """Request that this popup closes."""
+        lib.wlr_xdg_popup_destroy(self._ptr)
+
 
 class XdgPopupState(Ptr):
     def __init__(self, ptr) -> None:
