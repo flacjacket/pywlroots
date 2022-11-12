@@ -2742,6 +2742,21 @@ if has_xwayland():
     typedef uint32_t xcb_pixmap_t;
     typedef uint32_t xcb_window_t;
     typedef uint32_t xcb_atom_t;
+    typedef struct {
+        ...;
+    } xcb_icccm_wm_hints_t;
+    typedef struct {
+    uint32_t flags;
+    int32_t x, y;
+    int32_t width, height;
+    int32_t min_width, min_height;
+    int32_t max_width, max_height;
+    int32_t width_inc, height_inc;
+    int32_t min_aspect_num, min_aspect_den;
+    int32_t max_aspect_num, max_aspect_den;
+    int32_t base_width, base_height;
+    uint32_t win_gravity;
+    } xcb_size_hints_t;
 
     struct wlr_xwm;
     struct wlr_xwayland_cursor;
@@ -2797,30 +2812,6 @@ if has_xwayland():
         WLR_XWAYLAND_SURFACE_DECORATIONS_NO_BORDER = 1,
         WLR_XWAYLAND_SURFACE_DECORATIONS_NO_TITLE = 2,
     };
-    struct wlr_xwayland_surface_hints {
-        uint32_t flags;
-        uint32_t input;
-        int32_t initial_state;
-        xcb_pixmap_t icon_pixmap;
-        xcb_window_t icon_window;
-        int32_t icon_x, icon_y;
-        xcb_pixmap_t icon_mask;
-        xcb_window_t window_group;
-        ...;
-    };
-    struct wlr_xwayland_surface_size_hints {
-        uint32_t flags;
-        int32_t x, y;
-        int32_t width, height;
-        int32_t min_width, min_height;
-        int32_t max_width, max_height;
-        int32_t width_inc, height_inc;
-        int32_t base_width, base_height;
-        int32_t min_aspect_num, min_aspect_den;
-        int32_t max_aspect_num, max_aspect_den;
-        uint32_t win_gravity;
-        ...;
-    };
     enum wlr_xwayland_icccm_input_model {
         WLR_ICCCM_INPUT_MODEL_NONE = 0,
         WLR_ICCCM_INPUT_MODEL_PASSIVE = 1,
@@ -2855,9 +2846,8 @@ if has_xwayland():
         xcb_atom_t *protocols;
         size_t protocols_len;
         uint32_t decorations;
-        struct wlr_xwayland_surface_hints *hints;
-        uint32_t hints_urgency;
-        struct wlr_xwayland_surface_size_hints *size_hints;
+        xcb_icccm_wm_hints_t *hints;
+        xcb_size_hints_t *size_hints;
         bool pinging;
         struct wl_event_source *ping_timer;
         // _NET_WM_STATE
@@ -2890,7 +2880,6 @@ if has_xwayland():
             struct wl_signal set_geometry;
             struct wl_signal ping_timeout;
         } events;
-        struct wl_listener surface_destroy;
         void *data;
         ...;
     };
