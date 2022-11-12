@@ -1,7 +1,13 @@
 # Copyright (c) 2019 Sean Vig
 
 from .buffer import Buffer  # noqa: F401
-from .compositor import Compositor, Surface, SurfaceState  # noqa: F401
+from .compositor import (  # noqa: F401
+    Compositor,
+    Surface,
+    SurfaceState,
+    SubCompositor,
+    SubSurface,
+)
 from .cursor import Cursor  # noqa: F401
 from .data_control_v1 import DataControlManagerV1  # noqa: F401
 from .data_device_manager import DataDeviceManager  # noqa: F401

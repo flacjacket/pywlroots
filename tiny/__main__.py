@@ -26,7 +26,9 @@ from .server import TinywlServer
 
 def main(argv) -> None:
     with Display() as display:
-        compositor, allocator, renderer, backend = build_compositor(display)
+        compositor, allocator, renderer, backend, subcompositor = build_compositor(
+            display
+        )
         device_manager = DataDeviceManager(display)  # noqa: F841
         xdg_shell = XdgShell(display)
         with OutputLayout() as output_layout, Cursor(

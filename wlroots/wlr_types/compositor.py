@@ -30,6 +30,11 @@ class Compositor(Ptr):
         self._ptr = lib.wlr_compositor_create(display._ptr, renderer._ptr)
 
 
+class SubCompositor(Ptr):
+    def __init__(self, display: Display) -> None:
+        self._ptr = lib.wlr_subcompositor_create(display._ptr)
+
+
 class Surface(PtrHasData):
     def __init__(self, ptr):
         """Create a wlroots Surface
