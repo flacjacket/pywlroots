@@ -11,6 +11,7 @@ jobs:
       libdrm-version: "2.4.113"
       seatd-version: "0.6.3"
       pixman-version: "0.42.0"
+      hwdata-version: "0.364"
       wayland-version: "1.21.0"
       wayland-protocols-version: "1.27"
     strategy:
@@ -22,7 +23,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
-            hwdata \
             libegl1-mesa-dev \
             libgbm-dev \
             libgles2-mesa-dev \
@@ -55,12 +55,14 @@ jobs:
           wget $LIBDRM_URL
           wget -O seatd.tar.gz $SEATD_URL
           wget $PIXMAN_URL
+          wget -O hwdata.tar.gz $HWDATA_URL
           wget -O wlroots.tar.gz $WLROOTS_URL
           tar -xJf wayland-${{ env.wayland-version }}.tar.xz
           tar -xJf wayland-protocols-${{ env.wayland-protocols-version }}.tar.xz
           tar -xzf drm-libdrm-${{ env.libdrm-version }}.tar.gz
           tar -xzf seatd.tar.gz
           tar -xjf pixman-pixman-${{ env.pixman-version }}.tar.bz2
+          tar -xzf hwdata.tar.gz
           tar -xzf wlroots.tar.gz
         env:
           WAYLAND_URL: https://gitlab.freedesktop.org/wayland/wayland/-/releases/${{ env.wayland-version }}/downloads/wayland-${{ env.wayland-version }}.tar.xz
@@ -68,6 +70,7 @@ jobs:
           LIBDRM_URL: https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-${{ env.libdrm-version }}/drm-libdrm-${{ env.libdrm-version }}.tar.gz
           SEATD_URL: https://git.sr.ht/~kennylevinsen/seatd/archive/${{ env.seatd-version }}.tar.gz
           PIXMAN_URL: https://gitlab.freedesktop.org/pixman/pixman/-/archive/pixman-${{ env.pixman-version }}/pixman-pixman-${{ env.pixman-version }}.tar.bz2
+          HWDATA_URL: https://github.com/vcrhonek/hwdata/archive/refs/tags/v${{ env.hwdata-version }}.tar.gz
           WLROOTS_URL: https://gitlab.freedesktop.org/wlroots/wlroots/-/archive/${{ matrix.wlroots-version }}/wlroots-${{ matrix.wlroots-version }}.tar.gz
       - name: Build wayland
         working-directory: wayland-${{ env.wayland-version }}
@@ -104,6 +107,12 @@ jobs:
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           sudo ninja -C build install
+      - name: Build hwdata
+        working-directory: hwdata-${{ env.hwdata-version }}
+        run: |
+          ./configure --prefix=/usr --libdir=/lib --datadir=/usr/share
+          make
+          sudo make install
       - name: Build wlroots
         working-directory: wlroots-${{ matrix.wlroots-version }}
         run: |
