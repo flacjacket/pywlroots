@@ -34,6 +34,13 @@ class XdgSurfaceRole(enum.IntEnum):
     POPUP = lib.WLR_XDG_SURFACE_ROLE_POPUP
 
 
+class XdgTopLevelWMCapabilities(enum.IntFlag):
+    WINDOW_MENU = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_WINDOW_MENU
+    MAXIMIZE = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_MAXIMIZE
+    FULLSCREEN = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_FULLSCREEN
+    MINIMIZE = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_MINIMIZE
+
+
 class XdgShell(PtrHasData):
     def __init__(self, display: Display, version: int = 5) -> None:
         """Create the shell for protocol windows
@@ -141,22 +148,34 @@ class XdgSurface(PtrHasData):
         return Box(box_ptr.x, box_ptr.y, box_ptr.width, box_ptr.height)
 
     def set_size(self, width: int, height: int) -> int:
-        return lib.wlr_xdg_toplevel_set_size(self._ptr, width, height)
+        return lib.wlr_xdg_toplevel_set_size(self._ptr.toplevel, width, height)
 
     def set_activated(self, activated: bool) -> int:
         if self.role != XdgSurfaceRole.TOPLEVEL:
             raise ValueError(f"xdg surface must be top-level, got: {self.role}")
 
-        return lib.wlr_xdg_toplevel_set_activated(self._ptr, activated)
+        return lib.wlr_xdg_toplevel_set_activated(self._ptr.toplevel, activated)
 
-    def set_tiled(self, tiled: int) -> int:
-        return lib.wlr_xdg_toplevel_set_tiled(self._ptr, tiled)
+    def set_maximized(self, maximized: bool) -> int:
+        return lib.wlr_xdg_toplevel_set_maximized(self._ptr.toplevel, maximized)
 
-    def set_fullscreen(self, fullscreened: bool) -> int:
-        return lib.wlr_xdg_toplevel_set_fullscreen(self._ptr, fullscreened)
+    def set_fullscreen(self, fullscreen: bool) -> int:
+        return lib.wlr_xdg_toplevel_set_fullscreen(self._ptr.toplevel, fullscreen)
+
+    def set_resizing(self, resizing: bool) -> int:
+        return lib.wlr_xdg_toplevel_set_resizing(self._ptr.toplevel, resizing)
+
+    def set_tiled(self, tiled_edges: int) -> int:
+        return lib.wlr_xdg_toplevel_set_tiled(self._ptr.toplevel, tiled_edges)
+
+    def set_bounds(self, width: int, height: int) -> int:
+        return lib.wlr_xdg_toplevel_set_bounds(self._ptr.toplevel, width, height)
+
+    def set_wm_capabilities(self, caps: XdgTopLevelWMCapabilities) -> int:
+        return lib.wlr_xdg_toplevel_set_wm_capabilities(self._ptr.toplevel, caps)
 
     def send_close(self) -> int:
-        return lib.wlr_xdg_toplevel_send_close(self._ptr)
+        return lib.wlr_xdg_toplevel_send_close(self._ptr.toplevel)
 
     def surface_at(
         self, surface_x: float, surface_y: float
@@ -232,7 +251,6 @@ class XdgTopLevel(Ptr):
         )
         self.request_fullscreen_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_fullscreen),
-            data_wrapper=XdgTopLevelSetFullscreenEvent,
         )
         self.request_minimize_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_minimize)

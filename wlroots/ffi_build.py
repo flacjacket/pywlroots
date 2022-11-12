@@ -2332,6 +2332,13 @@ enum wlr_xdg_surface_role {
     ...
 };
 
+enum wlr_xdg_toplevel_wm_capabilities {
+    WLR_XDG_TOPLEVEL_WM_CAPABILITIES_WINDOW_MENU = 1 << 0,
+    WLR_XDG_TOPLEVEL_WM_CAPABILITIES_MAXIMIZE = 1 << 1,
+    WLR_XDG_TOPLEVEL_WM_CAPABILITIES_FULLSCREEN = 1 << 2,
+    WLR_XDG_TOPLEVEL_WM_CAPABILITIES_MINIMIZE = 1 << 3,
+};
+
 struct wlr_xdg_surface {
     struct wlr_xdg_client *client;
     struct wl_resource *resource;
@@ -2414,20 +2421,24 @@ void wlr_xdg_popup_unconstrain_from_box(struct wlr_xdg_popup *popup,
 
 void wlr_xdg_surface_ping(struct wlr_xdg_surface *surface);
 
-uint32_t wlr_xdg_toplevel_set_size(struct wlr_xdg_surface *surface,
-    uint32_t width, uint32_t height);
-uint32_t wlr_xdg_toplevel_set_activated(struct wlr_xdg_surface *surface,
-    bool activated);
-uint32_t wlr_xdg_toplevel_set_maximized(struct wlr_xdg_surface *surface,
-    bool maximized);
-uint32_t wlr_xdg_toplevel_set_fullscreen(struct wlr_xdg_surface *surface,
-    bool fullscreen);
-uint32_t wlr_xdg_toplevel_set_resizing(struct wlr_xdg_surface *surface,
-    bool resizing);
-uint32_t wlr_xdg_toplevel_set_tiled(struct wlr_xdg_surface *surface,
-    uint32_t tiled_edges);
+uint32_t wlr_xdg_toplevel_set_size(struct wlr_xdg_toplevel *toplevel,
+        int32_t width, int32_t height);
+uint32_t wlr_xdg_toplevel_set_activated(struct wlr_xdg_toplevel *toplevel,
+        bool activated);
+uint32_t wlr_xdg_toplevel_set_maximized(struct wlr_xdg_toplevel *toplevel,
+        bool maximized);
+uint32_t wlr_xdg_toplevel_set_fullscreen(struct wlr_xdg_toplevel *toplevel,
+        bool fullscreen);
+uint32_t wlr_xdg_toplevel_set_resizing(struct wlr_xdg_toplevel *toplevel,
+        bool resizing);
+uint32_t wlr_xdg_toplevel_set_tiled(struct wlr_xdg_toplevel *toplevel,
+        uint32_t tiled_edges);
+uint32_t wlr_xdg_toplevel_set_bounds(struct wlr_xdg_toplevel *toplevel,
+        int32_t width, int32_t height);
+uint32_t wlr_xdg_toplevel_set_wm_capabilities(struct wlr_xdg_toplevel *toplevel,
+        uint32_t caps);
 
-void wlr_xdg_toplevel_send_close(struct wlr_xdg_surface *surface);
+void wlr_xdg_toplevel_send_close(struct wlr_xdg_toplevel *toplevel);
 void wlr_xdg_popup_destroy(struct wlr_xdg_surface *surface);
 
 struct wlr_surface *wlr_xdg_surface_surface_at(
