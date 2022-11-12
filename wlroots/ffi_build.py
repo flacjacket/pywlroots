@@ -233,6 +233,8 @@ enum wlr_buffer_data_ptr_access_flag {
 bool wlr_buffer_begin_data_ptr_access(struct wlr_buffer *buffer, uint32_t flags,
     void **data, uint32_t *format, size_t *stride);
 void wlr_buffer_end_data_ptr_access(struct wlr_buffer *buffer);
+struct wlr_buffer *wlr_buffer_lock(struct wlr_buffer *buffer);
+void wlr_buffer_unlock(struct wlr_buffer *buffer);
 """
 
 # types/wlr_cursor.h
