@@ -35,13 +35,13 @@ class XdgSurfaceRole(enum.IntEnum):
 
 
 class XdgShell(PtrHasData):
-    def __init__(self, display: Display) -> None:
+    def __init__(self, display: Display, version: int = 5) -> None:
         """Create the shell for protocol windows
 
         :param display:
             The Wayland server display to create the shell on.
         """
-        self._ptr = lib.wlr_xdg_shell_create(display._ptr)
+        self._ptr = lib.wlr_xdg_shell_create(display._ptr, version)
 
         self.new_surface_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_surface), data_wrapper=XdgSurface
@@ -359,6 +359,8 @@ class XdgPopup(Ptr):
         """
         self._ptr = ffi.cast("struct wlr_xdg_popup *", ptr)
 
+        self.reposition_event = Signal(ptr=ffi.addressof(self._ptr.events.reposition))
+
     @property
     def base(self) -> XdgSurface:
         """The xdg surface associated with the popup"""
@@ -371,6 +373,14 @@ class XdgPopup(Ptr):
         _weakkeydict[parent] = self
         return parent
 
+    @property
+    def current(self) -> XdgPopupState:
+        return XdgPopupState(self._ptr.current)
+
+    @property
+    def pending(self) -> XdgPopupState:
+        return XdgPopupState(self._ptr.pending)
+
     def unconstrain_from_box(self, box: Box) -> None:
         """
         Set the geometry of this popup to unconstrain it according to its xdg-positioner
@@ -378,3 +388,25 @@ class XdgPopup(Ptr):
         system.
         """
         lib.wlr_xdg_popup_unconstrain_from_box(self._ptr, box._ptr)
+
+
+class XdgPopupState(Ptr):
+    def __init__(self, ptr) -> None:
+        """A struct wlr_xdg_popup_state
+
+        :param ptr:
+            The wlr_xdg_popup_state cdata pointer
+        """
+        self._ptr = ffi.cast("struct wlr_xdg_popup_state *", ptr)
+
+    @property
+    def geometry(self) -> Box:
+        """
+        Position of the popup relative to the upper left corner of the window geometry
+        of the parent surface.
+        """
+        return Box(self._ptr.geometry)
+
+    @property
+    def reactive(self) -> bool:
+        return self._ptr.reactive

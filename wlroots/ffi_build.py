@@ -2207,19 +2207,43 @@ struct wlr_xdg_client {
     ...;
 };
 
-struct wlr_xdg_positioner {
+struct wlr_xdg_positioner_rules {
     struct wlr_box anchor_rect;
     enum xdg_positioner_anchor anchor;
     enum xdg_positioner_gravity gravity;
     enum xdg_positioner_constraint_adjustment constraint_adjustment;
 
+    bool reactive;
+
+    bool has_parent_configure_serial;
+    uint32_t parent_configure_serial;
+
     struct {
         int32_t width, height;
-    } size;
+    } size, parent_size;
 
     struct {
         int32_t x, y;
     } offset;
+    ...;
+};
+
+struct wlr_xdg_popup_state {
+    struct wlr_box geometry;
+
+    bool reactive;
+    ...;
+};
+
+enum wlr_xdg_popup_configure_field {
+    WLR_XDG_POPUP_CONFIGURE_REPOSITION_TOKEN = 1 << 0,
+};
+
+struct wlr_xdg_popup_configure {
+    uint32_t fields; // enum wlr_xdg_popup_configure_field
+    struct wlr_box geometry;
+    struct wlr_xdg_positioner_rules rules;
+    uint32_t reposition_token;
     ...;
 };
 
@@ -2232,15 +2256,20 @@ struct wlr_xdg_popup {
     struct wlr_surface *parent;
     struct wlr_seat *seat;
 
-    struct wlr_box geometry;
+    struct wlr_xdg_popup_configure scheduled;
 
-    struct wlr_xdg_positioner positioner;
+    struct wlr_xdg_popup_state current, pending;
 
-    struct wl_list grab_link; // wlr_xdg_popup_grab::popups
+    struct {
+        struct wl_signal reposition;
+    } events;
+
+    struct wl_list grab_link; // wlr_xdg_popup_grab.popups
     ...;
 };
 
-struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display);
+struct wlr_xdg_shell *wlr_xdg_shell_create(struct wl_display *display,
+    uint32_t version);
 
 struct wlr_xdg_toplevel_state {
     bool maximized, fullscreen, resizing, activated;
