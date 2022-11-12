@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import enum
+import typing
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlKeyboard
 
 from wlroots import ffi, PtrHasData, lib, Ptr
+
+if typing.TYPE_CHECKING:
+    from wlroots.wlr_types.input_device import InputDevice
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
@@ -81,6 +85,11 @@ class Keyboard(PtrHasData):
         self.modifiers_event = Signal(ptr=ffi.addressof(self._ptr.events.modifiers))
         self.keymap_event = Signal(ptr=ffi.addressof(self._ptr.events.keymap))
         self.repeat_info_event = Signal(ptr=ffi.addressof(self._ptr.events.repeat_info))
+
+    @classmethod
+    def from_input_device(cls, input_device: InputDevice) -> Keyboard:
+        ptr = lib.wlr_keyboard_from_input_device(input_device._ptr)
+        return cls(ptr)
 
     def set_keymap(self, keymap) -> None:
         """Set the keymap associated with the keyboard"""

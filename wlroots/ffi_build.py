@@ -975,6 +975,8 @@ void wlr_keyboard_set_keymap(struct wlr_keyboard *kb,
 void wlr_keyboard_set_repeat_info(struct wlr_keyboard *kb, int32_t rate,
     int32_t delay);
 uint32_t wlr_keyboard_get_modifiers(struct wlr_keyboard *keyboard);
+struct wlr_keyboard *wlr_keyboard_from_input_device(
+    struct wlr_input_device *input_device);
 """
 
 # types/wlr_linux_dmabuf_v1.h

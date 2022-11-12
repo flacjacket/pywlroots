@@ -16,6 +16,7 @@ from wlroots.util.edges import Edges
 from wlroots.util.log import logger
 from wlroots.wlr_types import (
     Cursor,
+    Keyboard,
     Output,
     OutputLayout,
     Scene,
@@ -198,11 +199,12 @@ class TinywlServer:
     def send_modifiers(
         self, modifiers: KeyboardModifiers, input_device: InputDevice
     ) -> None:
-        self._seat.set_keyboard(input_device)
+        keyboard = Keyboard.from_input_device(input_device)
+        self._seat.set_keyboard(keyboard)
         self._seat.keyboard_notify_modifiers(modifiers)
 
     def send_key(self, key_event: KeyboardKeyEvent, input_device: InputDevice) -> None:
-        keyboard = input_device.keyboard
+        keyboard = Keyboard.from_input_device(input_device)
         keyboard_modifier = keyboard.modifier
 
         handled = False
@@ -223,7 +225,7 @@ class TinywlServer:
 
         # Otherwise, we pass it along to the client
         if not handled:
-            self._seat.set_keyboard(input_device)
+            self._seat.set_keyboard(keyboard)
             self._seat.keyboard_notify_key(key_event)
 
     def handle_keybinding(self, keysym: int) -> bool:
@@ -347,7 +349,7 @@ class TinywlServer:
         self._cursor.attach_input_device(input_device)
 
     def _server_new_keyboard(self, input_device: InputDevice) -> None:
-        keyboard = input_device.keyboard
+        keyboard = Keyboard.from_input_device(input_device)
 
         xkb_context = xkb.Context()
         keymap = xkb_context.keymap_new_from_names()
@@ -358,7 +360,7 @@ class TinywlServer:
         keyboard_handler = KeyboardHandler(keyboard, input_device, self)
         self.keyboards.append(keyboard_handler)
 
-        self._seat.set_keyboard(input_device)
+        self._seat.set_keyboard(keyboard)
 
     # #############################################################
     # cursor motion callbacks

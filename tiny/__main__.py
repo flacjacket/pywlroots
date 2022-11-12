@@ -55,7 +55,7 @@ def main(argv) -> None:
 
 
 if __name__ == "__main__":
-    log_init(logging.DEBUG)
+    log_init(logging.INFO)
     logging.basicConfig(level=logging.INFO)
 
     main(sys.argv[1:])
