@@ -522,7 +522,6 @@ struct wlr_drag_icon {
         struct wl_signal unmap;
         struct wl_signal destroy;
     } events;
-    struct wl_listener surface_destroy;
     void *data;
     ...;
 };
@@ -1053,9 +1052,7 @@ struct wlr_output {
 
     char *name;
     char *description; // may be NULL
-    char make[56];
-    char model[16];
-    char serial[16];
+    char *make, *model, *serial;
     int32_t phys_width, phys_height; // mm
 
     // Note: some backends may have zero modes
@@ -1186,7 +1183,6 @@ void wlr_output_damage_add_box(struct wlr_output_damage *output_damage,
 CDEF += """
 struct wlr_output_layout {
     struct wl_list outputs;
-    struct wlr_output_layout_state *state;
 
     struct {
         struct wl_signal add;
@@ -2494,7 +2490,7 @@ struct wlr_xdg_toplevel {
     struct wlr_xdg_surface *base;
     bool added;
 
-    struct wlr_xdg_surface *parent;
+    struct wlr_xdg_toplevel *parent;
     struct wl_listener parent_unmap;
 
     struct wlr_xdg_toplevel_state current, pending;
@@ -2835,7 +2831,6 @@ struct wlr_layer_surface_v1 {
     bool added, configured, mapped;
     struct wl_list configure_list;
     struct wlr_layer_surface_v1_state current, pending;
-    struct wl_listener surface_destroy;
     struct {
         struct wl_signal destroy;
         struct wl_signal map;
