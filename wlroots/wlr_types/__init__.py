@@ -1,6 +1,6 @@
 # Copyright (c) 2019 Sean Vig
 
-from .compositor import Compositor  # noqa: F401
+from .compositor import Compositor, Surface, SurfaceState  # noqa: F401
 from .cursor import Cursor  # noqa: F401
 from .data_control_v1 import DataControlManagerV1  # noqa: F401
 from .data_device_manager import DataDeviceManager  # noqa: F401
@@ -32,7 +32,6 @@ from .relative_pointer_manager_v1 import RelativePointerManagerV1  # noqa: F401
 from .scene import Scene, SceneNode  # noqa: F401
 from .screencopy_v1 import ScreencopyManagerV1  # noqa: F401
 from .seat import Seat  # noqa: F401
-from .surface import Surface, SurfaceState  # noqa: F401
 from .texture import Texture  # noqa: F401
 from .virtual_keyboard_v1 import VirtualKeyboardManagerV1  # noqa: F401
 from .virtual_pointer_v1 import VirtualPointerManagerV1  # noqa: F401

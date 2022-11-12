@@ -258,16 +258,9 @@ void wlr_cursor_attach_output_layout(struct wlr_cursor *cur,
 
 # types/wlr_compositor.h
 CDEF += """
-struct wlr_subcompositor {
-    struct wl_global *global;
-    ...;
-};
-
 struct wlr_compositor {
     struct wl_global *global;
     struct wlr_renderer *renderer;
-
-    struct wlr_subcompositor subcompositor;
 
     struct wl_listener display_destroy;
 
@@ -281,10 +274,170 @@ struct wlr_compositor {
 struct wlr_compositor *wlr_compositor_create(struct wl_display *display,
     struct wlr_renderer *renderer);
 
+struct wlr_surface_state {
+    uint32_t committed;
+    uint32_t seq;
+
+    struct wlr_buffer *buffer;
+    int32_t dx, dy;
+    struct pixman_region32 surface_damage, buffer_damage;
+    struct pixman_region32 opaque, input;
+    enum wl_output_transform transform;
+    int32_t scale;
+    struct wl_list frame_callback_list;
+
+    int width, height;
+    int buffer_width, buffer_height;
+
+    struct wl_list subsurfaces_below;
+    struct wl_list subsurfaces_above;
+    ...;
+};
+
+struct wlr_surface_role {
+    const char *name;
+    void (*commit)(struct wlr_surface *surface);
+    void (*precommit)(struct wlr_surface *surface,
+        const struct wlr_surface_state *state);
+    void (*destroy)(struct wlr_surface *surface);
+    ...;
+};
+
+struct wlr_surface_output {
+    struct wlr_surface *surface;
+    struct wlr_output *output;
+    struct wl_list link;
+    struct wl_listener bind;
+    struct wl_listener destroy;
+    ...;
+};
+
+struct wlr_surface {
+    struct wl_resource *resource;
+    struct wlr_renderer *renderer;
+    struct wlr_client_buffer *buffer;
+    int sx, sy;
+    struct pixman_region32 buffer_damage;
+    struct pixman_region32 external_damage;
+    struct pixman_region32 opaque_region;
+    struct pixman_region32 input_region;
+    struct wlr_surface_state current, pending;
+
+    struct wl_list cached;
+
+    const struct wlr_surface_role *role;
+    void *role_data;
+
+    struct {
+        struct wl_signal client_commit;
+        struct wl_signal commit;
+        struct wl_signal new_subsurface;
+        struct wl_signal destroy;
+    } events;
+
+    struct wl_list current_outputs;
+    struct wlr_addon_set addons;
+    void *data;
+    struct wl_listener renderer_destroy;
+    ...;
+};
+
+typedef void (*wlr_surface_iterator_func_t)(struct wlr_surface *surface,
+    int sx, int sy, void *data);
+
+bool wlr_surface_set_role(struct wlr_surface *surface,
+    const struct wlr_surface_role *role, void *role_data,
+    struct wl_resource *error_resource, uint32_t error_code);
+
+void wlr_surface_destroy_role_object(struct wlr_surface *surface);
+
+bool wlr_surface_has_buffer(struct wlr_surface *surface);
+
+struct wlr_texture *wlr_surface_get_texture(struct wlr_surface *surface);
+
+struct wlr_surface *wlr_surface_get_root_surface(struct wlr_surface *surface);
+
+bool wlr_surface_point_accepts_input(struct wlr_surface *surface,
+    double sx, double sy);
+
+struct wlr_surface *wlr_surface_surface_at(struct wlr_surface *surface,
+    double sx, double sy, double *sub_x, double *sub_y);
+
+void wlr_surface_send_enter(struct wlr_surface *surface,
+    struct wlr_output *output);
+
+void wlr_surface_send_leave(struct wlr_surface *surface,
+    struct wlr_output *output);
+
+void wlr_surface_send_frame_done(struct wlr_surface *surface,
+    const struct timespec *when);
+
+void wlr_surface_get_extends(struct wlr_surface *surface, struct wlr_box *box);
+
+struct wlr_surface *wlr_surface_from_resource(struct wl_resource *resource);
+
+void wlr_surface_for_each_surface(struct wlr_surface *surface,
+    wlr_surface_iterator_func_t iterator, void *user_data);
+
+void wlr_surface_get_effective_damage(struct wlr_surface *surface,
+    struct pixman_region32 *damage);
+
+void wlr_surface_get_buffer_source_box(struct wlr_surface *surface,
+    struct wlr_fbox *box);
+
+uint32_t wlr_surface_lock_pending(struct wlr_surface *surface);
+
+void wlr_surface_unlock_cached(struct wlr_surface *surface, uint32_t seq);
+
+extern "Python" void surface_iterator_callback(struct wlr_surface *surface, int sx, int sy, void *data);
+"""
+
+# types/wlr_subcompositor.h
+CDEF += """
+struct wlr_subsurface_parent_state {
+    int32_t x, y;
+    ...;
+};
+
+struct wlr_subsurface {
+    struct wl_resource *resource;
+    struct wlr_surface *surface;
+    struct wlr_surface *parent;
+
+    struct wlr_subsurface_parent_state current, pending;
+
+    uint32_t cached_seq;
+    bool has_cache;
+
+    bool synchronized;
+    bool reordered;
+    bool mapped;
+    bool added;
+
+    struct wl_listener surface_client_commit;
+    struct wl_listener parent_destroy;
+
+    struct {
+        struct wl_signal destroy;
+        struct wl_signal map;
+        struct wl_signal unmap;
+    } events;
+
+    void *data;
+    ...;
+};
+
+struct wlr_subcompositor {
+    struct wl_global *global;
+    ...;
+};
+
 bool wlr_surface_is_subsurface(struct wlr_surface *surface);
 
 struct wlr_subsurface *wlr_subsurface_from_wlr_surface(
     struct wlr_surface *surface);
+
+struct wlr_subcompositor *wlr_subcompositor_create(struct wl_display *display);
 """
 
 # types/wlr_data_control_v1.h
@@ -975,8 +1128,6 @@ struct wlr_output_damage {
     struct pixman_region32 previous[WLR_OUTPUT_DAMAGE_PREVIOUS_LEN];
     size_t previous_idx;
 
-    bool pending_attach_render;
-
     struct {
         struct wl_signal frame;
         struct wl_signal destroy;
@@ -987,7 +1138,6 @@ struct wlr_output_damage {
     struct wl_listener output_needs_frame;
     struct wl_listener output_damage;
     struct wl_listener output_frame;
-    struct wl_listener output_precommit;
     struct wl_listener output_commit;
     ...;
 };
@@ -1832,152 +1982,6 @@ void wlr_server_decoration_manager_set_default_mode(
     struct wlr_server_decoration_manager *manager, uint32_t default_mode);
 """
 
-# types/wlr_surface.h
-CDEF += """
-struct wlr_surface_state {
-    uint32_t committed;
-    uint32_t seq;
-
-    struct wlr_buffer *buffer;
-    int32_t dx, dy;
-    struct pixman_region32 surface_damage, buffer_damage;
-    struct pixman_region32 opaque, input;
-    enum wl_output_transform transform;
-    int32_t scale;
-    struct wl_list frame_callback_list;
-
-    int width, height;
-    int buffer_width, buffer_height;
-
-    struct wl_list subsurfaces_below;
-    struct wl_list subsurfaces_above;
-    ...;
-};
-
-struct wlr_surface_role {
-    const char *name;
-    void (*commit)(struct wlr_surface *surface);
-    void (*precommit)(struct wlr_surface *surface);
-    ...;
-};
-
-struct wlr_surface_output {
-    struct wlr_surface *surface;
-    struct wlr_output *output;
-    struct wl_list link;
-    struct wl_listener bind;
-    struct wl_listener destroy;
-    ...;
-};
-
-struct wlr_surface {
-    struct wl_resource *resource;
-    struct wlr_renderer *renderer;
-    struct wlr_client_buffer *buffer;
-    int sx, sy;
-    struct pixman_region32 buffer_damage;
-    struct pixman_region32 opaque_region;
-    struct pixman_region32 input_region;
-    struct wlr_surface_state current, pending;
-
-    struct wl_list cached;
-
-    const struct wlr_surface_role *role;
-    void *role_data;
-
-    struct {
-        struct wl_signal commit;
-        struct wl_signal new_subsurface;
-        struct wl_signal destroy;
-    } events;
-
-    struct wl_list current_outputs;
-    void *data;
-    struct wl_listener renderer_destroy;
-
-    ...;
-};
-
-struct wlr_subsurface_parent_state {
-    int32_t x, y;
-    ...;
-};
-
-struct wlr_subsurface {
-    struct wl_resource *resource;
-    struct wlr_surface *surface;
-    struct wlr_surface *parent;
-
-    struct wlr_subsurface_parent_state current, pending;
-
-    uint32_t cached_seq;
-    bool has_cache;
-
-    bool synchronized;
-    bool reordered;
-    bool mapped;
-
-    struct wl_listener surface_destroy;
-    struct wl_listener parent_destroy;
-
-    struct {
-        struct wl_signal destroy;
-        struct wl_signal map;
-        struct wl_signal unmap;
-    } events;
-
-    void *data;
-    ...;
-};
-
-typedef void (*wlr_surface_iterator_func_t)(struct wlr_surface *surface,
-    int sx, int sy, void *data);
-
-bool wlr_surface_set_role(struct wlr_surface *surface,
-    const struct wlr_surface_role *role, void *role_data,
-    struct wl_resource *error_resource, uint32_t error_code);
-
-bool wlr_surface_has_buffer(struct wlr_surface *surface);
-
-struct wlr_texture *wlr_surface_get_texture(struct wlr_surface *surface);
-
-struct wlr_surface *wlr_surface_get_root_surface(struct wlr_surface *surface);
-
-bool wlr_surface_point_accepts_input(struct wlr_surface *surface,
-    double sx, double sy);
-
-struct wlr_surface *wlr_surface_surface_at(struct wlr_surface *surface,
-    double sx, double sy, double *sub_x, double *sub_y);
-
-void wlr_surface_send_enter(struct wlr_surface *surface,
-    struct wlr_output *output);
-
-void wlr_surface_send_leave(struct wlr_surface *surface,
-    struct wlr_output *output);
-
-void wlr_surface_send_frame_done(struct wlr_surface *surface,
-    const struct timespec *when);
-
-void wlr_surface_get_extends(struct wlr_surface *surface, struct wlr_box *box);
-
-struct wlr_surface *wlr_surface_from_resource(struct wl_resource *resource);
-
-void wlr_surface_for_each_surface(struct wlr_surface *surface,
-    wlr_surface_iterator_func_t iterator, void *user_data);
-
-void wlr_surface_get_effective_damage(struct wlr_surface *surface,
-    struct pixman_region32 *damage);
-
-void wlr_surface_get_buffer_source_box(struct wlr_surface *surface,
-    struct wlr_fbox *box);
-
-uint32_t wlr_surface_lock_pending(struct wlr_surface *surface);
-
-void wlr_surface_unlock_cached(struct wlr_surface *surface, uint32_t seq);
-
-extern "Python" void surface_iterator_callback(struct wlr_surface *surface, int sx, int sy, void *data);
-"""
-
 # types/wlr_virtual_keyboard_v1.h
 CDEF += """
 struct wlr_virtual_keyboard_manager_v1 {
@@ -2173,6 +2177,14 @@ struct wlr_xdg_output_manager_v1 {
 
 struct wlr_xdg_output_manager_v1 *wlr_xdg_output_manager_v1_create(
     struct wl_display *display, struct wlr_output_layout *layout);
+"""
+
+# util/addon.h
+CDEF += """
+struct wlr_addon_set {
+    struct wl_list addons;
+    ...;
+};
 """
 
 # types/wlr_xdg_shell.h
@@ -2552,8 +2564,8 @@ SOURCE = """
 #include <wlr/types/wlr_relative_pointer_v1.h>
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_screencopy_v1.h>
-#include <wlr/types/wlr_surface.h>
 #include <wlr/types/wlr_seat.h>
+#include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_server_decoration.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_virtual_pointer_v1.h>
@@ -2561,6 +2573,8 @@ SOURCE = """
 #include <wlr/types/wlr_xdg_decoration_v1.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/util/addon.h>
+#include <wlr/util/box.h>
 #include <wlr/util/log.h>
 #include <wlr/util/region.h>
 #include <wlr/version.h>
