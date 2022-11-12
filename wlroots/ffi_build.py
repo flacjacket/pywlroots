@@ -131,6 +131,9 @@ struct wlr_allocator {
 
 struct wlr_allocator *wlr_allocator_autocreate(struct wlr_backend *backend,
     struct wlr_renderer *renderer);
+
+struct wlr_buffer *wlr_allocator_create_buffer(struct wlr_allocator *alloc,
+    int width, int height, const struct wlr_drm_format *format);
 """
 
 # render/wlr_renderer.h
@@ -164,10 +167,8 @@ struct wlr_texture *wlr_texture_from_pixels(struct wlr_renderer *renderer,
     uint32_t fmt, uint32_t stride, uint32_t width, uint32_t height,
     const void *data);
 
-bool wlr_texture_write_pixels(struct wlr_texture *texture,
-    uint32_t stride, uint32_t width, uint32_t height,
-    uint32_t src_x, uint32_t src_y, uint32_t dst_x, uint32_t dst_y,
-    const void *data);
+bool wlr_texture_update_from_buffer(struct wlr_texture *texture,
+    struct wlr_buffer *buffer, struct pixman_region32 *damage);
 
 void wlr_texture_destroy(struct wlr_texture *texture);
 """
@@ -198,6 +199,24 @@ bool wlr_box_empty(const struct wlr_box *box);
 
 void wlr_box_transform(struct wlr_box *dest, const struct wlr_box *box,
     enum wl_output_transform transform, int width, int height);
+"""
+
+# types/wlr_buffer.h
+CDEF += """
+struct wlr_buffer {
+    ...;
+};
+
+void wlr_buffer_drop(struct wlr_buffer *buffer);
+
+enum wlr_buffer_data_ptr_access_flag {
+    WLR_BUFFER_DATA_PTR_ACCESS_READ = 1 << 0,
+    WLR_BUFFER_DATA_PTR_ACCESS_WRITE = 1 << 1,
+};
+
+bool wlr_buffer_begin_data_ptr_access(struct wlr_buffer *buffer, uint32_t flags,
+    void **data, uint32_t *format, size_t *stride);
+void wlr_buffer_end_data_ptr_access(struct wlr_buffer *buffer);
 """
 
 # types/wlr_cursor.h
@@ -2537,6 +2556,7 @@ SOURCE = """
 #include <wlr/backend/libinput.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
+#include <wlr/types/wlr_buffer.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_data_control_v1.h>

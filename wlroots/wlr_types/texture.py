@@ -5,10 +5,11 @@ from __future__ import annotations
 
 import typing
 
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
 
 if typing.TYPE_CHECKING:
     from wlroots.renderer import Renderer
+    from wlroots.util.region import PixmanRegion32
 
 
 class Texture(Ptr):
@@ -69,6 +70,23 @@ class Texture(Ptr):
             dst_y,
             data,
         )
+
+    def update_from_buffer(
+        self,
+        buffer: Buffer,
+        damage: PixmanRegion32 | None = None,
+    ) -> bool:
+        """
+        Update a texture with a struct wlr_buffer's contents.
+
+        The damage can be used by the renderer as an optimization: only the supplied
+        region needs to be updated.
+        """
+        if damage is None:
+            damage_ptr = ffi.NULL
+        else:
+            damage_ptr = damage._ptr
+        return lib.wlr_texture_update_from_buffer(self._ptr, buffer._ptr, damage_ptr)
 
     def destroy(self) -> None:
         """Destroys this wlr_texture."""
