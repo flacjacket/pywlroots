@@ -271,6 +271,11 @@ class XdgTopLevel(Ptr):
         """The app id of the toplevel object"""
         return str_or_none(self._ptr.app_id)
 
+    @property
+    def requested(self) -> XdgTopLevelRequested:
+        """Requested initial state"""
+        return XdgTopLevelRequested(self._ptr.requested)
+
 
 class XdgTopLevelMoveEvent(Ptr):
     def __init__(self, ptr) -> None:
@@ -392,3 +397,27 @@ class XdgPopupState(Ptr):
     @property
     def reactive(self) -> bool:
         return self._ptr.reactive
+
+
+class XdgTopLevelRequested(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ptr
+
+    @property
+    def maximized(self) -> bool:
+        return self._ptr.maximized
+
+    @property
+    def minimized(self) -> bool:
+        return self._ptr.minimized
+
+    @property
+    def fullscreen(self) -> bool:
+        return self._ptr.maximized
+
+    @property
+    def fullscreen_output(self) -> Output | None:
+        output_ptr = self._ptr.fullscreen_output
+        if output_ptr == ffi.NULL:
+            return None
+        return Output(output_ptr)
