@@ -89,18 +89,25 @@ class OutputLayout(Ptr):
         """Remove an output from the layout."""
         lib.wlr_output_layout_remove(self._ptr, output._ptr)
 
-    def get_box(self, reference: Output | None = None) -> Box | None:
+    def get_box(
+        self, reference: Output | None = None, dest_box: Box | None = None
+    ) -> Box:
         """
         Get the box of the layout for the given reference output in layout
         coordinates. If `reference` is None, the box will be for the extents of the
-        entire layout.
+        entire layout. If the output isn't in the layout, the box will be empty.
         """
         if reference:
-            box_ptr = lib.wlr_output_layout_get_box(self._ptr, reference._ptr)
-            if box_ptr == ffi.NULL:
-                return None
+            reference_ptr = reference._ptr
         else:
-            box_ptr = lib.wlr_output_layout_get_box(self._ptr, ffi.NULL)
+            reference_ptr = ffi.NULL
+
+        if dest_box:
+            lib.wlr_output_layout_get_box(self._ptr, reference_ptr, dest_box._ptr)
+            return dest_box
+
+        box_ptr = ffi.new("struct wlr_box *")
+        lib.wlr_output_layout_get_box(self._ptr, reference_ptr, box_ptr)
         return Box(ptr=box_ptr)
 
     def closest_point(

@@ -1041,8 +1041,8 @@ void wlr_output_layout_move(struct wlr_output_layout *layout,
 void wlr_output_layout_remove(struct wlr_output_layout *layout,
     struct wlr_output *output);
 
-struct wlr_box *wlr_output_layout_get_box(
-    struct wlr_output_layout *layout, struct wlr_output *reference);
+void wlr_output_layout_get_box(struct wlr_output_layout *layout,
+    struct wlr_output *reference, struct wlr_box *dest_box);
 
 void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
     struct wlr_output *output);
