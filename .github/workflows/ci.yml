@@ -10,6 +10,7 @@ jobs:
     env:
       libdrm-version: "2.4.113"
       seatd-version: "0.6.3"
+      pixman-version: "0.42.0"
       wayland-version: "1.21.0"
       wayland-protocols-version: "1.27"
     strategy:
@@ -21,6 +22,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
+            hwdata \
             libegl1-mesa-dev \
             libgbm-dev \
             libgles2-mesa-dev \
@@ -52,17 +54,20 @@ jobs:
           wget $WAYLAND_PROTOCOLS_URL
           wget $LIBDRM_URL
           wget -O seatd.tar.gz $SEATD_URL
+          wget $PIXMAN_URL
           wget -O wlroots.tar.gz $WLROOTS_URL
           tar -xJf wayland-${{ env.wayland-version }}.tar.xz
           tar -xJf wayland-protocols-${{ env.wayland-protocols-version }}.tar.xz
           tar -xzf drm-libdrm-${{ env.libdrm-version }}.tar.gz
           tar -xzf seatd.tar.gz
+          tar -xjf pixman-pixman-${{ env.pixman-version }}.tar.bz2
           tar -xzf wlroots.tar.gz
         env:
           WAYLAND_URL: https://gitlab.freedesktop.org/wayland/wayland/-/releases/${{ env.wayland-version }}/downloads/wayland-${{ env.wayland-version }}.tar.xz
           WAYLAND_PROTOCOLS_URL: https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/${{ env.wayland-protocols-version }}/downloads/wayland-protocols-${{ env.wayland-protocols-version }}.tar.xz
           LIBDRM_URL: https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-${{ env.libdrm-version }}/drm-libdrm-${{ env.libdrm-version }}.tar.gz
           SEATD_URL: https://git.sr.ht/~kennylevinsen/seatd/archive/${{ env.seatd-version }}.tar.gz
+          PIXMAN_URL: https://gitlab.freedesktop.org/pixman/pixman/-/archive/pixman-${{ env.pixman-version }}/pixman-pixman-${{ env.pixman-version }}.tar.bz2
           WLROOTS_URL: https://gitlab.freedesktop.org/wlroots/wlroots/-/archive/${{ matrix.wlroots-version }}/wlroots-${{ matrix.wlroots-version }}.tar.gz
       - name: Build wayland
         working-directory: wayland-${{ env.wayland-version }}
@@ -87,6 +92,13 @@ jobs:
           sudo ninja -C build install
       - name: Build seatd
         working-directory: seatd-${{ env.seatd-version }}
+        run: |
+          meson build --prefix=/usr
+          ninja -C build
+          DESTDIR=~/wayland ninja -C build install
+          sudo ninja -C build install
+      - name: Build pixman
+        working-directory: pixman-pixman-${{ env.pixman-version }}
         run: |
           meson build --prefix=/usr
           ninja -C build
