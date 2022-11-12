@@ -6,7 +6,7 @@ on:
 jobs:
   build-wayland:
     name: Build Wayland libraries
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       libdrm-version: "2.4.113"
       seatd-version: "0.6.3"
@@ -129,7 +129,7 @@ jobs:
           if-no-files-found: error
   unit-test:
     name: Python ${{ matrix.python-version}} unit tests (${{ matrix.wlroots-version }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-wayland
     if: ${{ success() || failure() }}
     strategy:
@@ -200,7 +200,7 @@ jobs:
           WLR_RENDERER_ALLOW_SOFTWARE: '1'
   flake8-test:
     name: flake8 tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       python-version: "3.10"
     steps:
@@ -217,7 +217,7 @@ jobs:
         run: flake8 wlroots tiny check_headers.py
   mypy-test:
     name: mypy tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       python-version: "3.11"
     steps:
@@ -244,7 +244,7 @@ jobs:
           mypy check_headers.py
   black-test:
     name: black tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       python-version: "3.11"
     steps:
@@ -261,7 +261,7 @@ jobs:
         run: black --check wlroots tiny check_headers.py
   packaging-test:
     name: packaging tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-wayland
     if: ${{ success() || failure() }}
     env:
@@ -298,7 +298,7 @@ jobs:
           twine check dist/*
   protocol-headers-test:
     name: protocol headers test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build-wayland
     if: ${{ success() || failure() }}
     env:
