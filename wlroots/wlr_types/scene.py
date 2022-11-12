@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-import weakref
-
 from wlroots import ffi, lib, PtrHasData, Ptr
 from wlroots.util.clock import Timespec
 from wlroots.wlr_types import Output, OutputLayout
 from wlroots.wlr_types.xdg_shell import XdgSurface
-
-_weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 
 
 class Scene(Ptr):
@@ -20,16 +16,24 @@ class Scene(Ptr):
             raise RuntimeError("Unable to attach scene to output layout")
 
     @property
-    def node(self) -> SceneNode:
+    def tree(self) -> SceneTree:
         """The associated scene node."""
-        node = SceneNode(ffi.addressof(self._ptr.node))
-        _weakkeydict[node] = self._ptr
-        return node
+        return SceneTree(ffi.addressof(self._ptr.tree))
 
     def get_scene_output(self, output: Output) -> SceneOutput:
         """Get a scene-graph output from a wlr_output."""
         ptr = lib.wlr_scene_get_scene_output(self._ptr, output._ptr)
         return SceneOutput(ptr)
+
+    @staticmethod
+    def xdg_surface_create(parent: SceneTree, xdg_surface: XdgSurface) -> SceneTree:
+        """Add a node displaying an xdg_surface and all of its sub-surfaces to the scene-graph.
+
+        The origin of the returned scene-graph node will match the top-left
+        corner of the xdg_surface window geometry.
+        """
+        ptr = lib.wlr_scene_xdg_surface_create(parent._ptr, xdg_surface._ptr)
+        return SceneTree(ptr)
 
 
 class SceneOutput(Ptr):
@@ -52,22 +56,21 @@ class SceneOutput(Ptr):
         lib.wlr_scene_output_send_frame_done(self._ptr, timespec._ptr)
 
 
-class SceneNode(PtrHasData):
+class SceneTree(PtrHasData):
     def __init__(self, ptr) -> None:
-        """ "A node is an object in the scene."""
+        """struct wlr_scene_tree"""
         self._ptr = ptr
 
-    @classmethod
-    def xdg_surface_create(
-        cls, parent: SceneNode, xdg_surface: XdgSurface
-    ) -> SceneNode:
-        """Add a node displaying an xdg_surface and all of its sub-surfaces to the scene-graph.
+    @property
+    def node(self) -> SceneNode:
+        """struct wlr_scene_tree"""
+        return SceneNode(ffi.addressof(self._ptr.node))
 
-        The origin of the returned scene-graph node will match the top-left
-        corner of the xdg_surface window geometry.
-        """
-        ptr = lib.wlr_scene_xdg_surface_create(parent._ptr, xdg_surface._ptr)
-        return SceneNode(ptr)
+
+class SceneNode(PtrHasData):
+    def __init__(self, ptr) -> None:
+        """A node is an object in the scene."""
+        self._ptr = ptr
 
     def set_position(self, x: int, y: int) -> None:
         """Set the output's position in the scene-graph."""

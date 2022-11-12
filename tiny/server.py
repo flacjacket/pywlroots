@@ -19,7 +19,7 @@ from wlroots.wlr_types import (
     Output,
     OutputLayout,
     Scene,
-    SceneNode,
+    SceneTree,
     Seat,
     Surface,
     XCursorManager,
@@ -291,15 +291,15 @@ class TinywlServer:
             # enable this, we always set the user data field of xdg_surfaces to
             # the corresponding scene node.
             parent_xdg_surface = XdgSurface.from_surface(xdg_surface.popup.parent)
-            parent_scene_node = cast(SceneNode, parent_xdg_surface.data)
-            scene_node = SceneNode.xdg_surface_create(parent_scene_node, xdg_surface)
-            xdg_surface.data = scene_node
+            parent_scene_tree = cast(SceneTree, parent_xdg_surface.data)
+            scene_tree = Scene.xdg_surface_create(parent_scene_tree, xdg_surface)
+            xdg_surface.data = scene_tree
             return
 
         assert xdg_surface.role == XdgSurfaceRole.TOPLEVEL
 
-        scene_node = SceneNode.xdg_surface_create(self._scene.node, xdg_surface)
-        view = View(xdg_surface, self, scene_node)
+        scene_tree = Scene.xdg_surface_create(self._scene.tree, xdg_surface)
+        view = View(xdg_surface, self, scene_tree.node)
         self.views.append(view)
 
     # #############################################################
