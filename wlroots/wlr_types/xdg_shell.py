@@ -277,9 +277,9 @@ class XdgTopLevelMoveEvent(Ptr):
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_move_event *", ptr)
 
     @property
-    def surface(self) -> Surface:
+    def toplevel(self) -> XdgTopLevel:
         # TODO: keep weakref
-        return Surface(self._ptr.surface)
+        return XdgTopLevel(self._ptr.toplevel)
 
     # TODO: seat client
 
@@ -293,9 +293,9 @@ class XdgTopLevelResizeEvent(Ptr):
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_resize_event *", ptr)
 
     @property
-    def surface(self) -> Surface:
+    def toplevel(self) -> XdgTopLevel:
         # TODO: keep weakref
-        return Surface(self._ptr.surface)
+        return XdgTopLevel(self._ptr.toplevel)
 
     # TODO: seat client
 
@@ -308,32 +308,14 @@ class XdgTopLevelResizeEvent(Ptr):
         return self._ptr.edges
 
 
-class XdgTopLevelSetFullscreenEvent(Ptr):
-    def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_xdg_toplevel_set_fullscreen_event *", ptr)
-
-    @property
-    def surface(self) -> Surface:
-        # TODO: keep weakref
-        return Surface(self._ptr.surface)
-
-    @property
-    def fullscreen(self) -> bool:
-        return self._ptr.fullscreen
-
-    @property
-    def output(self) -> Output:
-        return Output(self._ptr.output)
-
-
 class XdgTopLevelShowWindowMenuEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_show_window_menu_event *", ptr)
 
     @property
-    def surface(self) -> Surface:
+    def toplevel(self) -> XdgTopLevel:
         # TODO: keep weakref
-        return Surface(self._ptr.surface)
+        return XdgTopLevel(self._ptr.toplevel)
 
     # TODO: seat client
 
