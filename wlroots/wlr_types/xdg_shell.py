@@ -272,12 +272,12 @@ class XdgTopLevel(Ptr):
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
 
     @property
-    def parent(self) -> XdgSurface | None:
-        """The surface of the parent of this toplevel"""
+    def parent(self) -> XdgTopLevel | None:
+        """The parent of this toplevel"""
         parent_ptr = self._ptr.parent
         if parent_ptr is None:
             return None
-        return XdgSurface(parent_ptr)
+        return XdgTopLevel(parent_ptr)
 
     @property
     def title(self) -> str | None:
