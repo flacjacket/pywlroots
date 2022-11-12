@@ -26,7 +26,7 @@ class Buffer(Ptr):
         self, flags: BufferDataPtrAccessFlag
     ) -> tuple[ffi.CData, int, int]:
         """Access a pointer to the underlying data"""
-        data = ffi.new('void**')
+        data = ffi.new("void**")
         format_ptr = ffi.new("uint32_t *")
         stride_ptr = ffi.new("size_t *")
 
@@ -37,6 +37,6 @@ class Buffer(Ptr):
 
         return data[0], format_ptr[0], stride_ptr[0]
 
-    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
-        """Finish accessing data pointer"""
+    def end_data_ptr_access(self) -> None:
+        """End access to the underlying data"""
         lib.wlr_buffer_end_data_ptr_access(self._ptr)

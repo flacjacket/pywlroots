@@ -161,6 +161,20 @@ bool wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_
 void wlr_renderer_destroy(struct wlr_renderer *renderer);
 """
 
+# render/drm_format_set.h
+CDEF += """
+struct wlr_drm_format_set {
+    ...;
+};
+struct wlr_drm_format {
+    ...;
+};
+const struct wlr_drm_format_set *wlr_renderer_get_render_formats(
+    struct wlr_renderer *renderer);
+const struct wlr_drm_format *wlr_drm_format_set_get(
+    const struct wlr_drm_format_set *set, uint32_t format);
+"""
+
 # render/wlr_texture.h
 CDEF += """
 struct wlr_texture *wlr_texture_from_pixels(struct wlr_renderer *renderer,
@@ -171,6 +185,8 @@ bool wlr_texture_update_from_buffer(struct wlr_texture *texture,
     struct wlr_buffer *buffer, struct pixman_region32 *damage);
 
 void wlr_texture_destroy(struct wlr_texture *texture);
+struct wlr_texture *wlr_texture_from_buffer(struct wlr_renderer *renderer,
+    struct wlr_buffer *buffer);
 """
 
 # types/wlr_box.h
@@ -1275,6 +1291,8 @@ struct wlr_output_head_v1_state {
     int32_t x, y;
     enum wl_output_transform transform;
     float scale;
+    bool adaptive_sync_enabled;
+    ...;
 };
 
 struct wlr_output_manager_v1 *wlr_output_manager_v1_create(
@@ -2555,7 +2573,9 @@ SOURCE = """
 #include <wlr/backend/headless.h>
 #include <wlr/backend/libinput.h>
 #include <wlr/render/allocator.h>
+#include <wlr/render/drm_format_set.h>
 #include <wlr/render/wlr_renderer.h>
+#include <render/wlr_renderer.h>
 #include <wlr/types/wlr_buffer.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>

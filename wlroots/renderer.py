@@ -99,3 +99,27 @@ class Renderer(Ptr):
         box.
         """
         lib.wlr_renderer_scissor(self._ptr, box._ptr if box else ffi.NULL)
+
+    def get_render_formats(self) -> DRMFormatSet:
+        ptr = lib.wlr_renderer_get_render_formats(self._ptr)
+        return DRMFormatSet(ptr)
+
+
+class DRMFormatSet(Ptr):
+    """struct wlr_drm_format_set"""
+
+    def __init__(self, ptr) -> None:
+        self._ptr = ptr
+
+    def get(self, format: int) -> DRMFormat | None:
+        ptr = lib.wlr_drm_format_set_get(self._ptr, format)
+        if ptr == ffi.NULL:
+            return None
+        return DRMFormat(ptr)
+
+
+class DRMFormat(Ptr):
+    """struct wlr_drm_format"""
+
+    def __init__(self, ptr) -> None:
+        self._ptr = ptr

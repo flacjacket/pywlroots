@@ -97,6 +97,14 @@ class OutputHeadV1State(Ptr):
     def transform(self, value: WlOutput.transform) -> None:
         self._ptr.transform = value
 
+    @property
+    def adaptive_sync_enabled(self) -> bool:
+        return self._ptr.adaptive_sync_enabled
+
+    @adaptive_sync_enabled.setter
+    def adaptive_sync_enabled(self, value: bool) -> None:
+        self._ptr.adaptive_sync_enabled = value
+
 
 class OutputConfigurationV1(Ptr):
     def __init__(self, ptr=None) -> None:
