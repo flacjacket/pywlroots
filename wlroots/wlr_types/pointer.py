@@ -163,10 +163,6 @@ class PointerPinchBeginEvent(_PointerEvent):
         return self._ptr.time_msec
 
     @property
-    def fingers(self) -> int:
-        return self._ptr.fingers
-
-    @property
     def dx(self) -> float:
         return self._ptr.dx
 
