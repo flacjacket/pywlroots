@@ -100,10 +100,6 @@ class Renderer(Ptr):
         """
         lib.wlr_renderer_scissor(self._ptr, box._ptr if box else ffi.NULL)
 
-    def get_render_formats(self) -> DRMFormatSet:
-        ptr = lib.wlr_renderer_get_render_formats(self._ptr)
-        return DRMFormatSet(ptr)
-
 
 class DRMFormatSet(Ptr):
     """struct wlr_drm_format_set"""

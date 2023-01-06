@@ -123,7 +123,7 @@ CDEF += """
 bool wlr_session_change_vt(struct wlr_session *session, unsigned vt);
 """
 
-# render/allocator.h
+# wlr/render/allocator.h
 CDEF += """
 struct wlr_allocator {
     ...;
@@ -136,7 +136,7 @@ struct wlr_buffer *wlr_allocator_create_buffer(struct wlr_allocator *alloc,
     int width, int height, const struct wlr_drm_format *format);
 """
 
-# render/wlr_renderer.h
+# wlr/render/wlr_renderer.h
 CDEF += """
 struct wlr_renderer *wlr_renderer_autocreate(struct wlr_backend *backend);
 
@@ -161,7 +161,7 @@ bool wlr_renderer_init_wl_display(struct wlr_renderer *r, struct wl_display *wl_
 void wlr_renderer_destroy(struct wlr_renderer *renderer);
 """
 
-# render/drm_format_set.h
+# wlr/render/drm_format_set.h
 CDEF += """
 struct wlr_drm_format_set {
     ...;
@@ -169,13 +169,11 @@ struct wlr_drm_format_set {
 struct wlr_drm_format {
     ...;
 };
-const struct wlr_drm_format_set *wlr_renderer_get_render_formats(
-    struct wlr_renderer *renderer);
 const struct wlr_drm_format *wlr_drm_format_set_get(
     const struct wlr_drm_format_set *set, uint32_t format);
 """
 
-# render/wlr_texture.h
+# wlr/render/wlr_texture.h
 CDEF += """
 struct wlr_texture *wlr_texture_from_pixels(struct wlr_renderer *renderer,
     uint32_t fmt, uint32_t stride, uint32_t width, uint32_t height,
@@ -2716,7 +2714,6 @@ SOURCE = """
 #include <wlr/render/allocator.h>
 #include <wlr/render/drm_format_set.h>
 #include <wlr/render/wlr_renderer.h>
-#include <render/wlr_renderer.h>
 #include <wlr/types/wlr_buffer.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_cursor.h>
