@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import signal
 from typing import TYPE_CHECKING, cast
+from weakref import WeakKeyDictionary
 
 from pywayland.protocol.wayland import WlKeyboard, WlSeat
 from pywayland.server import Display, Listener
@@ -20,6 +21,10 @@ from wlroots.wlr_types import (
     Output,
     OutputLayout,
     Scene,
+    SceneBuffer,
+    SceneNode,
+    SceneNodeType,
+    SceneSurface,
     SceneTree,
     Seat,
     Surface,
@@ -45,6 +50,8 @@ from .view import View
 if TYPE_CHECKING:
     from wlroots.wlr_types import InputDevice
     from wlroots.wlr_types.keyboard import KeyboardKeyEvent, KeyboardModifiers
+
+_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
 def get_keysyms(xkb_state, keycode):
@@ -128,11 +135,27 @@ class TinywlServer:
     def view_at(
         self, layout_x, layout_y
     ) -> tuple[View | None, Surface | None, float, float]:
-        for view in self.views[::-1]:
-            surface, x, y = view.view_at(layout_x, layout_y)
-            if surface is not None:
-                return view, surface, x, y
-        return None, None, 0, 0
+        maybe_node = self._scene.tree.node.node_at(
+            layout_x,
+            layout_y,
+        )
+        if maybe_node is None or maybe_node[0].type != SceneNodeType.BUFFER:
+            return None, None, 0, 0
+
+        node, sx, sy = maybe_node
+        scene_buffer = SceneBuffer.from_node(node)
+        if scene_buffer is None:
+            return None, None, 0, 0
+        scene_surface = SceneSurface.from_buffer(scene_buffer)
+        if scene_surface is None:
+            return None, None, 0, 0
+
+        surface = scene_surface.surface
+        tree = node.parent
+        # Find the node corresponding to the view at the root of this tree
+        while tree.node.data is None:
+            tree = tree.node.parent
+        return tree.node.data, surface, sx, sy
 
     def _process_cursor_move(self) -> None:
         # Move the grabbed view to the new position
@@ -303,6 +326,12 @@ class TinywlServer:
         scene_tree = Scene.xdg_surface_create(self._scene.tree, xdg_surface)
         view = View(xdg_surface, self, scene_tree.node)
         self.views.append(view)
+
+        # Keep the node alive for as long as the view, so that the view is accessible at
+        # its data struct member.
+        scene_node = scene_tree.node
+        scene_node.data = view
+        _weakkeydict[view] = scene_node
 
     # #############################################################
     # output and frame handling callbacks
