@@ -12,13 +12,9 @@ from wlroots.wlr_types import Surface
 if TYPE_CHECKING:
     from wlroots.util.box import Box
     from wlroots.util.clock import Timespec
-    from wlroots.wlr_types import (
-        Buffer,
-        LayerSurfaceV1,
-        Output,
-        OutputLayout,
-        XdgSurface,
-    )
+    from wlroots.wlr_types import Buffer, Output, OutputLayout
+    from wlroots.wlr_types.layer_shell_v1 import LayerSurfaceV1
+    from wlroots.wlr_types.xdg_shell import XdgSurface
 
 
 class SceneNodeType(enum.IntEnum):
