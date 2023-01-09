@@ -2,9 +2,13 @@
 # Copyright (c) Matt Colligan 2022
 
 import enum
+from weakref import WeakKeyDictionary
 
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
+
 from .input_device import ButtonState, InputDevice
+
+_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
 @enum.unique
@@ -27,8 +31,9 @@ class Pointer(Ptr):
 
     @property
     def base(self) -> InputDevice:
-        """The pointer associated with the event"""
-        return InputDevice(ffi.addressof(self._ptr.base))
+        device_ptr = ffi.addressof(self._ptr.base)
+        _weakkeydict[device_ptr] = self._ptr
+        return InputDevice(device_ptr)
 
 
 class _PointerEvent(Ptr):

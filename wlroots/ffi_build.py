@@ -932,6 +932,8 @@ struct wlr_keyboard_modifiers {
 };
 
 struct wlr_keyboard {
+    struct wlr_input_device base;
+
     const struct wlr_keyboard_impl *impl;
     struct wlr_keyboard_group *group;
 

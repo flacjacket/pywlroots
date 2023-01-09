@@ -86,6 +86,12 @@ class Keyboard(PtrHasData):
         self.keymap_event = Signal(ptr=ffi.addressof(self._ptr.events.keymap))
         self.repeat_info_event = Signal(ptr=ffi.addressof(self._ptr.events.repeat_info))
 
+    @property
+    def base(self) -> InputDevice:
+        device_ptr = ffi.addressof(self._ptr.base)
+        _weakkeydict[device_ptr] = self._ptr
+        return InputDevice(device_ptr)
+
     @classmethod
     def from_input_device(cls, input_device: InputDevice) -> Keyboard:
         ptr = lib.wlr_keyboard_from_input_device(input_device._ptr)

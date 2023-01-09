@@ -41,10 +41,6 @@ class VirtualPointerV1(Ptr):
         """A wlr_virtual_pointer_v1 struct."""
         self._ptr = ffi.cast("struct wlr_virtual_pointer_v1 *", ptr)
 
-        self.destroy_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.destroy), data_wrapper=VirtualPointerV1
-        )
-
     @property
     def pointer(self) -> Pointer:
         pointer_ptr = ffi.addressof(self._ptr.pointer)

@@ -32,7 +32,7 @@ class VirtualKeyboardV1(Ptr):
         )
 
     @property
-    def Keyboard(self) -> Keyboard:
+    def keyboard(self) -> Keyboard:
         keyboard_ptr = ffi.addressof(self._ptr.keyboard)
         _weakkeydict[keyboard_ptr] = self._ptr
         return Keyboard(keyboard_ptr)
