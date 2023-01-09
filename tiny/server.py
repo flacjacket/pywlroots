@@ -150,10 +150,10 @@ class TinywlServer:
             return None, None, 0, 0
 
         surface = scene_surface.surface
-        tree = node.parent
+        tree = cast(SceneTree, node.parent)
         # Find the node corresponding to the view at the root of this tree
         while tree.node.data is None:
-            tree = tree.node.parent
+            tree = cast(SceneTree, tree.node.parent)
         return tree.node.data, surface, sx, sy
 
     def _process_cursor_move(self) -> None:
