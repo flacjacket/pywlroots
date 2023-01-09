@@ -137,6 +137,10 @@ class SceneNode(PtrHasData):
     def y(self) -> int:
         return self._ptr.y
 
+    @property
+    def enabled(self) -> bool:
+        return self._ptr.enabled
+
     def destroy(self) -> None:
         """Immediately destroy the scene-graph node."""
         lib.wlr_scene_node_destroy(self._ptr)
