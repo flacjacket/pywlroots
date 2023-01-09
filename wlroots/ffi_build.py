@@ -1023,6 +1023,8 @@ struct pixman_box32 {
 };
 
 void pixman_region32_init(struct pixman_region32 *region);
+void pixman_region32_init_rect(struct pixman_region32 *region, int x, int y,
+    unsigned int width, unsigned int height);
 
 void pixman_region32_fini(struct pixman_region32 *region);
 
