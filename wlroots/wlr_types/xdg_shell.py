@@ -374,9 +374,9 @@ class XdgPopup(Ptr):
     @property
     def parent(self) -> Surface:
         """Parent Surface."""
-        parent = Surface(self._ptr.parent)
-        _weakkeydict[parent] = self
-        return parent
+        parent_ptr = self._ptr.parent
+        _weakkeydict[parent_ptr] = self
+        return Surface(parent_ptr)
 
     @property
     def current(self) -> XdgPopupState:
