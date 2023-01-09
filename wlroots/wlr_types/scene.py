@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import enum
+from typing import TYPE_CHECKING
 
-from wlroots import ffi, lib, PtrHasData, Ptr
-from wlroots.util.clock import Timespec
-from wlroots.wlr_types import Output, OutputLayout, Surface
-from wlroots.wlr_types.xdg_shell import XdgSurface
-from wlroots.wlr_types.layer_shell_v1 import LayerSurfaceV1
-from wlroots.util.box import Box
+from wlroots import Ptr, PtrHasData, ffi, lib
+from wlroots.util.region import PixmanRegion32
+from wlroots.wlr_types import Surface
+
+if TYPE_CHECKING:
+    from wlroots.util.box import Box
+    from wlroots.util.clock import Timespec
+    from wlroots.wlr_types import (Buffer, LayerSurfaceV1, Output,
+                                   OutputLayout, XdgSurface)
 
 
 class SceneNodeType(enum.IntEnum):
@@ -107,7 +111,9 @@ class SceneTree(PtrHasData):
 
     @classmethod
     def subsurface_tree_create(cls, parent: SceneTree, surface: Surface) -> SceneTree:
-        return SceneTree(lib.wlr_scene_subsurface_tree_create(parent._ptr, surface._ptr))
+        return SceneTree(
+            lib.wlr_scene_subsurface_tree_create(parent._ptr, surface._ptr)
+        )
 
 
 class SceneNode(PtrHasData):
@@ -194,6 +200,29 @@ class SceneBuffer(Ptr):
         if ptr == ffi.NULL:
             return None
         return cls(ptr)
+
+    @classmethod
+    def create(cls, parent: SceneTree, buffer: Buffer) -> SceneBuffer | None:
+        ptr = lib.wlr_scene_buffer_create(parent._ptr, buffer._ptr)
+        if ptr == ffi.NULL:
+            return None
+        return cls(ptr)
+
+    @property
+    def node(self) -> SceneNode:
+        ptr = ffi.addressof(self._ptr.node)
+        return SceneNode(ptr)
+
+    def set_buffer(self, buffer: Buffer | None) -> None:
+        buffer_ptr = buffer._ptr if buffer else ffi.NULL
+        lib.wlr_scene_buffer_set_buffer(self._ptr, buffer_ptr)
+
+    def set_buffer_with_damage(
+        self, buffer: Buffer | None, region: PixmanRegion32 | None = None
+    ) -> None:
+        buffer_ptr = buffer._ptr if buffer else ffi.NULL
+        region_ptr = region._ptr if region else ffi.NULL
+        lib.wlr_scene_buffer_set_buffer_with_damage(self._ptr, buffer_ptr, region_ptr)
 
 
 class SceneSurface(Ptr):
