@@ -22,7 +22,6 @@ from wlroots.wlr_types import (
     OutputLayout,
     Scene,
     SceneBuffer,
-    SceneNode,
     SceneNodeType,
     SceneSurface,
     SceneTree,
