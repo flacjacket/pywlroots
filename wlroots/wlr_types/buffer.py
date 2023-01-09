@@ -18,9 +18,7 @@ class Buffer(Ptr):
 
     def drop(self) -> None:
         """Destroys this wlr_texture."""
-        if self._ptr is not None:
-            ffi.release(self._ptr)
-            self._ptr = None
+        lib.wlr_buffer_drop(self._ptr)
 
     def begin_data_ptr_access(
         self, flags: BufferDataPtrAccessFlag
