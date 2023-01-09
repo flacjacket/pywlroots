@@ -211,7 +211,7 @@ class PointerPinchUpdateEvent(_PointerEvent):
 
 class PointerPinchEndEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
-        ptr = ffi.cast("struct wlr_event_pointer_pinch_end *", ptr)
+        ptr = ffi.cast("struct wlr_pointer_pinch_end_event *", ptr)
         self._ptr = ptr
 
     @property
