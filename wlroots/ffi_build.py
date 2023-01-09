@@ -1692,6 +1692,8 @@ typedef bool (*wlr_scene_buffer_point_accepts_input_func_t)(
     struct wlr_scene_buffer *buffer, int sx, int sy);
 typedef void (*wlr_scene_buffer_iterator_func_t)(
     struct wlr_scene_buffer *buffer, int sx, int sy, void *user_data);
+extern "Python" void buffer_iterator_callback(
+    struct wlr_scene_buffer *buffer, int sx, int sy, void *user_data);
 
 enum wlr_scene_node_type {
     WLR_SCENE_NODE_TREE,
