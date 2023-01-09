@@ -27,10 +27,6 @@ class VirtualKeyboardV1(Ptr):
         """A wlr_virtual_keyboard_v1 instance."""
         self._ptr = ffi.cast("struct wlr_virtual_keyboard_v1 *", ptr)
 
-        self.destroy_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.destroy), data_wrapper=VirtualKeyboardV1
-        )
-
     @property
     def keyboard(self) -> Keyboard:
         keyboard_ptr = ffi.addressof(self._ptr.keyboard)
