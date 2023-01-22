@@ -51,13 +51,6 @@ class Surface(PtrHasData):
         )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
-    def __eq__(self, other: object) -> bool:
-        """Check if the other surface is equal by the cdata pointer"""
-        if not isinstance(other, Surface):
-            return NotImplemented
-
-        return self._ptr == other._ptr
-
     @property
     def is_xdg_surface(self) -> bool:
         """True if the current surface is an XDG surface"""
