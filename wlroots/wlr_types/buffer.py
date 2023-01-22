@@ -38,9 +38,3 @@ class Buffer(Ptr):
     def end_data_ptr_access(self) -> None:
         """End access to the underlying data"""
         lib.wlr_buffer_end_data_ptr_access(self._ptr)
-
-    def lock(self) -> None:
-        lib.wlr_buffer_lock(self._ptr)
-
-    def unlock(self) -> None:
-        lib.wlr_buffer_unlock(self._ptr)
