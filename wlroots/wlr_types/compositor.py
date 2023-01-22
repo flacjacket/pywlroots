@@ -36,7 +36,7 @@ class SubCompositor(Ptr):
 
 
 class Surface(PtrHasData):
-    def __init__(self, ptr):
+    def __init__(self, ptr) -> None:
         """Create a wlroots Surface
 
         :param ptr:
