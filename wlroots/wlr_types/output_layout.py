@@ -102,13 +102,11 @@ class OutputLayout(Ptr):
         else:
             reference_ptr = ffi.NULL
 
-        if dest_box:
-            lib.wlr_output_layout_get_box(self._ptr, reference_ptr, dest_box._ptr)
-            return dest_box
+        if not dest_box:
+            dest_box = Box(ptr=ffi.new("struct wlr_box *"))
 
-        box_ptr = ffi.new("struct wlr_box *")
-        lib.wlr_output_layout_get_box(self._ptr, reference_ptr, box_ptr)
-        return Box(ptr=box_ptr)
+        lib.wlr_output_layout_get_box(self._ptr, reference_ptr, dest_box._ptr)
+        return dest_box
 
     def closest_point(
         self, lx: float, ly: float, reference: Output | None = None
