@@ -55,12 +55,22 @@ class PtrHasData(Ptr):
     def data(self, data: Any) -> None:
         """Store the given data on the current object"""
         if data is None:
+            # Clear the data reference.
+            if self.data in _weakkeydict:
+                del _weakkeydict[self.data]
             self._ptr.data = ffi.NULL
-            del _weakkeydict[self]
+            return
+
+        # We adding a new data reference.
+        if isinstance(data, ffi.CData):
+            # We were already provided with a handle. The allows users of this code to
+            # handle memory themselves.
+            handle = data
         else:
+            # We need to make a new handle. This keeps the data alive.
             handle = ffi.new_handle(data)
-            _weakkeydict[self] = (handle, data)
-            self._ptr.data = handle
+            _weakkeydict[data] = handle
+        self._ptr.data = handle
 
 
 def str_or_none(member: ffi.CData) -> str | None:
