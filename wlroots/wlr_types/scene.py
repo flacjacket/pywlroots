@@ -24,17 +24,19 @@ class SceneNodeType(enum.IntEnum):
 
 
 class Scene(Ptr):
-    def __init__(self, output_layout: OutputLayout) -> None:
+    def __init__(self) -> None:
         """ "A root scene-graph node."""
         self._ptr = lib.wlr_scene_create()
-        if not lib.wlr_scene_attach_output_layout(self._ptr, output_layout._ptr):
-            raise RuntimeError("Unable to attach scene to output layout")
 
     @property
     def tree(self) -> SceneTree:
         """The associated scene node."""
         ptr = ffi.addressof(self._ptr.tree)
         return SceneTree(ptr)
+
+    def attach_output_layout(self, output_layout: OutputLayout) -> bool:
+        """Get a scene-graph output from a wlr_output."""
+        return lib.wlr_scene_attach_output_layout(self._ptr, output_layout._ptr)
 
     def get_scene_output(self, output: Output) -> SceneOutput:
         """Get a scene-graph output from a wlr_output."""
@@ -85,6 +87,10 @@ class SceneOutput(Ptr):
         if not lib.wlr_scene_output_commit(self._ptr):
             raise RuntimeError("Unable to commit scene output")
 
+    def destroy(self) -> None:
+        """Destroy a scene-graph output."""
+        lib.wlr_scene_output_destroy(self._ptr)
+
     def send_frame_done(self, timespec: Timespec) -> None:
         """Send frame done on scene output.
 
@@ -93,6 +99,10 @@ class SceneOutput(Ptr):
         scene_output.
         """
         lib.wlr_scene_output_send_frame_done(self._ptr, timespec._ptr)
+
+    def set_position(self, lx: int, ly: int) -> None:
+        """Set the output's position in the scene-graph."""
+        lib.wlr_scene_output_set_position(self._ptr, lx, ly)
 
 
 class SceneTree(PtrHasData):
