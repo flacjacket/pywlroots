@@ -275,7 +275,7 @@ class Surface(PtrHasData):
 
     @property
     def wm_instance(self) -> str | None:
-        return str_or_none(self._ptr.wm_instance)
+        return str_or_none(self._ptr.instance)
 
     @property
     def role(self) -> str | None:
