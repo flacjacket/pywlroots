@@ -435,7 +435,7 @@ class XdgTopLevelRequested(Ptr):
 
     @property
     def fullscreen(self) -> bool:
-        return self._ptr.maximized
+        return self._ptr.fullscreen
 
     @property
     def fullscreen_output(self) -> Output | None:
