@@ -3,16 +3,13 @@
 from __future__ import annotations
 
 import enum
-import typing
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
 from pywayland.protocol.wayland import WlKeyboard
 
 from wlroots import ffi, PtrHasData, lib, Ptr
-
-if typing.TYPE_CHECKING:
-    from wlroots.wlr_types.input_device import InputDevice
+from wlroots.wlr_types.input_device import InputDevice
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
