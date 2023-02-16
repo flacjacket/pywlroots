@@ -36,7 +36,8 @@ def main(argv) -> None:
         ) as cursor, XCursorManager(24) as xcursor_manager, Seat(
             display, "seat0"
         ) as seat:
-            scene = Scene(output_layout)
+            scene = Scene()
+            scene.attach_output_layout(output_layout)
             tinywl_server = TinywlServer(  # noqa: F841
                 display=display,
                 backend=backend,
