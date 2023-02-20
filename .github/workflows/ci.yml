@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        wlroots-version: ["0.16.1", master]
+        wlroots-version: ["0.16.2", master]
     steps:
       - name: Install dependencies
         run: |
@@ -144,7 +144,7 @@ jobs:
           - "pypy-3.7"
           - "pypy-3.8"
           - "pypy-3.9"
-        wlroots-version: ["0.16.1"]
+        wlroots-version: ["0.16.2"]
         include:
           - python-version: "3.11"
             wlroots-version: master
@@ -264,7 +264,7 @@ jobs:
     needs: build-wayland
     env:
       python-version: "3.11"
-      wlroots-version: "0.16.1"
+      wlroots-version: "0.16.2"
     steps:
       - name: Download wayland libraries
         uses: actions/download-artifact@v3
@@ -300,7 +300,7 @@ jobs:
     needs: build-wayland
     env:
       python-version: "3.11"
-      wlroots-version: "0.16.1"
+      wlroots-version: "0.16.2"
     steps:
       - name: Download wayland libraries
         uses: actions/download-artifact@v3
