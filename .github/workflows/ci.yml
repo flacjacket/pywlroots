@@ -115,6 +115,7 @@ jobs:
           sudo make install
       - name: Build wlroots
         working-directory: wlroots-${{ matrix.wlroots-version }}
+        continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: |
           meson build --prefix=/usr -Dxwayland=enabled
           ninja -C build
@@ -131,7 +132,6 @@ jobs:
     name: Python ${{ matrix.python-version}} unit tests (${{ matrix.wlroots-version }})
     runs-on: ubuntu-22.04
     needs: build-wayland
-    if: ${{ success() || failure() }}
     strategy:
       fail-fast: false
       matrix:
@@ -191,7 +191,6 @@ jobs:
           python wlroots/ffi_build.py
       - name: Run unit tests
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
-        if: ${{ success() }}
         run: pytest -Wall
         env:
           WLR_HEADLESS_OUTPUTS: '1'
@@ -263,7 +262,6 @@ jobs:
     name: packaging tests
     runs-on: ubuntu-22.04
     needs: build-wayland
-    if: ${{ success() || failure() }}
     env:
       python-version: "3.11"
       wlroots-version: "0.16.0"
@@ -300,7 +298,6 @@ jobs:
     name: protocol headers test
     runs-on: ubuntu-22.04
     needs: build-wayland
-    if: ${{ success() || failure() }}
     env:
       python-version: "3.11"
       wlroots-version: "0.16.0"
