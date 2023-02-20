@@ -75,7 +75,8 @@ def check(protocols: list[pathlib.Path]) -> None:
         if len(protocol_header) != len(generated_header):
             raise ValueError(
                 f"Mismatch line count in {protocol_xml.name}, run: "
-                f"`wayland-scanner server-header /path/to/{protocol_xml.name} wlroots/include/{protocol_header_file.name}`"
+                f"`wayland-scanner server-header /path/to/{protocol_xml.name} "
+                f"wlroots/include/{protocol_header_file.name}`"
             )
 
         for i, (generated_line, line) in enumerate(
