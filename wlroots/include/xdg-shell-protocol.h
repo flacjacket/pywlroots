@@ -110,7 +110,7 @@ extern const struct wl_interface xdg_wm_base_interface;
  * For an xdg_positioner object to be considered complete, it must have a
  * non-zero size set by set_size, and a non-zero anchor rectangle set by
  * set_anchor_rect. Passing an incomplete xdg_positioner object when
- * positioning a surface raises an error.
+ * positioning a surface raises an invalid_positioner error.
  * @section page_iface_xdg_positioner_api API
  * See @ref iface_xdg_positioner.
  */
@@ -135,7 +135,7 @@ extern const struct wl_interface xdg_wm_base_interface;
  * For an xdg_positioner object to be considered complete, it must have a
  * non-zero size set by set_size, and a non-zero anchor rectangle set by
  * set_anchor_rect. Passing an incomplete xdg_positioner object when
- * positioning a surface raises an error.
+ * positioning a surface raises an invalid_positioner error.
  */
 extern const struct wl_interface xdg_positioner_interface;
 #endif
@@ -384,6 +384,10 @@ enum xdg_wm_base_error {
 	 * the client provided an invalid positioner
 	 */
 	XDG_WM_BASE_ERROR_INVALID_POSITIONER = 5,
+	/**
+	 * the client didn’t respond to a ping event in time
+	 */
+	XDG_WM_BASE_ERROR_UNRESPONSIVE = 6,
 };
 #endif /* XDG_WM_BASE_ERROR_ENUM */
 
@@ -399,7 +403,7 @@ struct xdg_wm_base_interface {
 	 *
 	 * Destroying a bound xdg_wm_base object while there are surfaces
 	 * still alive created by this xdg_wm_base object instance is
-	 * illegal and will result in a protocol error.
+	 * illegal and will result in a defunct_surfaces error.
 	 */
 	void (*destroy)(struct wl_client *client,
 			struct wl_resource *resource);
@@ -421,7 +425,7 @@ struct xdg_wm_base_interface {
 	 * only be assigned a role extending xdg_surface, such as
 	 * xdg_toplevel or xdg_popup. It is illegal to create an
 	 * xdg_surface for a wl_surface which already has an assigned role
-	 * and this will result in a protocol error.
+	 * and this will result in a role error.
 	 *
 	 * This creates an xdg_surface for the given surface. An
 	 * xdg_surface is used as basis to define a role to a given
@@ -439,7 +443,8 @@ struct xdg_wm_base_interface {
 	 * respond to a ping event
 	 *
 	 * A client must respond to a ping event with a pong request or
-	 * the client may be deemed unresponsive. See xdg_wm_base.ping.
+	 * the client may be deemed unresponsive. See xdg_wm_base.ping and
+	 * xdg_wm_base.error.unresponsive.
 	 * @param serial serial of the ping event
 	 */
 	void (*pong)(struct wl_client *client,
@@ -708,7 +713,9 @@ struct xdg_positioner_interface {
 	 * gravity is specified (e.g. 'bottom_right' or 'top_left'), then
 	 * the child surface will be placed towards the specified gravity;
 	 * otherwise, the child surface will be centered over the anchor
-	 * point on any axis that had no gravity specified.
+	 * point on any axis that had no gravity specified. If the gravity
+	 * is not in the ‘gravity’ enum, an invalid_input error is
+	 * raised.
 	 * @param gravity gravity direction
 	 */
 	void (*set_gravity)(struct wl_client *client,
@@ -853,10 +860,30 @@ struct xdg_positioner_interface {
 #ifndef XDG_SURFACE_ERROR_ENUM
 #define XDG_SURFACE_ERROR_ENUM
 enum xdg_surface_error {
+	/**
+	 * Surface was not fully constructed
+	 */
 	XDG_SURFACE_ERROR_NOT_CONSTRUCTED = 1,
+	/**
+	 * Surface was already constructed
+	 */
 	XDG_SURFACE_ERROR_ALREADY_CONSTRUCTED = 2,
+	/**
+	 * Attaching a buffer to an unconfigured surface
+	 */
 	XDG_SURFACE_ERROR_UNCONFIGURED_BUFFER = 3,
+	/**
+	 * Invalid serial number when acking a configure event
+	 */
 	XDG_SURFACE_ERROR_INVALID_SERIAL = 4,
+	/**
+	 * Width or height was zero or negative
+	 */
+	XDG_SURFACE_ERROR_INVALID_SIZE = 5,
+	/**
+	 * Surface was destroyed before its role object
+	 */
+	XDG_SURFACE_ERROR_DEFUNCT_ROLE_OBJECT = 6,
 };
 #endif /* XDG_SURFACE_ERROR_ENUM */
 
@@ -869,7 +896,8 @@ struct xdg_surface_interface {
 	 * destroy the xdg_surface
 	 *
 	 * Destroy the xdg_surface object. An xdg_surface must only be
-	 * destroyed after its role object has been destroyed.
+	 * destroyed after its role object has been destroyed, otherwise a
+	 * defunct_role_object error is raised.
 	 */
 	void (*destroy)(struct wl_client *client,
 			struct wl_resource *resource);
@@ -934,10 +962,10 @@ struct xdg_surface_interface {
 	 * the wl_surface associated with this xdg_surface.
 	 *
 	 * The width and height must be greater than zero. Setting an
-	 * invalid size will raise an error. When applied, the effective
-	 * window geometry will be the set window geometry clamped to the
-	 * bounding rectangle of the combined geometry of the surface of
-	 * the xdg_surface and the associated subsurfaces.
+	 * invalid size will raise an invalid_size error. When applied, the
+	 * effective window geometry will be the set window geometry
+	 * clamped to the bounding rectangle of the combined geometry of
+	 * the surface of the xdg_surface and the associated subsurfaces.
 	 */
 	void (*set_window_geometry)(struct wl_client *client,
 				    struct wl_resource *resource,
@@ -959,6 +987,8 @@ struct xdg_surface_interface {
 	 *
 	 * If the client receives multiple configure events before it can
 	 * respond to one, it only has to ack the last configure event.
+	 * Acking a configure event that was never sent raises an
+	 * invalid_serial error.
 	 *
 	 * A client is not required to commit immediately after sending an
 	 * ack_configure request - it may even ack_configure several times
@@ -1038,6 +1068,10 @@ enum xdg_toplevel_error {
 	 * invalid parent toplevel
 	 */
 	XDG_TOPLEVEL_ERROR_INVALID_PARENT = 1,
+	/**
+	 * client provided an invalid min or max size
+	 */
+	XDG_TOPLEVEL_ERROR_INVALID_SIZE = 2,
 };
 #endif /* XDG_TOPLEVEL_ERROR_ENUM */
 
@@ -1275,7 +1309,7 @@ struct xdg_toplevel_interface {
 	 * application identifiers and how they relate to well-known D-Bus
 	 * names and .desktop files.
 	 *
-	 * [0] http://standards.freedesktop.org/desktop-entry-spec/
+	 * [0] https://standards.freedesktop.org/desktop-entry-spec/
 	 */
 	void (*set_app_id)(struct wl_client *client,
 			   struct wl_resource *resource,
@@ -1291,7 +1325,8 @@ struct xdg_toplevel_interface {
 	 * This request asks the compositor to pop up such a window menu at
 	 * the given position, relative to the local surface coordinates of
 	 * the parent surface. There are no guarantees as to what menu
-	 * items the window menu contains.
+	 * items the window menu contains, or even if a window menu will be
+	 * drawn at all.
 	 *
 	 * This request must be used in response to some sort of user
 	 * action like a button press, key press, or touch down event.
@@ -1408,11 +1443,11 @@ struct xdg_toplevel_interface {
 	 * request.
 	 *
 	 * Requesting a maximum size to be smaller than the minimum size of
-	 * a surface is illegal and will result in a protocol error.
+	 * a surface is illegal and will result in an invalid_size error.
 	 *
 	 * The width and height must be greater than or equal to zero.
-	 * Using strictly negative values for width and height will result
-	 * in a protocol error.
+	 * Using strictly negative values for width or height will result
+	 * in a invalid_size error.
 	 */
 	void (*set_max_size)(struct wl_client *client,
 			     struct wl_resource *resource,
@@ -1450,11 +1485,11 @@ struct xdg_toplevel_interface {
 	 * request.
 	 *
 	 * Requesting a minimum size to be larger than the maximum size of
-	 * a surface is illegal and will result in a protocol error.
+	 * a surface is illegal and will result in an invalid_size error.
 	 *
 	 * The width and height must be greater than or equal to zero.
 	 * Using strictly negative values for width and height will result
-	 * in a protocol error.
+	 * in a invalid_size error.
 	 */
 	void (*set_min_size)(struct wl_client *client,
 			     struct wl_resource *resource,
