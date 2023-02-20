@@ -106,7 +106,7 @@ jobs:
       - name: Build wlroots
         working-directory: wlroots-${{ env.wlroots-version }}
         run: |
-          meson build --prefix=/usr
+          meson build --prefix=/usr -Dxwayland=enabled
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
       - name: Create artifact
