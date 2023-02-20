@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     container: quay.io/pypa/manylinux_2_28_x86_64
     env:
-      libdrm-version: "2.4.113"
+      libdrm-version: "2.4.114"
       seatd-version: "0.6.3"
       pixman-version: "0.42.0"
       wayland-protocols-version: "1.31"

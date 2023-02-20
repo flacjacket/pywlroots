@@ -8,7 +8,7 @@ jobs:
     name: Build Wayland libraries
     runs-on: ubuntu-22.04
     env:
-      libdrm-version: "2.4.113"
+      libdrm-version: "2.4.114"
       seatd-version: "0.6.4"
       pixman-version: "0.42.0"
       hwdata-version: "0.364"
