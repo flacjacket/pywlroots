@@ -9,6 +9,7 @@ from pywayland.server import Signal
 from pywayland.protocol.wayland import WlKeyboard
 
 from wlroots import ffi, PtrHasData, lib, Ptr
+from wlroots.wlr_types.input_device import InputDevice
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
@@ -39,7 +40,7 @@ class KeyboardKeyEvent(Ptr):
         This event is emitted before the xkb state of the keyboard has been
         updated (including modifiers).
         """
-        self._ptr = ffi.cast("struct wlr_event_keyboard_key *", ptr)
+        self._ptr = ffi.cast("struct wlr_keyboard_key_event *", ptr)
 
     @property
     def time_msec(self) -> int:
@@ -81,7 +82,17 @@ class Keyboard(PtrHasData):
         self.modifiers_event = Signal(ptr=ffi.addressof(self._ptr.events.modifiers))
         self.keymap_event = Signal(ptr=ffi.addressof(self._ptr.events.keymap))
         self.repeat_info_event = Signal(ptr=ffi.addressof(self._ptr.events.repeat_info))
-        self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
+
+    @property
+    def base(self) -> InputDevice:
+        device_ptr = ffi.addressof(self._ptr.base)
+        _weakkeydict[device_ptr] = self._ptr
+        return InputDevice(device_ptr)
+
+    @classmethod
+    def from_input_device(cls, input_device: InputDevice) -> Keyboard:
+        ptr = lib.wlr_keyboard_from_input_device(input_device._ptr)
+        return cls(ptr)
 
     def set_keymap(self, keymap) -> None:
         """Set the keymap associated with the keyboard"""

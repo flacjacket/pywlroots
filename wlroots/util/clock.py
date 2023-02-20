@@ -27,7 +27,7 @@ class Timespec(Ptr):
     @property
     def nsec(self) -> int:
         """Nanoseconds in designated time"""
-        return self._ptr.tv_sec
+        return self._ptr.tv_nsec
 
     @property
     def time(self) -> float:

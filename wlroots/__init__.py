@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import weakref
 from typing import Any
 
 from ._ffi import ffi, lib  # noqa: F401
@@ -14,6 +15,8 @@ __wlroots_version__ = "{}.{}.{}".format(
 )
 
 __version__ = _version
+
+_weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 
 
 class Ptr:
@@ -51,8 +54,23 @@ class PtrHasData(Ptr):
     @data.setter
     def data(self, data: Any) -> None:
         """Store the given data on the current object"""
-        self._data_handle = ffi.new_handle(data)
-        self._ptr.data = self._data_handle
+        if data is None:
+            # Clear the data reference.
+            if self.data in _weakkeydict:
+                del _weakkeydict[self.data]
+            self._ptr.data = ffi.NULL
+            return
+
+        # We adding a new data reference.
+        if isinstance(data, ffi.CData):
+            # We were already provided with a handle. The allows users of this code to
+            # handle memory themselves.
+            handle = data
+        else:
+            # We need to make a new handle. This keeps the data alive.
+            handle = ffi.new_handle(data)
+            _weakkeydict[data] = handle
+        self._ptr.data = handle
 
 
 def str_or_none(member: ffi.CData) -> str | None:

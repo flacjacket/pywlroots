@@ -9,7 +9,7 @@ from pywayland.protocol.wayland import WlSeat
 
 from wlroots import ffi, PtrHasData, lib, Ptr
 from .data_device_manager import Drag
-from .input_device import ButtonState, InputDevice
+from .input_device import ButtonState
 from .keyboard import Keyboard, KeyboardModifiers, KeyboardKeyEvent
 from .pointer import AxisSource, AxisOrientation
 from .surface import Surface
@@ -226,13 +226,13 @@ class Seat(PtrHasData):
         """Whether or not the pointer has a grab other than the default grab"""
         lib.wlr_seat_pointer_has_grab(self._ptr)
 
-    def set_keyboard(self, input_device: InputDevice) -> None:
+    def set_keyboard(self, keyboard: Keyboard) -> None:
         """Set this keyboard as the active keyboard for the seat
 
-        :param input_device:
-            The input device associated to the keyboard to set
+        :param keyboard:
+            The keyboard to set as active.
         """
-        lib.wlr_seat_set_keyboard(self._ptr, input_device._ptr)
+        lib.wlr_seat_set_keyboard(self._ptr, keyboard._ptr)
 
     def grab(self) -> KeyboardGrab:
         """Start a grab of the keyboard of this seat"""

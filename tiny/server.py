@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import signal
 from typing import TYPE_CHECKING, cast
+from weakref import WeakKeyDictionary
 
 from pywayland.protocol.wayland import WlKeyboard, WlSeat
 from pywayland.server import Display, Listener
@@ -10,16 +11,20 @@ from wlroots import ffi, lib
 from wlroots.allocator import Allocator
 from wlroots.backend import Backend
 from wlroots.renderer import Renderer
+from wlroots.util.box import Box
 from wlroots.util.clock import Timespec
 from wlroots.util.edges import Edges
 from wlroots.util.log import logger
 from wlroots.wlr_types import (
-    Box,
     Cursor,
+    Keyboard,
     Output,
     OutputLayout,
     Scene,
-    SceneNode,
+    SceneBuffer,
+    SceneNodeType,
+    SceneSurface,
+    SceneTree,
     Seat,
     Surface,
     XCursorManager,
@@ -29,9 +34,9 @@ from wlroots.wlr_types.cursor import WarpMode
 from wlroots.wlr_types.input_device import ButtonState, InputDeviceType
 from wlroots.wlr_types.keyboard import KeyboardModifier
 from wlroots.wlr_types.pointer import (
-    PointerEventButton,
-    PointerEventMotion,
-    PointerEventMotionAbsolute,
+    PointerButtonEvent,
+    PointerMotionEvent,
+    PointerMotionAbsoluteEvent,
 )
 from wlroots.wlr_types.seat import RequestSetSelectionEvent
 from wlroots.wlr_types.xdg_shell import XdgSurface, XdgSurfaceRole
@@ -44,6 +49,8 @@ from .view import View
 if TYPE_CHECKING:
     from wlroots.wlr_types import InputDevice
     from wlroots.wlr_types.keyboard import KeyboardKeyEvent, KeyboardModifiers
+
+_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
 def get_keysyms(xkb_state, keycode):
@@ -127,11 +134,27 @@ class TinywlServer:
     def view_at(
         self, layout_x, layout_y
     ) -> tuple[View | None, Surface | None, float, float]:
-        for view in self.views[::-1]:
-            surface, x, y = view.view_at(layout_x, layout_y)
-            if surface is not None:
-                return view, surface, x, y
-        return None, None, 0, 0
+        maybe_node = self._scene.tree.node.node_at(
+            layout_x,
+            layout_y,
+        )
+        if maybe_node is None or maybe_node[0].type != SceneNodeType.BUFFER:
+            return None, None, 0, 0
+
+        node, sx, sy = maybe_node
+        scene_buffer = SceneBuffer.from_node(node)
+        if scene_buffer is None:
+            return None, None, 0, 0
+        scene_surface = SceneSurface.from_buffer(scene_buffer)
+        if scene_surface is None:
+            return None, None, 0, 0
+
+        surface = scene_surface.surface
+        tree = cast(SceneTree, node.parent)
+        # Find the node corresponding to the view at the root of this tree
+        while tree.node.data is None:
+            tree = cast(SceneTree, tree.node.parent)
+        return tree.node.data, surface, sx, sy
 
     def _process_cursor_move(self) -> None:
         # Move the grabbed view to the new position
@@ -198,11 +221,12 @@ class TinywlServer:
     def send_modifiers(
         self, modifiers: KeyboardModifiers, input_device: InputDevice
     ) -> None:
-        self._seat.set_keyboard(input_device)
+        keyboard = Keyboard.from_input_device(input_device)
+        self._seat.set_keyboard(keyboard)
         self._seat.keyboard_notify_modifiers(modifiers)
 
     def send_key(self, key_event: KeyboardKeyEvent, input_device: InputDevice) -> None:
-        keyboard = input_device.keyboard
+        keyboard = Keyboard.from_input_device(input_device)
         keyboard_modifier = keyboard.modifier
 
         handled = False
@@ -223,7 +247,7 @@ class TinywlServer:
 
         # Otherwise, we pass it along to the client
         if not handled:
-            self._seat.set_keyboard(input_device)
+            self._seat.set_keyboard(keyboard)
             self._seat.keyboard_notify_key(key_event)
 
     def handle_keybinding(self, keysym: int) -> bool:
@@ -291,16 +315,22 @@ class TinywlServer:
             # enable this, we always set the user data field of xdg_surfaces to
             # the corresponding scene node.
             parent_xdg_surface = XdgSurface.from_surface(xdg_surface.popup.parent)
-            parent_scene_node = cast(SceneNode, parent_xdg_surface.data)
-            scene_node = SceneNode.xdg_surface_create(parent_scene_node, xdg_surface)
-            xdg_surface.data = scene_node
+            parent_scene_tree = cast(SceneTree, parent_xdg_surface.data)
+            scene_tree = Scene.xdg_surface_create(parent_scene_tree, xdg_surface)
+            xdg_surface.data = scene_tree
             return
 
         assert xdg_surface.role == XdgSurfaceRole.TOPLEVEL
 
-        scene_node = SceneNode.xdg_surface_create(self._scene.node, xdg_surface)
-        view = View(xdg_surface, self, scene_node)
+        scene_tree = Scene.xdg_surface_create(self._scene.tree, xdg_surface)
+        view = View(xdg_surface, self, scene_tree.node)
         self.views.append(view)
+
+        # Keep the node alive for as long as the view, so that the view is accessible at
+        # its data struct member.
+        scene_node = scene_tree.node
+        scene_node.data = view
+        _weakkeydict[view] = scene_node
 
     # #############################################################
     # output and frame handling callbacks
@@ -329,16 +359,16 @@ class TinywlServer:
     # input handling callbacks
 
     def server_new_input(self, listener, input_device: InputDevice) -> None:
-        if input_device.device_type == InputDeviceType.POINTER:
+        if input_device.type == InputDeviceType.POINTER:
             self._server_new_pointer(input_device)
-        elif input_device.device_type == InputDeviceType.KEYBOARD:
+        elif input_device.type == InputDeviceType.KEYBOARD:
             self._server_new_keyboard(input_device)
 
         capabilities = WlSeat.capability.pointer
         if len(self.keyboards) > 0:
             capabilities |= WlSeat.capability.keyboard
 
-        logging.info("new input %s", input_device.device_type)
+        logging.info("new input %s", input_device.type)
         logging.info("capabilities %s", capabilities)
 
         self._seat.set_capabilities(capabilities)
@@ -347,7 +377,7 @@ class TinywlServer:
         self._cursor.attach_input_device(input_device)
 
     def _server_new_keyboard(self, input_device: InputDevice) -> None:
-        keyboard = input_device.keyboard
+        keyboard = Keyboard.from_input_device(input_device)
 
         xkb_context = xkb.Context()
         keymap = xkb_context.keymap_new_from_names()
@@ -358,32 +388,33 @@ class TinywlServer:
         keyboard_handler = KeyboardHandler(keyboard, input_device, self)
         self.keyboards.append(keyboard_handler)
 
-        self._seat.set_keyboard(input_device)
+        self._seat.set_keyboard(keyboard)
 
     # #############################################################
     # cursor motion callbacks
 
-    def server_cursor_motion(self, listener, event_motion: PointerEventMotion) -> None:
+    def server_cursor_motion(self, listener, event_motion: PointerMotionEvent) -> None:
         logging.debug("cursor motion")
-        # self._cursor.move(event_motion_absolute.device
         self._cursor.move(
-            event_motion.delta_x, event_motion.delta_y, input_device=event_motion.device
+            event_motion.delta_x,
+            event_motion.delta_y,
+            input_device=event_motion.pointer.base,
         )
         self.process_cursor_motion(event_motion.time_msec)
 
     def server_cursor_motion_absolute(
-        self, listener, event_motion_absolute: PointerEventMotionAbsolute
+        self, listener, event_motion_absolute: PointerMotionAbsoluteEvent
     ) -> None:
         logging.debug("cursor abs motion")
         self._cursor.warp(
             WarpMode.AbsoluteClosest,
             event_motion_absolute.x,
             event_motion_absolute.y,
-            input_device=event_motion_absolute.device,
+            input_device=event_motion_absolute.pointer.base,
         )
         self.process_cursor_motion(event_motion_absolute.time_msec)
 
-    def server_cursor_button(self, listener, event: PointerEventButton) -> None:
+    def server_cursor_button(self, listener, event: PointerButtonEvent) -> None:
         logging.info("Got button click event %s", event.button_state)
         self._seat.pointer_notify_button(
             event.time_msec, event.button, event.button_state

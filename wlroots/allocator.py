@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from wlroots import lib, Ptr
-from wlroots.renderer import Renderer
+from wlroots import Ptr, ffi, lib
 from wlroots.backend import Backend
+from wlroots.renderer import Renderer, DRMFormat
+from wlroots.wlr_types.buffer import Buffer
 
 
 class Allocator(Ptr):
@@ -24,3 +25,9 @@ class Allocator(Ptr):
         if not ret:
             raise RuntimeError("Unable to create an allocator.")
         return Allocator(ret)
+
+    def create_buffer(self, width: int, height: int, format: DRMFormat) -> Buffer:
+        """Creates the adequate allocator given a backend and a renderer."""
+        ptr = lib.wlr_allocator_create_buffer(self._ptr, width, height, format._ptr)
+        ptr = ffi.gc(ptr, lib.wlr_buffer_drop)
+        return Buffer(ptr)

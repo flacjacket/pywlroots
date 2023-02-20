@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from pywayland.protocol.wayland import WlOutput
-from wlroots import ffi, lib, Ptr
+
+from wlroots import Ptr, ffi, lib
 from wlroots.util.box import Box
 
 
@@ -19,14 +20,23 @@ class PixmanRegion32(Ptr):
         else:
             self._ptr = ptr
 
+    def init(self) -> None:
+        lib.pixman_region32_init(self._ptr)
+
+    def init_rect(self, x: int, y: int, width: int, height: int) -> None:
+        lib.pixman_region32_init_rect(self._ptr, x, y, width, height)
+
+    def fini(self) -> None:
+        lib.pixman_region32_fini(self._ptr)
+
     def __enter__(self) -> PixmanRegion32:
         """Use the pixman_region32 in a context manager"""
-        lib.pixman_region32_init(self._ptr)
+        self.init()
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         """Finish up when exiting the context"""
-        lib.pixman_region32_fini(self._ptr)
+        self.fini()
 
     def rectangles_as_boxes(self) -> list[Box]:
         nrects_ptr = ffi.new("int *")

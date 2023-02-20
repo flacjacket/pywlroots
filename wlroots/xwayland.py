@@ -275,7 +275,7 @@ class Surface(PtrHasData):
 
     @property
     def wm_instance(self) -> str | None:
-        return str_or_none(self._ptr.wm_instance)
+        return str_or_none(self._ptr.instance)
 
     @property
     def role(self) -> str | None:
@@ -307,10 +307,6 @@ class Surface(PtrHasData):
     def protocols(self) -> list[int]:
         """This is an array of xcb_atom_t."""
         return ffi.unpack(self._ptr.protocols, self._ptr.protocols_len)
-
-    @property
-    def hints_urgency(self) -> int:
-        return self._ptr.hints_urgency
 
     @property
     def size_hints(self) -> SizeHints | None:
@@ -424,7 +420,7 @@ class MinimizeEvent(Ptr):
 
 class SizeHints(Ptr):
     def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_xwayland_surface_size_hints *", ptr)
+        self._ptr = ffi.cast("xcb_size_hints_t *", ptr)
 
     @property
     def flags(self) -> int:
@@ -461,3 +457,11 @@ class SizeHints(Ptr):
     @property
     def max_height(self) -> int:
         return self._ptr.max_height
+
+    @property
+    def width_inc(self) -> int:
+        return self._ptr.width_inc
+
+    @property
+    def height_inc(self) -> int:
+        return self._ptr.height_inc

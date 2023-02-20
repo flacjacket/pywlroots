@@ -34,14 +34,21 @@ class XdgSurfaceRole(enum.IntEnum):
     POPUP = lib.WLR_XDG_SURFACE_ROLE_POPUP
 
 
+class XdgTopLevelWMCapabilities(enum.IntFlag):
+    WINDOW_MENU = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_WINDOW_MENU
+    MAXIMIZE = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_MAXIMIZE
+    FULLSCREEN = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_FULLSCREEN
+    MINIMIZE = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_MINIMIZE
+
+
 class XdgShell(PtrHasData):
-    def __init__(self, display: Display) -> None:
+    def __init__(self, display: Display, version: int = 5) -> None:
         """Create the shell for protocol windows
 
         :param display:
             The Wayland server display to create the shell on.
         """
-        self._ptr = lib.wlr_xdg_shell_create(display._ptr)
+        self._ptr = lib.wlr_xdg_shell_create(display._ptr, version)
 
         self.new_surface_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_surface), data_wrapper=XdgSurface
@@ -141,22 +148,34 @@ class XdgSurface(PtrHasData):
         return Box(box_ptr.x, box_ptr.y, box_ptr.width, box_ptr.height)
 
     def set_size(self, width: int, height: int) -> int:
-        return lib.wlr_xdg_toplevel_set_size(self._ptr, width, height)
+        return lib.wlr_xdg_toplevel_set_size(self._ptr.toplevel, width, height)
 
     def set_activated(self, activated: bool) -> int:
         if self.role != XdgSurfaceRole.TOPLEVEL:
             raise ValueError(f"xdg surface must be top-level, got: {self.role}")
 
-        return lib.wlr_xdg_toplevel_set_activated(self._ptr, activated)
+        return lib.wlr_xdg_toplevel_set_activated(self._ptr.toplevel, activated)
 
-    def set_tiled(self, tiled: int) -> int:
-        return lib.wlr_xdg_toplevel_set_tiled(self._ptr, tiled)
+    def set_maximized(self, maximized: bool) -> int:
+        return lib.wlr_xdg_toplevel_set_maximized(self._ptr.toplevel, maximized)
 
-    def set_fullscreen(self, fullscreened: bool) -> int:
-        return lib.wlr_xdg_toplevel_set_fullscreen(self._ptr, fullscreened)
+    def set_fullscreen(self, fullscreen: bool) -> int:
+        return lib.wlr_xdg_toplevel_set_fullscreen(self._ptr.toplevel, fullscreen)
+
+    def set_resizing(self, resizing: bool) -> int:
+        return lib.wlr_xdg_toplevel_set_resizing(self._ptr.toplevel, resizing)
+
+    def set_tiled(self, tiled_edges: int) -> int:
+        return lib.wlr_xdg_toplevel_set_tiled(self._ptr.toplevel, tiled_edges)
+
+    def set_bounds(self, width: int, height: int) -> int:
+        return lib.wlr_xdg_toplevel_set_bounds(self._ptr.toplevel, width, height)
+
+    def set_wm_capabilities(self, caps: XdgTopLevelWMCapabilities) -> int:
+        return lib.wlr_xdg_toplevel_set_wm_capabilities(self._ptr.toplevel, caps)
 
     def send_close(self) -> int:
-        return lib.wlr_xdg_toplevel_send_close(self._ptr)
+        return lib.wlr_xdg_toplevel_send_close(self._ptr.toplevel)
 
     def surface_at(
         self, surface_x: float, surface_y: float
@@ -232,7 +251,6 @@ class XdgTopLevel(Ptr):
         )
         self.request_fullscreen_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_fullscreen),
-            data_wrapper=XdgTopLevelSetFullscreenEvent,
         )
         self.request_minimize_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_minimize)
@@ -254,12 +272,12 @@ class XdgTopLevel(Ptr):
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
 
     @property
-    def parent(self) -> XdgSurface | None:
-        """The surface of the parent of this toplevel"""
+    def parent(self) -> XdgTopLevel | None:
+        """The parent of this toplevel"""
         parent_ptr = self._ptr.parent
         if parent_ptr is None:
             return None
-        return XdgSurface(parent_ptr)
+        return XdgTopLevel(parent_ptr)
 
     @property
     def title(self) -> str | None:
@@ -271,15 +289,20 @@ class XdgTopLevel(Ptr):
         """The app id of the toplevel object"""
         return str_or_none(self._ptr.app_id)
 
+    @property
+    def requested(self) -> XdgTopLevelRequested:
+        """Requested initial state"""
+        return XdgTopLevelRequested(self._ptr.requested)
+
 
 class XdgTopLevelMoveEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_move_event *", ptr)
 
     @property
-    def surface(self) -> Surface:
+    def toplevel(self) -> XdgTopLevel:
         # TODO: keep weakref
-        return Surface(self._ptr.surface)
+        return XdgTopLevel(self._ptr.toplevel)
 
     # TODO: seat client
 
@@ -293,9 +316,9 @@ class XdgTopLevelResizeEvent(Ptr):
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_resize_event *", ptr)
 
     @property
-    def surface(self) -> Surface:
+    def toplevel(self) -> XdgTopLevel:
         # TODO: keep weakref
-        return Surface(self._ptr.surface)
+        return XdgTopLevel(self._ptr.toplevel)
 
     # TODO: seat client
 
@@ -308,32 +331,14 @@ class XdgTopLevelResizeEvent(Ptr):
         return self._ptr.edges
 
 
-class XdgTopLevelSetFullscreenEvent(Ptr):
-    def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_xdg_toplevel_set_fullscreen_event *", ptr)
-
-    @property
-    def surface(self) -> Surface:
-        # TODO: keep weakref
-        return Surface(self._ptr.surface)
-
-    @property
-    def fullscreen(self) -> bool:
-        return self._ptr.fullscreen
-
-    @property
-    def output(self) -> Output:
-        return Output(self._ptr.output)
-
-
 class XdgTopLevelShowWindowMenuEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_show_window_menu_event *", ptr)
 
     @property
-    def surface(self) -> Surface:
+    def toplevel(self) -> XdgTopLevel:
         # TODO: keep weakref
-        return Surface(self._ptr.surface)
+        return XdgTopLevel(self._ptr.toplevel)
 
     # TODO: seat client
 
@@ -359,6 +364,8 @@ class XdgPopup(Ptr):
         """
         self._ptr = ffi.cast("struct wlr_xdg_popup *", ptr)
 
+        self.reposition_event = Signal(ptr=ffi.addressof(self._ptr.events.reposition))
+
     @property
     def base(self) -> XdgSurface:
         """The xdg surface associated with the popup"""
@@ -367,9 +374,17 @@ class XdgPopup(Ptr):
     @property
     def parent(self) -> Surface:
         """Parent Surface."""
-        parent = Surface(self.parent)
-        _weakkeydict[parent] = self
-        return parent
+        parent_ptr = self._ptr.parent
+        _weakkeydict[parent_ptr] = self
+        return Surface(parent_ptr)
+
+    @property
+    def current(self) -> XdgPopupState:
+        return XdgPopupState(self._ptr.current)
+
+    @property
+    def pending(self) -> XdgPopupState:
+        return XdgPopupState(self._ptr.pending)
 
     def unconstrain_from_box(self, box: Box) -> None:
         """
@@ -378,3 +393,53 @@ class XdgPopup(Ptr):
         system.
         """
         lib.wlr_xdg_popup_unconstrain_from_box(self._ptr, box._ptr)
+
+    def destroy(self) -> None:
+        """Request that this popup closes."""
+        lib.wlr_xdg_popup_destroy(self._ptr)
+
+
+class XdgPopupState(Ptr):
+    def __init__(self, ptr) -> None:
+        """A struct wlr_xdg_popup_state
+
+        :param ptr:
+            The wlr_xdg_popup_state cdata pointer
+        """
+        self._ptr = ffi.cast("struct wlr_xdg_popup_state *", ptr)
+
+    @property
+    def geometry(self) -> Box:
+        """
+        Position of the popup relative to the upper left corner of the window geometry
+        of the parent surface.
+        """
+        return Box(self._ptr.geometry)
+
+    @property
+    def reactive(self) -> bool:
+        return self._ptr.reactive
+
+
+class XdgTopLevelRequested(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ptr
+
+    @property
+    def maximized(self) -> bool:
+        return self._ptr.maximized
+
+    @property
+    def minimized(self) -> bool:
+        return self._ptr.minimized
+
+    @property
+    def fullscreen(self) -> bool:
+        return self._ptr.fullscreen
+
+    @property
+    def fullscreen_output(self) -> Output | None:
+        output_ptr = self._ptr.fullscreen_output
+        if output_ptr == ffi.NULL:
+            return None
+        return Output(output_ptr)

@@ -5,7 +5,7 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, lib, Ptr
+from wlroots import ffi, lib, Ptr, PtrHasData
 from .surface import Surface
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
@@ -21,7 +21,7 @@ class DataDeviceManager(Ptr):
         self._ptr = lib.wlr_data_device_manager_create(display._ptr)
 
 
-class Drag(Ptr):
+class Drag(PtrHasData):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_drag *", ptr)
 
@@ -81,7 +81,7 @@ class DragDropEvent(Ptr):
         return Drag(drag_ptr)
 
 
-class DragIcon(Ptr):
+class DragIcon(PtrHasData):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_drag_icon *", ptr)
 

@@ -9,8 +9,7 @@ from pywayland.protocol.wayland.wl_pointer import WlPointer
 from pywayland.server import Display, Signal
 
 from wlroots import Ptr, ffi, lib
-from wlroots.wlr_types.input_device import InputDevice
-from wlroots.wlr_types.pointer import PointerEventAxis
+from wlroots.wlr_types.pointer import Pointer, PointerAxisEvent
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
@@ -42,20 +41,16 @@ class VirtualPointerV1(Ptr):
         """A wlr_virtual_pointer_v1 struct."""
         self._ptr = ffi.cast("struct wlr_virtual_pointer_v1 *", ptr)
 
-        self.destroy_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.destroy), data_wrapper=VirtualPointerV1
-        )
+    @property
+    def pointer(self) -> Pointer:
+        pointer_ptr = ffi.addressof(self._ptr.pointer)
+        _weakkeydict[pointer_ptr] = self._ptr
+        return Pointer(pointer_ptr)
 
     @property
-    def input_device(self) -> InputDevice:
-        device_ptr = ffi.addressof(self._ptr.input_device)
-        _weakkeydict[device_ptr] = self._ptr
-        return InputDevice(device_ptr)
-
-    @property
-    def axis_event(self) -> Iterable[PointerEventAxis]:
+    def axis_event(self) -> Iterable[PointerAxisEvent]:
         for axis_event in self._ptr.axis_event:
-            yield PointerEventAxis(axis_event)
+            yield PointerAxisEvent(axis_event)
 
     @property
     def axis(self) -> WlPointer.axis:

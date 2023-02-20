@@ -136,11 +136,19 @@ class LayerSurfaceV1(PtrHasData):
         _weakkeydict[state_ptr] = self._ptr
         return LayerSurfaceV1State(state_ptr)
 
+    @pending.setter
+    def pending(self, state: LayerSurfaceV1State) -> None:
+        self._ptr.pending = state._ptr
+
     @property
     def current(self) -> LayerSurfaceV1State:
         state_ptr = self._ptr.current
         _weakkeydict[state_ptr] = self._ptr
         return LayerSurfaceV1State(state_ptr)
+
+    @current.setter
+    def current(self, state: LayerSurfaceV1State) -> None:
+        self._ptr.current = state._ptr
 
     def configure(self, width: int, height: int) -> None:
         """
