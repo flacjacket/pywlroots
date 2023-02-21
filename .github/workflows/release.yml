@@ -106,7 +106,7 @@ jobs:
       - name: Build wlroots
         working-directory: wlroots-${{ env.wlroots-version }}
         run: |
-          meson build --prefix=/usr
+          meson build --prefix=/usr -Dxwayland=enabled
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
       - name: Create artifact
@@ -155,7 +155,7 @@ jobs:
             xcb-util-image \
             xcb-util-keysyms \
             xcb-util-renderutil \
-            xcb-util-wm
+            xcb-util-wm-devel
           pip install -r requirements-wheel.txt
       - name: Build wheels
         run: |
@@ -209,7 +209,7 @@ jobs:
             xcb-util-image \
             xcb-util-keysyms \
             xcb-util-renderutil \
-            xcb-util-wm
+            xcb-util-wm-devel
           pip install -r requirements-wheel.txt
       - name: Build wheels
         run: |
@@ -235,6 +235,7 @@ jobs:
           - "3.8"
           - "3.9"
           - "3.10"
+          - "3.11"
           - "pypy-3.7"
           - "pypy-3.8"
           - "pypy-3.9"
@@ -260,6 +261,7 @@ jobs:
           import wlroots
           print(wlroots.__version__)
           print(wlroots.__wlroots_version__)
+          print(wlroots.lib.WLR_XWAYLAND_SURFACE_DECORATIONS_ALL == 0)
   build-source:
     name: Build source package
     runs-on: ubuntu-latest
