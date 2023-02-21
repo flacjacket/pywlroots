@@ -155,7 +155,7 @@ jobs:
             xcb-util-image \
             xcb-util-keysyms \
             xcb-util-renderutil \
-            xcb-util-wm
+            xcb-util-wm-devel
           pip install -r requirements-wheel.txt
       - name: Build wheels
         run: |
@@ -209,7 +209,7 @@ jobs:
             xcb-util-image \
             xcb-util-keysyms \
             xcb-util-renderutil \
-            xcb-util-wm
+            xcb-util-wm-devel
           pip install -r requirements-wheel.txt
       - name: Build wheels
         run: |
@@ -260,6 +260,7 @@ jobs:
           import wlroots
           print(wlroots.__version__)
           print(wlroots.__wlroots_version__)
+          print(wlroots.lib.WLR_XWAYLAND_SURFACE_DECORATIONS_ALL == 0)
   build-source:
     name: Build source package
     runs-on: ubuntu-latest
