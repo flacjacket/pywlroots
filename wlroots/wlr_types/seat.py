@@ -115,9 +115,11 @@ class Seat(PtrHasData):
         return SeatKeyboardState(keyboard_state_ptr)
 
     @property
-    def keyboard(self) -> Keyboard:
-        """Get the keyboard associated with this seat"""
+    def keyboard(self) -> Keyboard | None:
+        """Get the active keyboard for the seat."""
         keyboard_ptr = lib.wlr_seat_get_keyboard(self._ptr)
+        if keyboard_ptr == ffi.NULL:
+            return None
         return Keyboard(keyboard_ptr)
 
     def destroy(self) -> None:

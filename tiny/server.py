@@ -300,7 +300,8 @@ class TinywlServer:
         # keep track of this and automatically send key events to the
         # appropriate clients without additional work on your part.
         keyboard = self._seat.keyboard
-        self._seat.keyboard_notify_enter(view.xdg_surface.surface, keyboard)
+        if keyboard:
+            self._seat.keyboard_notify_enter(view.xdg_surface.surface, keyboard)
 
     # #############################################################
     # surface handling callbacks
