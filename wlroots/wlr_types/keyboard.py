@@ -128,13 +128,10 @@ class Keyboard(PtrHasData):
     @property
     def modifier(self) -> KeyboardModifier:
         """The enum representing the currently active modifier keys"""
+        if self._ptr == ffi.NULL:
+            raise RuntimeError("Tried to get modifier for NULL keyboard.")
         modifiers = lib.wlr_keyboard_get_modifiers(self._ptr)
         return KeyboardModifier(modifiers)
-
-    @property
-    def destroyed(self) -> bool:
-        """Tells you whether or not this keyboard has been destroyed"""
-        return self._ptr == ffi.NULL
 
 
 class KeyboardModifiers(Ptr):
