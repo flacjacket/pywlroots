@@ -7,6 +7,7 @@ from pywayland.server import Signal
 
 from wlroots import ffi, PtrHasData, lib
 from .input_device import InputDevice, InputDeviceType
+from .output import Output
 from .output_layout import OutputLayout
 from .pointer import (
     PointerAxisEvent,
@@ -263,3 +264,31 @@ class Cursor(PtrHasData):
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         """Clean up the cursor when exiting the context"""
         self.destroy()
+
+    def map_to_output(self, output: Output | None) -> None:
+        """
+        Attaches this cursor to the given output, which must be among the outputs in the
+        current output_layout for this cursor. This call is invalid for a cursor without
+        an associated output layout.
+        """
+        if output is None:
+            output_ptr = ffi.NULL
+        else:
+            output_ptr = output._ptr
+
+        lib.wlr_cursor_map_to_output(self._ptr, output_ptr)
+
+    def map_input_to_output(
+        self, input_device: InputDevice, output: Output | None
+    ) -> None:
+        """
+        Maps all input from a specific input device to a given output. The input device
+        must be attached to this cursor and the output must be among the outputs in the
+        attached output layout.
+        """
+        if output is None:
+            output_ptr = ffi.NULL
+        else:
+            output_ptr = output._ptr
+
+        lib.wlr_cursor_map_input_to_output(self._ptr, input_device._ptr, output_ptr)
