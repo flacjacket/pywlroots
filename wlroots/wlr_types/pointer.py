@@ -1,10 +1,12 @@
 # Copyright (c) Sean Vig 2019
 # Copyright (c) Matt Colligan 2022
 
+from __future__ import annotations
+
 import enum
 from weakref import WeakKeyDictionary
 
-from wlroots import Ptr, ffi, lib
+from wlroots import Ptr, ffi, lib, str_or_none
 
 from .input_device import ButtonState, InputDevice
 
@@ -29,11 +31,20 @@ class Pointer(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
 
+    @classmethod
+    def from_input_device(cls, input_device: InputDevice) -> Pointer:
+        return Pointer(lib.wlr_pointer_from_input_device(input_device._ptr))
+
     @property
     def base(self) -> InputDevice:
         device_ptr = ffi.addressof(self._ptr.base)
         _weakkeydict[device_ptr] = self._ptr
         return InputDevice(device_ptr)
+
+    @property
+    def output_name(self) -> str | None:
+        """The name of any associated output"""
+        return str_or_none(self._ptr.output_name)
 
 
 class _PointerEvent(Ptr):

@@ -281,6 +281,8 @@ void wlr_cursor_warp_closest(struct wlr_cursor *cur,
     struct wlr_input_device *dev, double x, double y);
 void wlr_cursor_warp_absolute(struct wlr_cursor *cur,
     struct wlr_input_device *dev, double x, double y);
+void wlr_cursor_absolute_to_layout_coords(struct wlr_cursor *cur,
+    struct wlr_input_device *dev, double x, double y, double *lx, double *ly);
 void wlr_cursor_move(struct wlr_cursor *cur, struct wlr_input_device *dev,
     double delta_x, double delta_y);
 void wlr_cursor_set_surface(struct wlr_cursor *cur, struct wlr_surface *surface,
@@ -289,6 +291,10 @@ void wlr_cursor_attach_input_device(struct wlr_cursor *cur,
     struct wlr_input_device *dev);
 void wlr_cursor_attach_output_layout(struct wlr_cursor *cur,
     struct wlr_output_layout *l);
+void wlr_cursor_map_to_output(struct wlr_cursor *cur,
+    struct wlr_output *output);
+void wlr_cursor_map_input_to_output(struct wlr_cursor *cur,
+    struct wlr_input_device *dev, struct wlr_output *output);
 """
 
 # types/wlr_compositor.h
