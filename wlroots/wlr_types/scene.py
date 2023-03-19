@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from wlroots.util.clock import Timespec
     from wlroots.wlr_types import Buffer, Output, OutputLayout
     from wlroots.wlr_types.layer_shell_v1 import LayerSurfaceV1
+    from wlroots.wlr_types.presentation_time import Presentation
     from wlroots.wlr_types.xdg_shell import XdgSurface
 
 
@@ -37,6 +38,13 @@ class Scene(Ptr):
     def attach_output_layout(self, output_layout: OutputLayout) -> bool:
         """Get a scene-graph output from a wlr_output."""
         return lib.wlr_scene_attach_output_layout(self._ptr, output_layout._ptr)
+
+    def set_presentation(self, presentation: Presentation) -> None:
+        """
+        Handle presentation feedback for all surfaces in the scene, assuming that scene
+        outputs and the scene rendering functions are used.
+        """
+        lib.wlr_scene_set_presentation(self._ptr, presentation._ptr)
 
     def get_scene_output(self, output: Output) -> SceneOutput:
         """Get a scene-graph output from a wlr_output."""

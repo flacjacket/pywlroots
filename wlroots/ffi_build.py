@@ -89,8 +89,13 @@ def has_xwayland() -> bool:
     return has_xwayland
 
 
-# backend.h
+# typedef helpers
 CDEF = """
+typedef int32_t clockid_t;
+"""
+
+# backend.h
+CDEF += """
 struct wlr_backend_impl;
 
 struct wlr_backend
@@ -1652,6 +1657,15 @@ struct wlr_primary_selection_v1_device_manager *
     wlr_primary_selection_v1_device_manager_create(struct wl_display *display);
 """
 
+# types/wlr_presentation_time.h
+CDEF += """
+struct wlr_presentation {
+    ...;
+};
+struct wlr_presentation *wlr_presentation_create(struct wl_display *display,
+    struct wlr_backend *backend);
+"""
+
 # types/wlr_primary_selection.h
 CDEF += """
 void wlr_seat_set_primary_selection(struct wlr_seat *seat,
@@ -1923,7 +1937,6 @@ struct timespec {
     int64_t tv_nsec;
     ...;
 };
-typedef int32_t clockid_t;
 int clock_gettime(clockid_t clk_id, struct timespec *tp);
 
 #define CLOCK_MONOTONIC ...
@@ -2774,6 +2787,7 @@ SOURCE = """
 #include <wlr/types/wlr_pointer.h>
 #include <wlr/types/wlr_pointer_constraints_v1.h>
 #include <wlr/types/wlr_pointer_gestures_v1.h>
+#include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_primary_selection.h>
 #include <wlr/types/wlr_primary_selection_v1.h>
 #include <wlr/types/wlr_relative_pointer_v1.h>

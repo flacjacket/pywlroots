@@ -34,6 +34,7 @@ from .pointer_constraints_v1 import (  # noqa: F401
     PointerConstraintV1,
 )
 from .pointer_gestures_v1 import PointerGesturesV1  # noqa: F401
+from .presentation_time import Presentation  # noqa: F401
 from .primary_selection_v1 import PrimarySelectionV1DeviceManager  # noqa: F401
 from .relative_pointer_manager_v1 import RelativePointerManagerV1  # noqa: F401
 from .scene import (  # noqa: F401
