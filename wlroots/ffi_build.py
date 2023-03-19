@@ -2273,6 +2273,29 @@ struct wlr_xcursor {
 };
 """
 
+# types/wlr_xdg_activation_v1.h
+CDEF += """
+struct wlr_xdg_activation_v1 {
+    uint32_t token_timeout_msec;
+    struct wl_list tokens;
+
+    struct {
+        struct wl_signal destroy;
+        struct wl_signal request_activate;
+    } events;
+    ...;
+};
+
+struct wlr_xdg_activation_v1_request_activate_event {
+    struct wlr_xdg_activation_v1 *activation;
+    struct wlr_xdg_activation_token_v1 *token;
+    struct wlr_surface *surface;
+};
+
+struct wlr_xdg_activation_v1 *wlr_xdg_activation_v1_create(
+    struct wl_display *display);
+"""
+
 # types/wlr_xdg_decoration_v1.h
 CDEF += """
 enum wlr_xdg_toplevel_decoration_v1_mode {
@@ -2762,6 +2785,7 @@ SOURCE = """
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_virtual_pointer_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
+#include <wlr/types/wlr_xdg_activation_v1.h>
 #include <wlr/types/wlr_xdg_decoration_v1.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/types/wlr_xdg_shell.h>
