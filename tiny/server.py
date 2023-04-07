@@ -17,6 +17,7 @@ from wlroots.util.edges import Edges
 from wlroots.util.log import logger
 from wlroots.wlr_types import (
     Cursor,
+    idle_notify_v1,
     Keyboard,
     Output,
     OutputLayout,
@@ -98,6 +99,9 @@ class TinywlServer:
         # new pointing devices are attached to the cursor, and rendered with the manager
         self._cursor = cursor
         self._cursor_manager = cursor_manager
+
+        # idle_notify_v1 support
+        self.idle_notify = idle_notify_v1.IdleNotifierV1(self._display)
 
         # the seat manages the keyboard focus information
         self._seat = seat
@@ -195,6 +199,7 @@ class TinywlServer:
         self.grabbed_view.xdg_surface.set_size(new_width, new_height)
 
     def process_cursor_motion(self, time) -> None:
+        self.idle_notify.notify_activity(self._seat)
         if self.cursor_mode == CursorMode.MOVE:
             self._process_cursor_move()
             return
@@ -226,6 +231,7 @@ class TinywlServer:
         self._seat.keyboard_notify_modifiers(modifiers)
 
     def send_key(self, key_event: KeyboardKeyEvent, input_device: InputDevice) -> None:
+        self.idle_notify.notify_activity(self._seat)
         keyboard = Keyboard.from_input_device(input_device)
         keyboard_modifier = keyboard.modifier
 
