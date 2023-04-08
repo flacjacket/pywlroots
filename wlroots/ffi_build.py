@@ -854,6 +854,19 @@ struct wlr_idle_inhibitor_v1 {
 struct wlr_idle_inhibit_manager_v1 *wlr_idle_inhibit_v1_create(struct wl_display *display);
 """
 
+# types/wlr_idle_notify_v1.h
+CDEF += """
+struct wlr_idle_notifier_v1;
+
+struct wlr_idle_notifier_v1 *wlr_idle_notifier_v1_create(struct wl_display *display);
+
+void wlr_idle_notifier_v1_set_inhibited(struct wlr_idle_notifier_v1 *notifier,
+    bool inhibited);
+
+void wlr_idle_notifier_v1_notify_activity(struct wlr_idle_notifier_v1 *notifier,
+    struct wlr_seat *seat);
+"""
+
 # types/wlr_input_device.h
 CDEF += """
 enum wlr_button_state {
@@ -2774,6 +2787,7 @@ SOURCE = """
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_idle.h>
 #include <wlr/types/wlr_idle_inhibit_v1.h>
+#include <wlr/types/wlr_idle_notify_v1.h>
 #include <wlr/types/wlr_input_inhibitor.h>
 #include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_layer_shell_v1.h>
