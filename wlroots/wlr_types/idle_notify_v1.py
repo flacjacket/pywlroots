@@ -26,7 +26,7 @@ class IdleNotifierV1(Ptr):
     def notify_activity(self, seat: Seat) -> None:
         """
         Notify for user activity on a seat.
-        
+
         Compositors should call this function whenever an input event is triggered
         on a seat.
         """

@@ -861,10 +861,10 @@ struct wlr_idle_notifier_v1;
 struct wlr_idle_notifier_v1 *wlr_idle_notifier_v1_create(struct wl_display *display);
 
 void wlr_idle_notifier_v1_set_inhibited(struct wlr_idle_notifier_v1 *notifier,
-	bool inhibited);
+    bool inhibited);
 
 void wlr_idle_notifier_v1_notify_activity(struct wlr_idle_notifier_v1 *notifier,
-	struct wlr_seat *seat);
+    struct wlr_seat *seat);
 """
 
 # types/wlr_input_device.h
