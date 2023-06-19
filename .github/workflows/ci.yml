@@ -2,6 +2,9 @@ name: CI
 on:
   pull_request:
   push:
+  schedule:
+    # Run at 17:29 every Saturday
+    - cron: '29 17 * * 6'
 
 jobs:
   build-wayland:
@@ -12,7 +15,7 @@ jobs:
       seatd-version: "0.6.4"
       pixman-version: "0.42.0"
       hwdata-version: "0.364"
-      wayland-version: "1.21.0"
+      wayland-version: "1.22.0"
       wayland-protocols-version: "1.31"
     strategy:
       fail-fast: false
@@ -144,6 +147,7 @@ jobs:
           - "pypy-3.7"
           - "pypy-3.8"
           - "pypy-3.9"
+          - "pypy-3.10"
         wlroots-version: ["0.16.2"]
         include:
           - python-version: "3.11"
