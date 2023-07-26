@@ -9,7 +9,7 @@ wlroots keyboard functionality.
 
 .. _python-xkbcommon: https://github.com/sde1000/python-xkbcommon
 .. _pywayland: https://pywayland.readthedocs.io/en/latest/
-.. _wlroots: https://github.com/swaywm/wlroots
+.. _wlroots: https://gitlab.freedesktop.org/wlroots/wlroots/
 
 Installation
 ------------
