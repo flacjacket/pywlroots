@@ -34,18 +34,20 @@ class KeyboardModifier(enum.IntFlag):
 
 
 class ModifiersMask:
-    def __init__(self) -> None:
+    def __init__(self, keyboard: Keyboard) -> None:
         """The modifiers mask"""
         self._mask = ffi.new("xkb_mod_mask_t *", 0)
         self._one = ffi.new("uint32_t *", 1)
+        self._keyboard = keyboard
 
-    def add(self, modifier: str, keyboard: Keyboard) -> None:
+    def add(self, modifier: str) -> None:
         """Add a modifier to the mask
         Numlock is Mod2 and Capslock is Lock
         """
         idx = ffi.new("xkb_mod_index_t *")
         idx[0] = lib.xkb_keymap_mod_get_index(
-            keyboard._ptr.keymap, ffi.new("const char []", modifier.encode("ascii"))
+            self._keyboard._ptr.keymap,
+            ffi.new("const char []", modifier.encode("ascii")),
         )
         self._mask[0] |= self._one[0] << idx[0]
 
