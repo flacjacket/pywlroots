@@ -40,7 +40,7 @@ def load_wlroots_version():
     except (PermissionError, OSError):
         lib = importlib.import_module("wlroots").lib
 
-    return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"
+    return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"  # type: ignore[attr-defined]
 
 
 def check_version():
