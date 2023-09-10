@@ -2,7 +2,7 @@
 
 from pywayland.server import Display
 
-from wlroots import lib, Ptr
+from wlroots import Ptr, lib
 
 
 class DataControlManagerV1(Ptr):

@@ -8,7 +8,8 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
 
-from wlroots import ffi, Ptr, PtrHasData, lib
+from wlroots import Ptr, PtrHasData, ffi, lib
+
 from .output import Output
 from .surface import Surface
 

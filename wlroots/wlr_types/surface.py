@@ -5,7 +5,7 @@
 
 import warnings
 
-from wlroots.wlr_types.compositor import *  # noqa: F401,F403
+from wlroots.wlr_types.compositor import *  # noqa: F403
 
 warnings.warn(
     "wlroots.wlr_types.surface has moved to wlroots.wlr_types.compositor and will be removed in the future.",

@@ -4,14 +4,15 @@ from __future__ import annotations
 
 from weakref import WeakKeyDictionary
 
-from pywayland.server import Display, Signal
 from pywayland.protocol.wayland import WlSeat
+from pywayland.server import Display, Signal
 
-from wlroots import ffi, PtrHasData, lib, Ptr
+from wlroots import Ptr, PtrHasData, ffi, lib
+
 from .data_device_manager import Drag
 from .input_device import ButtonState
-from .keyboard import Keyboard, KeyboardModifiers, KeyboardKeyEvent
-from .pointer import AxisSource, AxisOrientation
+from .keyboard import Keyboard, KeyboardKeyEvent, KeyboardModifiers
+from .pointer import AxisOrientation, AxisSource
 from .surface import Surface
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()

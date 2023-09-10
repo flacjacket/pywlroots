@@ -1,6 +1,7 @@
 # Copyright (c) Matt Colligan 2021
 
-from wlroots import ffi, Ptr
+from wlroots import Ptr, ffi
+
 from .input_device import InputDevice
 
 

@@ -2,7 +2,7 @@
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, PtrHasData, lib
+from wlroots import PtrHasData, ffi, lib
 
 
 class GammaControlManagerV1(PtrHasData):

@@ -5,13 +5,11 @@ from __future__ import annotations
 import weakref
 from typing import Any
 
-from ._ffi import ffi, lib  # noqa: F401
+from ._ffi import ffi, lib
 from .version import version as _version
 
-__wlroots_version__ = "{}.{}.{}".format(
-    lib.WLR_VERSION_MAJOR,
-    lib.WLR_VERSION_MINOR,
-    lib.WLR_VERSION_MICRO,
+__wlroots_version__ = (
+    f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"
 )
 
 __version__ = _version

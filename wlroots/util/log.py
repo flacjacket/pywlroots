@@ -4,7 +4,6 @@ import logging
 
 from wlroots import ffi, lib
 
-
 logger = logging.getLogger("wlroots")
 
 

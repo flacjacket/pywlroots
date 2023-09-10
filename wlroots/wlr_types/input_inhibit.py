@@ -2,7 +2,7 @@
 
 from pywayland.server import Client, Display, Signal
 
-from wlroots import ffi, Ptr, lib
+from wlroots import Ptr, ffi, lib
 
 
 class InputInhibitManager(Ptr):

@@ -6,7 +6,7 @@ import weakref
 
 from pywayland.server import Signal
 
-from wlroots import ffi, PtrHasData, lib
+from wlroots import PtrHasData, ffi, lib
 
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 

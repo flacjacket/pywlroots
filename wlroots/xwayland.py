@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from pywayland.server import Signal
 
-from wlroots import ffi, lib, Ptr, PtrHasData, str_or_none
+from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 from wlroots.wlr_types.surface import Surface as WlrSurface
 
 if TYPE_CHECKING:

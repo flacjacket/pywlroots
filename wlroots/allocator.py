@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from wlroots import Ptr, ffi, lib
 from wlroots.backend import Backend
-from wlroots.renderer import Renderer, DRMFormat
+from wlroots.renderer import DRMFormat, Renderer
 from wlroots.wlr_types.buffer import Buffer
 
 

@@ -8,7 +8,8 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
 
-from wlroots import ffi, PtrHasData, lib
+from wlroots import PtrHasData, ffi, lib
+
 from .surface import Surface
 
 if TYPE_CHECKING:

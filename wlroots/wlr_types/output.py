@@ -5,12 +5,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pywayland.server import Signal
 from pywayland.protocol.wayland import WlOutput
+from pywayland.server import Signal
 from pywayland.utils import wl_list_for_each
 
-from wlroots import ffi, PtrHasData, lib, Ptr, str_or_none
+from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 from wlroots.util.region import PixmanRegion32
+
 from .matrix import Matrix
 
 if TYPE_CHECKING:

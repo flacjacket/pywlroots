@@ -8,9 +8,10 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
 
-from wlroots import ffi, lib, Ptr
-from .surface import Surface
+from wlroots import Ptr, ffi, lib
 from wlroots.util.region import PixmanRegion32
+
+from .surface import Surface
 
 if TYPE_CHECKING:
     from pywayland.server import Display

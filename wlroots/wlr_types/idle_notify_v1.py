@@ -1,7 +1,7 @@
 # Copyright (c) Charbel Assaad 2023
 from pywayland.server import Display
 
-from wlroots import lib, Ptr
+from wlroots import Ptr, lib
 
 from .seat import Seat
 

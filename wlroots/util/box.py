@@ -50,7 +50,7 @@ class Box:
     height = property(_int_getter("height"), _int_setter("height"))
 
     def __repr__(self) -> str:
-        return "Box(%s, %s, %s, %s)" % (self.x, self.y, self.width, self.height)
+        return f"Box({self.x}, {self.y}, {self.width}, {self.height})"
 
     def closest_point(self, x: float, y: float) -> tuple[float, float]:
         xy_ptr = ffi.new("double[2]")

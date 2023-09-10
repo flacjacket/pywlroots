@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pywayland.server import Signal
 
-from wlroots import ffi, lib, PtrHasData
+from wlroots import PtrHasData, ffi, lib
 
 if TYPE_CHECKING:
     from pywayland.server import Display

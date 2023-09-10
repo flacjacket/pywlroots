@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from pywayland.server import Listener
+
 from wlroots.util.box import Box
 from wlroots.util.edges import Edges
 

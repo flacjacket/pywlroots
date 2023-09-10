@@ -7,7 +7,7 @@ from typing import Iterator, Union
 
 from pywayland.server import Display
 
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
 from wlroots.backend import Backend
 from wlroots.util.box import Box
 from wlroots.wlr_types import Matrix, Texture

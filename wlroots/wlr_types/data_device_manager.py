@@ -5,7 +5,8 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, lib, Ptr, PtrHasData
+from wlroots import Ptr, PtrHasData, ffi, lib
+
 from .surface import Surface
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()

@@ -7,6 +7,8 @@ from weakref import WeakKeyDictionary
 
 from pywayland.protocol.wayland import WlKeyboard, WlSeat
 from pywayland.server import Display, Listener
+from xkbcommon import xkb
+
 from wlroots import ffi, lib
 from wlroots.allocator import Allocator
 from wlroots.backend import Backend
@@ -17,7 +19,6 @@ from wlroots.util.edges import Edges
 from wlroots.util.log import logger
 from wlroots.wlr_types import (
     Cursor,
-    idle_notify_v1,
     Keyboard,
     Output,
     OutputLayout,
@@ -30,18 +31,18 @@ from wlroots.wlr_types import (
     Surface,
     XCursorManager,
     XdgShell,
+    idle_notify_v1,
 )
 from wlroots.wlr_types.cursor import WarpMode
 from wlroots.wlr_types.input_device import ButtonState, InputDeviceType
 from wlroots.wlr_types.keyboard import KeyboardModifier
 from wlroots.wlr_types.pointer import (
     PointerButtonEvent,
-    PointerMotionEvent,
     PointerMotionAbsoluteEvent,
+    PointerMotionEvent,
 )
 from wlroots.wlr_types.seat import RequestSetSelectionEvent
 from wlroots.wlr_types.xdg_shell import XdgSurface, XdgSurfaceRole
-from xkbcommon import xkb
 
 from .cursor_mode import CursorMode
 from .keyboard_handler import KeyboardHandler
@@ -263,7 +264,7 @@ class TinywlServer:
             if len(self.views) >= 2:
                 *rest, new_view, prev_view = self.views
                 self.focus_view(new_view)
-                self.views = [prev_view] + rest + [new_view]
+                self.views = [prev_view, *rest, new_view]
 
         else:
             return False

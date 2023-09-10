@@ -1,11 +1,10 @@
 # Copyright (c) Sean Vig 2018
 
 import sys
-
 from distutils.command.build import build
+
 from setuptools import setup
 from setuptools.command.install import install
-
 
 NO_SETUP_REQUIRES_ARGUMENTS = ["--help", "-h", "sdist"]
 

@@ -9,6 +9,7 @@ import logging
 import sys
 
 from pywayland.server import Display
+
 from wlroots.helper import build_compositor
 from wlroots.util.log import log_init
 from wlroots.wlr_types import (

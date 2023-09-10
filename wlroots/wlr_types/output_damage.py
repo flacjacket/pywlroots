@@ -2,9 +2,10 @@
 
 from pywayland.server import Signal
 
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
 from wlroots.util.box import Box
 from wlroots.util.region import PixmanRegion32
+
 from .output import Output
 
 

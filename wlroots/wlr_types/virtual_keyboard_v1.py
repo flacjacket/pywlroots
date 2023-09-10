@@ -4,7 +4,7 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
 from wlroots.wlr_types.keyboard import Keyboard
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()

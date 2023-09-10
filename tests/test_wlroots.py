@@ -1,4 +1,4 @@
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
 
 
 class PtrT(Ptr):

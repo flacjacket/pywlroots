@@ -8,9 +8,10 @@ from typing import Callable, TypeVar
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, PtrHasData, lib, Ptr, str_or_none
+from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 from wlroots.util.box import Box
 from wlroots.util.edges import Edges
+
 from .output import Output
 from .surface import Surface
 

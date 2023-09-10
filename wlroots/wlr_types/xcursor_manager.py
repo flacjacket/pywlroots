@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
 
 from .cursor import Cursor
 

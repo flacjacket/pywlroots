@@ -4,11 +4,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterator
 
-from pywayland.server import Display, Signal
 from pywayland.protocol.wayland import WlOutput
+from pywayland.server import Display, Signal
 from pywayland.utils import wl_list_for_each
 
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
+
 from .output import Output, OutputMode
 
 
@@ -119,7 +120,7 @@ class OutputConfigurationV1(Ptr):
             self._ptr = ffi.cast("struct wlr_output_configuration_v1 *", ptr)
 
     @property
-    def heads(self) -> Iterator["OutputConfigurationHeadV1"]:
+    def heads(self) -> Iterator[OutputConfigurationHeadV1]:
         for ptr in wl_list_for_each(
             "struct wlr_output_configuration_head_v1 *",
             self._ptr.heads,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from wlroots import ffi, Ptr, lib
+from wlroots import Ptr, ffi, lib
 
 if TYPE_CHECKING:
     from pywayland.server import Display

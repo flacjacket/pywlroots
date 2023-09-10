@@ -5,10 +5,10 @@ from __future__ import annotations
 import enum
 from weakref import WeakKeyDictionary
 
-from pywayland.server import Signal
 from pywayland.protocol.wayland import WlKeyboard
+from pywayland.server import Signal
 
-from wlroots import ffi, PtrHasData, lib, Ptr
+from wlroots import Ptr, PtrHasData, ffi, lib
 from wlroots.wlr_types.input_device import InputDevice
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()

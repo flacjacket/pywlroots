@@ -1,7 +1,7 @@
 # Copyright (c) Antonin Riha 2022
 from pywayland.server import Display, Signal
 
-from wlroots import Ptr, ffi, lib, PtrHasData
+from wlroots import Ptr, PtrHasData, ffi, lib
 
 from .surface import Surface
 

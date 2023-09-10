@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pywayland.protocol.wayland import WlOutput
 
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
 from wlroots.util.box import Box
 
 

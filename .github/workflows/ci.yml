@@ -199,8 +199,8 @@ jobs:
           WLR_LIBINPUT_NO_DEVICES: '1'
           WLR_RENDERER: pixman
           WLR_RENDERER_ALLOW_SOFTWARE: '1'
-  flake8-test:
-    name: flake8 tests
+  ruff-test:
+    name: Ruff tests
     runs-on: ubuntu-22.04
     env:
       python-version: "3.10"
@@ -211,11 +211,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.python-version }}
-      - name: Install Python dependencies
-        run: |
-          pip install flake8
-      - name: Run flake8 test
-        run: flake8 wlroots tiny check_headers.py
+      - name: Run ruff check
+        uses: chartboost/ruff-action@v1
   mypy-test:
     name: mypy tests
     runs-on: ubuntu-22.04

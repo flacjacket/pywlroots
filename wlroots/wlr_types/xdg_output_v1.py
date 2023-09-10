@@ -2,7 +2,8 @@
 
 from pywayland.server import Display, Signal
 
-from wlroots import ffi, lib, Ptr
+from wlroots import Ptr, ffi, lib
+
 from .output_layout import OutputLayout
 
 

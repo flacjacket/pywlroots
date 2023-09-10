@@ -5,30 +5,31 @@ import enum
 
 from pywayland.server import Signal
 
-from wlroots import ffi, PtrHasData, lib
+from wlroots import PtrHasData, ffi, lib
+
 from .input_device import InputDevice, InputDeviceType
 from .output import Output
 from .output_layout import OutputLayout
 from .pointer import (
     PointerAxisEvent,
     PointerButtonEvent,
-    PointerMotionEvent,
+    PointerHoldBeginEvent,
+    PointerHoldEndEvent,
     PointerMotionAbsoluteEvent,
+    PointerMotionEvent,
     PointerPinchBeginEvent,
     PointerPinchEndEvent,
     PointerPinchUpdateEvent,
     PointerSwipeBeginEvent,
     PointerSwipeEndEvent,
     PointerSwipeUpdateEvent,
-    PointerHoldBeginEvent,
-    PointerHoldEndEvent,
 )
 from .surface import Surface
 from .touch import (
-    TouchEventUp,
+    TouchEventCancel,
     TouchEventDown,
     TouchEventMotion,
-    TouchEventCancel,
+    TouchEventUp,
 )
 
 

@@ -1,6 +1,7 @@
 # Copyright (c) 2022 Aakash Sen Sharma
 
 from pywayland.server import Display, Signal
+
 from wlroots import Ptr, ffi, lib
 
 

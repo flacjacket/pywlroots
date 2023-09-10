@@ -2,20 +2,21 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from weakref import WeakKeyDictionary
 
-from pywayland.server import Display, Signal
 from pywayland.protocol.wayland import WlOutput
-from typing import TYPE_CHECKING
+from pywayland.server import Display, Signal
 
-from wlroots import ffi, PtrHasData, lib, Ptr
+from wlroots import Ptr, PtrHasData, ffi, lib
 from wlroots.util.clock import Timespec
+
 from .texture import Texture
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 if TYPE_CHECKING:
-    from wlroots.renderer import Renderer  # noqa: F401
+    from wlroots.renderer import Renderer
 
 
 class Compositor(Ptr):

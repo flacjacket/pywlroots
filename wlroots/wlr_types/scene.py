@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import enum
-from typing import Callable, TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Callable, TypeVar
 
 from wlroots import Ptr, PtrHasData, ffi, lib
 from wlroots.util.region import PixmanRegion32
