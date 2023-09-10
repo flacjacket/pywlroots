@@ -156,7 +156,7 @@ jobs:
             xcb-util-keysyms \
             xcb-util-renderutil \
             xcb-util-wm-devel
-          pip install -r requirements-wheel.txt
+          pip install auditwheel
       - name: Build wheels
         run: |
           pip wheel . -w whl

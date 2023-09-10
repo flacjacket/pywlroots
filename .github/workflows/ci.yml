@@ -188,9 +188,7 @@ jobs:
       - name: Install Python dependencies
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: |
-          pip install -r requirements.txt
-          pip install pytest
-          python wlroots/ffi_build.py
+          pip install -e .[test]
       - name: Run unit tests
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: pytest -Wall
@@ -234,7 +232,7 @@ jobs:
         run: |
           pip install wheel
           pip install -r requirements.txt
-          pip install -r requirements_types.txt
+          pip install mypy types-cffi types-dataclasses
       - name: Run mypy test
         run: |
           mypy -p wlroots

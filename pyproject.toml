@@ -37,6 +37,11 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = ["pytest"]
+typecheck = [
+    "mypy",
+    "types-cffi",
+    "types-dataclasses",
+]
 
 [project.urls]
 homepage = "https://github.com/flacjacket/pywlroots"
