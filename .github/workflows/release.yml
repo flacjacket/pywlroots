@@ -141,7 +141,7 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           yum -y install \
@@ -159,11 +159,10 @@ jobs:
           pip install -r requirements-wheel.txt
       - name: Build wheels
         run: |
-          python wlroots/ffi_build.py
-          python setup.py bdist_wheel
-          ls dist/
-          auditwheel show dist/pywlroots-*.whl
-          auditwheel repair --plat manylinux_2_28_x86_64 -w output_wheels dist/pywlroots-*.whl
+          pip wheel . -w whl
+          ls whl/
+          auditwheel show whl/pywlroots-*.whl
+          auditwheel repair --plat manylinux_2_28_x86_64 -w output_wheels whl/pywlroots-*.whl
       - name: Upload wheel
         uses: actions/upload-artifact@v3
         with:
@@ -195,7 +194,7 @@ jobs:
           PYTHON_VERSION: ${{ matrix.python-version }}
           PP_VERSION: ${{ matrix.pypy-version }}
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           yum -y install \
@@ -213,11 +212,10 @@ jobs:
           pip install -r requirements-wheel.txt
       - name: Build wheels
         run: |
-          python wlroots/ffi_build.py
-          python setup.py bdist_wheel
-          ls dist/
-          auditwheel show dist/pywlroots-*.whl
-          auditwheel repair --plat manylinux_2_28_x86_64 -w output_wheels dist/pywlroots-*.whl
+          pip wheel . -w whl
+          ls whl/
+          auditwheel show whl/pywlroots-*.whl
+          auditwheel repair --plat manylinux_2_28_x86_64 -w output_wheels whl/pywlroots-*.whl
       - name: Upload wheel
         uses: actions/upload-artifact@v3
         with:
@@ -267,7 +265,7 @@ jobs:
       python-version: "3.10"
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
