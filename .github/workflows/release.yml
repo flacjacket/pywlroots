@@ -261,17 +261,40 @@ jobs:
   build-source:
     name: Build source package
     runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux_2_28_x86_64
+    needs: build-wayland
     env:
-      python-version: "3.10"
+      python-version: "3.11"
     steps:
+      - name: Download wayland libraries
+        uses: actions/download-artifact@v3
+        with:
+          name: wayland
+      - name: Unpack wayland artifact
+        run: tar xf wayland.tar.gz -C /
+      - name: Set python version
+        run: |
+          PYTHON_ROOT=$(find /opt/python -name cp${PYTHON_VERSION/./}-*)
+          echo "${PYTHON_ROOT}/bin" >> $GITHUB_PATH
+        shell: bash
+        env:
+          PYTHON_VERSION: ${{ env.python-version }}
       - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.python-version }}
       - name: Install dependencies
         run: |
+          yum -y install \
+            libinput-devel \
+            libpciaccess \
+            libudev-devel \
+            libxkbcommon-x11-devel \
+            mesa-libEGL \
+            mesa-libgbm \
+            xcb-util \
+            xcb-util-image \
+            xcb-util-keysyms \
+            xcb-util-renderutil \
+            xcb-util-wm-devel
           pip install build
       - name: Build source
         run: |
