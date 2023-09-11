@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 name = "pywlroots"
 description = "Python binding to the wlroots library using cffi"
 authors = [{name = "Sean Vig", email = "sean.v.775@gmail.com"}]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {text = "MIT"}
 readme = "README.rst"
 classifiers = [
@@ -18,7 +18,6 @@ classifiers = [
     "Operating System :: POSIX",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -68,15 +67,15 @@ version = {attr = "version.version"}
 select = ['E', 'F', 'I', 'N', 'W', 'UP', 'RUF']
 # Match black line length
 line-length = 88
-target-version = "py37"
+target-version = "py38"
 ignore = ["E501"]
 
 [tool.black]
 line-length = 88
-target-version = ["py37"]
+target-version = ["py38"]
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.8"
 check_untyped_defs = true
 # disallow_any_decorated = true
 # disallow_any_explicit = true
