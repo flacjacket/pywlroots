@@ -33,6 +33,25 @@ class KeyboardModifier(enum.IntFlag):
     MOD5 = lib.WLR_MODIFIER_MOD5
 
 
+class ModifiersMask:
+    def __init__(self, keyboard: Keyboard) -> None:
+        """The modifiers mask"""
+        self._mask = ffi.new("xkb_mod_mask_t *", 0)
+        self._one = ffi.new("uint32_t *", 1)
+        self._keyboard = keyboard
+
+    def add(self, modifier: str) -> None:
+        """Add a modifier to the mask
+        Numlock is Mod2 and Capslock is Lock
+        """
+        idx = ffi.new("xkb_mod_index_t *")
+        idx[0] = lib.xkb_keymap_mod_get_index(
+            self._keyboard._ptr.keymap,
+            ffi.new("const char []", modifier.encode("ascii")),
+        )
+        self._mask[0] |= self._one[0] << idx[0]
+
+
 class KeyboardKeyEvent(Ptr):
     def __init__(self, ptr) -> None:
         """Event that a key has been pressed or release
@@ -107,6 +126,13 @@ class Keyboard(PtrHasData):
             The delay in milliseconds before repeating
         """
         lib.wlr_keyboard_set_repeat_info(self._ptr, rate, delay)
+
+    def notify_modifiers(self, mask: ModifiersMask) -> None:
+        """Notify the keyboard that modifiers have been updated"""
+        zero = ffi.new("uint32_t *", 0)
+        lib.wlr_keyboard_notify_modifiers(
+            self._ptr, zero[0], zero[0], mask._mask[0], zero[0]
+        )
 
     @property
     def keycodes(self):

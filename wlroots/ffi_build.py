@@ -1005,6 +1005,13 @@ struct wlr_keyboard *wlr_keyboard_from_input_device(
     struct wlr_input_device *input_device);
 """
 
+# wlr/interfaces/wlr_keyboard.h
+CDEF += """
+void wlr_keyboard_notify_modifiers(struct wlr_keyboard *keyboard,
+    uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked,
+    uint32_t group);
+"""
+
 # types/wlr_linux_dmabuf_v1.h
 CDEF += """
 struct wlr_linux_dmabuf_v1 *wlr_linux_dmabuf_v1_create(struct wl_display *display,
