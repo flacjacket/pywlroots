@@ -11,7 +11,7 @@ name = "pywlroots"
 description = "Python binding to the wlroots library using cffi"
 authors = [{name = "Sean Vig", email = "sean.v.775@gmail.com"}]
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = {text = "University of Illinois/NCSA Open Source License"}
 readme = "README.rst"
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
