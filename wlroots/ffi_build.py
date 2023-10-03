@@ -2915,7 +2915,8 @@ struct wlr_layer_surface_v1 {
     ...;
 };
 
-struct wlr_layer_shell_v1 *wlr_layer_shell_v1_create(struct wl_display *display);
+struct wlr_layer_shell_v1 *wlr_layer_shell_v1_create(struct wl_display *display,
+    uint32_t version);
 
 void wlr_layer_surface_v1_configure(struct wlr_layer_surface_v1 *surface,
     uint32_t width, uint32_t height);

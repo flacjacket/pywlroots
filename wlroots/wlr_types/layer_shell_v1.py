@@ -197,10 +197,16 @@ class LayerSurfaceV1(PtrHasData):
         return Surface(surface_ptr), sub_x_data[0], sub_y_data[0]
 
 
+LAYER_SHELL_VERSION = 4
+
+
 class LayerShellV1(PtrHasData):
-    def __init__(self, display: Display) -> None:
+    def __init__(self, display: Display, version: int) -> None:
         """Create an wlr_xdg_output_manager_v1"""
-        self._ptr = lib.wlr_layer_shell_v1_create(display._ptr)
+        if not 0 < version <= LAYER_SHELL_VERSION:
+            raise ValueError("Invalid layer shell version.")
+
+        self._ptr = lib.wlr_layer_shell_v1_create(display._ptr, version)
 
         self.new_surface_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_surface), data_wrapper=LayerSurfaceV1
