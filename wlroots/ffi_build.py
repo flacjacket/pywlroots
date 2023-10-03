@@ -1101,12 +1101,18 @@ struct wlr_output {
     float scale;
     enum wl_output_subpixel subpixel;
     enum wl_output_transform transform;
+    enum wlr_output_adaptive_sync_status adaptive_sync_status;
+    uint32_t render_format;
 
     bool needs_frame;
     bool frame_pending;
     float transform_matrix[9];
+    bool non_desktop;
 
     struct wlr_output_state pending;
+
+    // Commit sequence number. Incremented on each commit, may overflow.
+    uint32_t commit_seq;
 
     struct {
         struct wl_signal frame;
@@ -1119,21 +1125,32 @@ struct wlr_output {
         struct wl_signal enable;
         struct wl_signal mode;
         struct wl_signal description;
+        struct wl_signal request_state;
         struct wl_signal destroy;
     } events;
 
     struct wl_event_source *idle_frame;
     struct wl_event_source *idle_done;
-
-    int attach_render_locks; // number of locks forcing rendering
-
-    struct wl_list cursors; // wlr_output_cursor::link
+    int attach_render_locks;
+    struct wl_list cursors;
     struct wlr_output_cursor *hardware_cursor;
+    struct wlr_swapchain *cursor_swapchain;
+    struct wlr_buffer *cursor_front_buffer;
     int software_cursor_locks;
-
+    struct wlr_allocator *allocator;
+    struct wlr_renderer *renderer;
+    struct wlr_swapchain *swapchain;
+    struct wlr_buffer *back_buffer;
     struct wl_listener display_destroy;
+    struct wlr_addon_set addons;
 
     void *data;
+    ...;
+};
+
+struct wlr_output_event_request_state {
+    struct wlr_output *output;
+    const struct wlr_output_state *state;
     ...;
 };
 
