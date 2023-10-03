@@ -362,7 +362,6 @@ struct wlr_surface {
     struct wl_resource *resource;
     struct wlr_renderer *renderer;
     struct wlr_client_buffer *buffer;
-    int sx, sy;
     struct pixman_region32 buffer_damage;
     struct pixman_region32 external_damage;
     struct pixman_region32 opaque_region;

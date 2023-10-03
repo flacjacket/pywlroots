@@ -72,16 +72,6 @@ class Surface(PtrHasData):
         return lib.wlr_surface_is_xwayland_surface(self._ptr)
 
     @property
-    def sx(self) -> int:
-        """Surface local buffer x position"""
-        return self._ptr.sx
-
-    @property
-    def sy(self) -> int:
-        """Surface local buffer y position"""
-        return self._ptr.sy
-
-    @property
     def current(self) -> SurfaceState:
         """The current commited surface state"""
         current_ptr = self._ptr.current
