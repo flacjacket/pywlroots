@@ -51,6 +51,10 @@ class Output(PtrHasData):
         self.enable_event = Signal(ptr=ffi.addressof(self._ptr.events.enable))
         self.mode_event = Signal(ptr=ffi.addressof(self._ptr.events.mode))
         self.description_event = Signal(ptr=ffi.addressof(self._ptr.events.description))
+        self.request_state_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_state),
+            data_wrapper=OutputEventRequestState,
+        )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
@@ -410,3 +414,16 @@ class OutputState(Ptr):
         lib.wlr_output_state_set_custom_mode(
             self._ptr, mode.width, mode.height, mode.refresh
         )
+
+
+class OutputEventRequestState(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_output_event_request_state *", ptr)
+
+    @property
+    def output(self) -> Output:
+        return Output(self._ptr.output)
+
+    @property
+    def state(self) -> OutputState:
+        return OutputState(self._ptr.state)
