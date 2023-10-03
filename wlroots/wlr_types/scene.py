@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from wlroots.util.box import Box
     from wlroots.util.clock import Timespec
     from wlroots.wlr_types import Buffer, Output, OutputLayout
+    from wlroots.wlr_types.data_device_manager import DragIcon
     from wlroots.wlr_types.layer_shell_v1 import LayerSurfaceV1
     from wlroots.wlr_types.presentation_time import Presentation
     from wlroots.wlr_types.xdg_shell import XdgSurface
@@ -133,6 +134,10 @@ class SceneTree(PtrHasData):
         return SceneTree(
             lib.wlr_scene_subsurface_tree_create(parent._ptr, surface._ptr)
         )
+
+    @classmethod
+    def drag_icon_create(cls, parent: SceneTree, drag_icon: DragIcon) -> SceneTree:
+        return SceneTree(lib.wlr_scene_drag_icon_create(parent._ptr, drag_icon._ptr))
 
 
 class SceneBuffer(Ptr):

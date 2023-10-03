@@ -1928,6 +1928,9 @@ struct wlr_scene_layer_surface_v1 *wlr_scene_layer_surface_v1_create(
 void wlr_scene_layer_surface_v1_configure(
     struct wlr_scene_layer_surface_v1 *scene_layer_surface,
     const struct wlr_box *full_area, struct wlr_box *usable_area);
+
+struct wlr_scene_tree *wlr_scene_drag_icon_create(
+    struct wlr_scene_tree *parent, struct wlr_drag_icon *drag_icon);
 """
 
 # types/wlr_screencopy_v1.h
