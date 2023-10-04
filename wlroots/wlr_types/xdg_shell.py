@@ -13,7 +13,7 @@ from wlroots.util.box import Box
 from wlroots.util.edges import Edges
 
 from .output import Output
-from .surface import Surface
+from .compositor import Surface
 
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 

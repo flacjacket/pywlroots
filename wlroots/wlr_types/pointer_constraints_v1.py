@@ -11,7 +11,7 @@ from pywayland.server import Signal
 from wlroots import Ptr, ffi, lib
 from wlroots.util.region import PixmanRegion32
 
-from .surface import Surface
+from .compositor import Surface
 
 if TYPE_CHECKING:
     from pywayland.server import Display

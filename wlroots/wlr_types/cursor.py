@@ -24,7 +24,7 @@ from .pointer import (
     PointerSwipeEndEvent,
     PointerSwipeUpdateEvent,
 )
-from .surface import Surface
+from .compositor import Surface
 from .touch import (
     TouchEventCancel,
     TouchEventDown,

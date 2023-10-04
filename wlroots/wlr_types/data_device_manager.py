@@ -7,7 +7,7 @@ from pywayland.server import Display, Signal
 
 from wlroots import Ptr, PtrHasData, ffi, lib
 
-from .surface import Surface
+from .compositor import Surface
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
