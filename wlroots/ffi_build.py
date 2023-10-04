@@ -1122,8 +1122,6 @@ struct wlr_output {
         struct wl_signal commit;
         struct wl_signal present;
         struct wl_signal bind;
-        struct wl_signal enable;
-        struct wl_signal mode;
         struct wl_signal description;
         struct wl_signal request_state;
         struct wl_signal destroy;
