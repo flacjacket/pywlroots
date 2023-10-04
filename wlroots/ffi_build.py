@@ -1014,7 +1014,7 @@ void wlr_keyboard_notify_modifiers(struct wlr_keyboard *keyboard,
 # types/wlr_linux_dmabuf_v1.h
 CDEF += """
 struct wlr_linux_dmabuf_v1 *wlr_linux_dmabuf_v1_create(struct wl_display *display,
-    struct wlr_renderer *renderer);
+    uint32_t version, const struct wlr_linux_dmabuf_feedback_v1 *default_feedback);
 """
 
 # types/wlr_matrix.h
