@@ -119,7 +119,6 @@ struct wlr_backend *wlr_backend_autocreate(struct wl_display *display,
 
 bool wlr_backend_start(struct wlr_backend *backend);
 void wlr_backend_destroy(struct wlr_backend *backend);
-struct wlr_session *wlr_backend_get_session(struct wlr_backend *backend);
 """
 
 # wlr/backend/libinput.h
