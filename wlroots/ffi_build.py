@@ -154,7 +154,7 @@ struct wlr_buffer *wlr_allocator_create_buffer(struct wlr_allocator *alloc,
 CDEF += """
 struct wlr_renderer *wlr_renderer_autocreate(struct wlr_backend *backend);
 
-void wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
+bool wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
 void wlr_renderer_end(struct wlr_renderer *r);
 void wlr_renderer_clear(struct wlr_renderer *r, const float color[static 4]);
 
