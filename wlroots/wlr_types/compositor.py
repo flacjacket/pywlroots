@@ -48,6 +48,10 @@ class Surface(PtrHasData):
         """
         self._ptr = ptr
 
+        self.precommit_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.precommit),
+            data_wrapper=SurfaceState,
+        )
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
         self.new_subsurface_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_subsurface),
