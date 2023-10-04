@@ -33,7 +33,7 @@ class Backend(Ptr):
             $WLR_BACKENDS (to set the available backends).
         """
         if backend_type == BackendType.AUTO:
-            ptr = lib.wlr_backend_autocreate(display._ptr)
+            ptr = lib.wlr_backend_autocreate(display._ptr, ffi.NULL)
         elif backend_type == BackendType.HEADLESS:
             ptr = lib.wlr_headless_backend_create(display._ptr)
         else:

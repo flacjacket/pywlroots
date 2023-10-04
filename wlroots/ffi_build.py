@@ -114,7 +114,8 @@ struct wlr_backend
     ...;
 };
 
-struct wlr_backend *wlr_backend_autocreate(struct wl_display *display);
+struct wlr_backend *wlr_backend_autocreate(struct wl_display *display,
+    struct wlr_session **session_ptr);
 
 bool wlr_backend_start(struct wlr_backend *backend);
 void wlr_backend_destroy(struct wlr_backend *backend);
