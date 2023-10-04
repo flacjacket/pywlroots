@@ -48,8 +48,6 @@ class Output(PtrHasData):
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
         self.present_event = Signal(ptr=ffi.addressof(self._ptr.events.present))
         self.bind_event = Signal(ptr=ffi.addressof(self._ptr.events.bind))
-        self.enable_event = Signal(ptr=ffi.addressof(self._ptr.events.enable))
-        self.mode_event = Signal(ptr=ffi.addressof(self._ptr.events.mode))
         self.description_event = Signal(ptr=ffi.addressof(self._ptr.events.description))
         self.request_state_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_state),
