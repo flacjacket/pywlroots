@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 class Compositor(Ptr):
-    def __init__(self, display: Display, renderer: Renderer) -> None:
+    def __init__(self, display: Display, renderer: Renderer | None = None) -> None:
         """A compositor for clients to be able to allocate surfaces
 
         :param display:
@@ -28,7 +28,10 @@ class Compositor(Ptr):
         :param renderer:
             The wlroots renderer to attach the compositor to.
         """
-        self._ptr = lib.wlr_compositor_create(display._ptr, renderer._ptr)
+        if renderer is None:
+            self._ptr = lib.wlr_compositor_create(display._ptr, ffi.NULL)
+        else:
+            self._ptr = lib.wlr_compositor_create(display._ptr, renderer._ptr)
 
 
 class SubCompositor(Ptr):
