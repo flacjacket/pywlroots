@@ -2936,9 +2936,7 @@ void wlr_layer_surface_v1_configure(struct wlr_layer_surface_v1 *surface,
 
 void wlr_layer_surface_v1_destroy(struct wlr_layer_surface_v1 *surface);
 
-bool wlr_surface_is_layer_surface(struct wlr_surface *surface);
-
-struct wlr_layer_surface_v1 *wlr_layer_surface_v1_from_wlr_surface(
+struct wlr_layer_surface_v1 *wlr_layer_surface_v1_try_from_wlr_surface(
     struct wlr_surface *surface);
 
 void wlr_layer_surface_v1_for_each_surface(struct wlr_layer_surface_v1 *surface,

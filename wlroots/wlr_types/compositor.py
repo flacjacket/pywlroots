@@ -60,11 +60,6 @@ class Surface(PtrHasData):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
-    def is_layer_surface(self) -> bool:
-        """True if the current surface is a layer surface"""
-        return lib.wlr_surface_is_layer_surface(self._ptr)
-
-    @property
     def current(self) -> SurfaceState:
         """The current commited surface state"""
         current_ptr = self._ptr.current
