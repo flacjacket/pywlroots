@@ -489,11 +489,6 @@ struct wlr_subcompositor {
     ...;
 };
 
-bool wlr_surface_is_subsurface(struct wlr_surface *surface);
-
-struct wlr_subsurface *wlr_subsurface_from_wlr_surface(
-    struct wlr_surface *surface);
-
 struct wlr_subcompositor *wlr_subcompositor_create(struct wl_display *display);
 """
 
@@ -1919,7 +1914,7 @@ struct wlr_scene_surface *wlr_scene_surface_create(struct wlr_scene_tree *parent
 
 struct wlr_scene_buffer *wlr_scene_buffer_from_node(struct wlr_scene_node *node);
 
-struct wlr_scene_surface *wlr_scene_surface_from_buffer(
+struct wlr_scene_surface *wlr_scene_surface_try_from_buffer(
     struct wlr_scene_buffer *scene_buffer);
 
 struct wlr_scene_rect *wlr_scene_rect_create(struct wlr_scene_tree *parent,
