@@ -88,12 +88,12 @@ class XdgSurface(PtrHasData):
         )
 
     @classmethod
-    def from_surface(cls, surface: Surface) -> XdgSurface:
+    def try_from_surface(cls, surface: Surface) -> XdgSurface | None:
         """Get the xdg surface associated with the given surface"""
-        if not surface.is_xdg_surface:
-            raise RuntimeError("Surface is not XDG surface")
-        surface_ptr = lib.wlr_xdg_surface_from_wlr_surface(surface._ptr)
-        return XdgSurface(surface_ptr)
+        maybe_ptr = lib.wlr_xdg_surface_try_from_wlr_surface(surface._ptr)
+        if maybe_ptr == ffi.NULL:
+            return None
+        return XdgSurface(maybe_ptr)
 
     @property
     def surface(self) -> Surface:

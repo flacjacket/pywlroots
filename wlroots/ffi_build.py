@@ -2718,9 +2718,8 @@ void wlr_xdg_popup_destroy(struct wlr_xdg_popup *popup);
 struct wlr_surface *wlr_xdg_surface_surface_at(
     struct wlr_xdg_surface *surface, double sx, double sy,
     double *sub_x, double *sub_y);
-bool wlr_surface_is_xdg_surface(struct wlr_surface *surface);
 
-struct wlr_xdg_surface *wlr_xdg_surface_from_wlr_surface(
+struct wlr_xdg_surface *wlr_xdg_surface_try_from_wlr_surface(
     struct wlr_surface *surface);
 
 void wlr_xdg_surface_get_geometry(struct wlr_xdg_surface *surface,
