@@ -286,7 +286,7 @@ class SceneSurface(Ptr):
 
     @classmethod
     def from_buffer(cls, buffer: SceneBuffer) -> SceneSurface | None:
-        ptr = lib.wlr_scene_surface_from_buffer(buffer._ptr)
+        ptr = lib.wlr_scene_surface_try_from_buffer(buffer._ptr)
         if ptr == ffi.NULL:
             return None
         return cls(ptr)
