@@ -202,6 +202,10 @@ class Output(PtrHasData):
         """Discard the pending output state"""
         lib.wlr_output_rollback(self._ptr)
 
+    def commit_state(self, state: OutputEventRequestState) -> None:
+        """Commit requested state"""
+        lib.wlr_output_commit_state(self._ptr, state._ptr)
+
     def effective_resolution(self) -> tuple[int, int]:
         """Computes the transformed and scaled output resolution"""
         width_ptr = ffi.new("int *")
