@@ -60,11 +60,6 @@ class Surface(PtrHasData):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
-    def is_xdg_surface(self) -> bool:
-        """True if the current surface is an XDG surface"""
-        return lib.wlr_surface_is_xdg_surface(self._ptr)
-
-    @property
     def is_layer_surface(self) -> bool:
         """True if the current surface is a layer surface"""
         return lib.wlr_surface_is_layer_surface(self._ptr)
