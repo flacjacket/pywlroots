@@ -2324,6 +2324,7 @@ struct wlr_xdg_activation_v1 {
     struct {
         struct wl_signal destroy;
         struct wl_signal request_activate;
+        struct wl_signal new_token;
     } events;
     ...;
 };
