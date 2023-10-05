@@ -3209,6 +3209,9 @@ if has_xwayland():
     typedef struct {
         ...;
     } xcb_generic_event_t;
+    typedef struct {
+        ...;
+    } xcb_ewmh_wm_strut_partial_t;
     typedef uint32_t xcb_pixmap_t;
     typedef uint32_t xcb_window_t;
     typedef uint32_t xcb_atom_t;
@@ -3292,10 +3295,14 @@ if has_xwayland():
         xcb_window_t window_id;
         struct wlr_xwm *xwm;
         uint32_t surface_id;
+        uint64_t serial;
         struct wl_list link;
         struct wl_list stack_link;
         struct wl_list unpaired_link;
         struct wlr_surface *surface;
+        struct wlr_addon surface_addon;
+        struct wl_listener surface_commit;
+        struct wl_listener surface_precommit;
         int16_t x, y;
         uint16_t width, height;
         uint16_t saved_width, saved_height;
@@ -3318,9 +3325,9 @@ if has_xwayland():
         uint32_t decorations;
         xcb_icccm_wm_hints_t *hints;
         xcb_size_hints_t *size_hints;
+        xcb_ewmh_wm_strut_partial_t *strut_partial;
         bool pinging;
         struct wl_event_source *ping_timer;
-        // _NET_WM_STATE
         bool modal;
         bool fullscreen;
         bool maximized_vert, maximized_horz;
@@ -3346,6 +3353,7 @@ if has_xwayland():
             struct wl_signal set_window_type;
             struct wl_signal set_hints;
             struct wl_signal set_decorations;
+            struct wl_signal set_strut_partial;
             struct wl_signal set_override_redirect;
             struct wl_signal set_geometry;
             struct wl_signal ping_timeout;
