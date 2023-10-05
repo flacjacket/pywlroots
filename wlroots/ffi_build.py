@@ -1180,6 +1180,8 @@ void wlr_output_set_damage(struct wlr_output *output,
 bool wlr_output_test(struct wlr_output *output);
 bool wlr_output_commit(struct wlr_output *output);
 void wlr_output_rollback(struct wlr_output *output);
+bool wlr_output_commit_state(struct wlr_output *output,
+    const struct wlr_output_state *state);
 
 void wlr_output_render_software_cursors(struct wlr_output *output,
     struct pixman_region32 *damage);
