@@ -3411,8 +3411,7 @@ if has_xwayland():
         bool fullscreen);
     void wlr_xwayland_set_seat(struct wlr_xwayland *xwayland,
         struct wlr_seat *seat);
-    bool wlr_surface_is_xwayland_surface(struct wlr_surface *surface);
-    struct wlr_xwayland_surface *wlr_xwayland_surface_from_wlr_surface(
+    struct wlr_xwayland_surface *wlr_xwayland_surface_try_from_wlr_surface(
         struct wlr_surface *surface);
     void wlr_xwayland_surface_ping(struct wlr_xwayland_surface *surface);
     bool wlr_xwayland_or_surface_wants_focus(

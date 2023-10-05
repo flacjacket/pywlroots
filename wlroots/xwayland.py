@@ -224,8 +224,11 @@ class Surface(PtrHasData):
         lib.wlr_xwayland_surface_set_fullscreen(self._ptr, fullscreen)
 
     @classmethod
-    def from_wlr_surface(cls, surface: WlrSurface) -> Surface:
-        return cls(lib.wlr_xwayland_surface_from_wlr_surface(surface._ptr))
+    def try_from_wlr_surface(cls, surface: WlrSurface) -> Surface | None:
+        maybe_ptr = lib.wlr_xwayland_surface_try_from_wlr_surface(surface._ptr)
+        if maybe_ptr == ffi.NULL:
+            return None
+        return cls(maybe_ptr)
 
     def ping(self) -> None:
         lib.wlr_xwayland_surface_ping(self._ptr)
