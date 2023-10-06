@@ -1846,6 +1846,10 @@ struct wlr_scene_layer_surface_v1 {
     ...;
 };
 
+struct wlr_scene_output_state_options {
+    struct wlr_scene_timer *timer;
+};
+
 void wlr_scene_node_destroy(struct wlr_scene_node *node);
 
 void wlr_scene_node_set_enabled(struct wlr_scene_node *node, bool enabled);
@@ -1930,7 +1934,8 @@ void wlr_scene_output_destroy(struct wlr_scene_output *scene_output);
 void wlr_scene_output_set_position(struct wlr_scene_output *scene_output,
     int lx, int ly);
 
-bool wlr_scene_output_commit(struct wlr_scene_output *scene_output);
+bool wlr_scene_output_commit(struct wlr_scene_output *scene_output,
+    const struct wlr_scene_output_state_options *options);
 
 void wlr_scene_output_send_frame_done(struct wlr_scene_output *scene_output,
     struct timespec *now);

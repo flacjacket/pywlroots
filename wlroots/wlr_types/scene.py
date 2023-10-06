@@ -91,9 +91,11 @@ class SceneOutput(Ptr):
         """
         return cls(lib.wlr_scene_output_create(scene._ptr, output._ptr))
 
-    def commit(self) -> bool:
+    def commit(self, options: SceneOutputStateOptions | None = None) -> bool:
         """Render and commit an output."""
-        return lib.wlr_scene_output_commit(self._ptr)
+        options_ptr = options._ptr if options is not None else ffi.NULL
+
+        return lib.wlr_scene_output_commit(self._ptr, options_ptr)
 
     def destroy(self) -> None:
         """Destroy a scene-graph output."""
@@ -344,3 +346,9 @@ class SceneLayerSurfaceV1(Ptr):
         lib.wlr_scene_layer_surface_v1_configure(
             self._ptr, full_area._ptr, usable_area._ptr
         )
+
+
+class SceneOutputStateOptions(Ptr):
+    def __init__(self, ptr) -> None:
+        """A `struct wlr_scene_output_state_options`."""
+        self._ptr = ptr
