@@ -734,6 +734,7 @@ struct wlr_gamma_control_manager_v1 {
 
     struct {
         struct wl_signal destroy;
+        struct wl_signal set_gamma;
     } events;
 
     void *data;
