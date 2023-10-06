@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import enum
+from typing import TYPE_CHECKING
 
 from pywayland.server import Signal
 
@@ -31,6 +32,9 @@ from .touch import (
     TouchMotionEvent,
     TouchUpEvent,
 )
+
+if TYPE_CHECKING:
+    from .xcursor_manager import XCursorManager
 
 
 class WarpMode(enum.Enum):
@@ -292,3 +296,11 @@ class Cursor(PtrHasData):
         """
         output_ptr = ptr_or_null(output)
         lib.wlr_cursor_map_input_to_output(self._ptr, input_device._ptr, output_ptr)
+
+    def set_xcursor(self, manager: XCursorManager, name: str) -> None:
+        """
+        Set the cursor image from an XCursor theme.
+
+        The image will be loaded from the struct wlr_xcursor_manager.
+        """
+        lib.wlr_cursor_set_xcursor(self._ptr, manager._ptr, name.encode())
