@@ -1217,7 +1217,7 @@ void wlr_output_layout_closest_point(struct wlr_output_layout *layout,
     struct wlr_output *reference, double lx, double ly, double *dest_lx,
     double *dest_ly);
 
-bool wlr_output_layout_add(struct wlr_output_layout *layout,
+struct wlr_output_layout_output *wlr_output_layout_add(struct wlr_output_layout *layout,
     struct wlr_output *output, int lx, int ly);
 
 void wlr_output_layout_remove(struct wlr_output_layout *layout,
@@ -1226,7 +1226,7 @@ void wlr_output_layout_remove(struct wlr_output_layout *layout,
 void wlr_output_layout_get_box(struct wlr_output_layout *layout,
     struct wlr_output *reference, struct wlr_box *dest_box);
 
-bool wlr_output_layout_add_auto(struct wlr_output_layout *layout,
+struct wlr_output_layout_output *wlr_output_layout_add_auto(struct wlr_output_layout *layout,
     struct wlr_output *output);
 
 struct wlr_output *wlr_output_layout_output_at(struct wlr_output_layout *layout,
