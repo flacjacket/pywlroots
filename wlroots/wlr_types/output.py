@@ -417,6 +417,9 @@ class OutputState(Ptr):
             self._ptr, mode.width, mode.height, mode.refresh
         )
 
+    def finish(self) -> None:
+        lib.wlr_output_state_finish(self._ptr)
+
 
 class OutputEventRequestState(Ptr):
     def __init__(self, ptr) -> None:

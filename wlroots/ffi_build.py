@@ -1227,6 +1227,13 @@ enum wl_output_transform wlr_output_transform_invert(
 enum wl_output_transform wlr_output_transform_compose(
     enum wl_output_transform tr_a, enum wl_output_transform tr_b);
 
+void wlr_output_state_finish(struct wlr_output_state *state);
+void wlr_output_state_set_enabled(struct wlr_output_state *state,
+    bool enabled);
+void wlr_output_state_set_mode(struct wlr_output_state *state,
+    struct wlr_output_mode *mode);
+void wlr_output_state_set_custom_mode(struct wlr_output_state *state,
+        int32_t width, int32_t height, int32_t refresh);
 """
 
 # types/wlr_output_layout.h
