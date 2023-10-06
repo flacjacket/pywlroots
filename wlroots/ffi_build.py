@@ -356,6 +356,7 @@ struct wlr_surface_role {
     void (*commit)(struct wlr_surface *surface);
     void (*precommit)(struct wlr_surface *surface,
         const struct wlr_surface_state *state);
+    void (*unmap)(struct wlr_surface *surface);
     void (*destroy)(struct wlr_surface *surface);
     ...;
 };
@@ -380,6 +381,7 @@ struct wlr_surface {
     struct wlr_surface_state current, pending;
 
     struct wl_list cached;
+    bool mapped;
 
     const struct wlr_surface_role *role;
     void *role_data;
@@ -388,6 +390,8 @@ struct wlr_surface {
         struct wl_signal client_commit;
         struct wl_signal precommit;
         struct wl_signal commit;
+        struct wl_signal map;
+        struct wl_signal unmap;
         struct wl_signal new_subsurface;
         struct wl_signal destroy;
     } events;
@@ -395,7 +399,6 @@ struct wlr_surface {
     struct wl_list current_outputs;
     struct wlr_addon_set addons;
     void *data;
-    struct wl_listener renderer_destroy;
     ...;
 };
 
