@@ -2590,7 +2590,7 @@ struct wlr_xdg_surface {
 
     struct wl_list popups; // wlr_xdg_popup::link
 
-    bool added, configured, mapped;
+    bool added, configured;
     struct wl_event_source *configure_idle;
     uint32_t scheduled_serial;
     struct wl_list configure_list;
@@ -2603,8 +2603,6 @@ struct wlr_xdg_surface {
         struct wl_signal destroy;
         struct wl_signal ping_timeout;
         struct wl_signal new_popup;
-        struct wl_signal map;
-        struct wl_signal unmap;
 
         struct wl_signal configure; // wlr_xdg_surface_configure
         struct wl_signal ack_configure; // wlr_xdg_surface_configure
