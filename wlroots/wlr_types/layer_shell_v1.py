@@ -97,8 +97,6 @@ class LayerSurfaceV1(PtrHasData):
         self._ptr = ffi.cast("struct wlr_layer_surface_v1 *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
-        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
         self.new_popup_event = Signal(ptr=ffi.addressof(self._ptr.events.new_popup))
 
     @property
