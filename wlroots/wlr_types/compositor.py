@@ -64,6 +64,8 @@ class Surface(PtrHasData):
             data_wrapper=SurfaceState,
         )
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
+        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
+        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
         self.new_subsurface_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_subsurface),
             data_wrapper=SubSurface,
