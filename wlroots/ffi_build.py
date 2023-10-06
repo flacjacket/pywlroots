@@ -471,7 +471,6 @@ struct wlr_subsurface {
 
     bool synchronized;
     bool reordered;
-    bool mapped;
     bool added;
 
     struct wl_listener surface_client_commit;
@@ -479,8 +478,6 @@ struct wlr_subsurface {
 
     struct {
         struct wl_signal destroy;
-        struct wl_signal map;
-        struct wl_signal unmap;
     } events;
 
     void *data;

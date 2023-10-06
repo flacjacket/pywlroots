@@ -138,8 +138,6 @@ class SubSurface(PtrHasData):
         self._ptr = ffi.cast("struct wlr_subsurface *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
-        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
 
     @property
     def surface(self) -> Surface:
