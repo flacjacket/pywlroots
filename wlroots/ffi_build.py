@@ -3336,10 +3336,6 @@ if has_xwayland():
         uint16_t mask; // xcb_config_window_t
         ...;
     };
-    struct wlr_xwayland_move_event {
-        struct wlr_xwayland_surface *surface;
-        ...;
-    };
     struct wlr_xwayland_remove_startup_info_event  {
         const char *id;
         xcb_window_t window;
