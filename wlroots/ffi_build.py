@@ -1232,42 +1232,6 @@ enum wl_output_transform wlr_output_transform_compose(
 
 """
 
-# types/wlr_output_damage.h
-CDEF += """
-#define WLR_OUTPUT_DAMAGE_PREVIOUS_LEN 2
-
-struct wlr_output_damage {
-    struct wlr_output *output;
-    int max_rects; // max number of damaged rectangles
-
-    struct pixman_region32 current; // in output-local coordinates
-
-    // circular queue for previous damage
-    struct pixman_region32 previous[WLR_OUTPUT_DAMAGE_PREVIOUS_LEN];
-    size_t previous_idx;
-
-    struct {
-        struct wl_signal frame;
-        struct wl_signal destroy;
-    } events;
-    ...;
-};
-
-struct wlr_output_damage *wlr_output_damage_create(struct wlr_output *output);
-void wlr_output_damage_destroy(struct wlr_output_damage *output_damage);
-
-bool wlr_output_damage_attach_render(struct wlr_output_damage *output_damage,
-    bool *needs_frame, struct pixman_region32  *buffer_damage);
-
-void wlr_output_damage_add(struct wlr_output_damage *output_damage,
-    struct pixman_region32 *damage);
-
-void wlr_output_damage_add_whole(struct wlr_output_damage *output_damage);
-
-void wlr_output_damage_add_box(struct wlr_output_damage *output_damage,
-    struct wlr_box *box);
-"""
-
 # types/wlr_output_layout.h
 CDEF += """
 struct wlr_output_layout {
@@ -3058,7 +3022,6 @@ SOURCE = """
 #include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output.h>
-#include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_output_power_management_v1.h>
