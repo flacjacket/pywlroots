@@ -11,7 +11,10 @@ from wlroots.wlr_types import Compositor, SubCompositor
 
 
 def build_compositor(
-    display: Display, *, backend_type=BackendType.AUTO
+    display: Display,
+    *,
+    backend_type=BackendType.AUTO,
+    compositor_version: int = 5,
 ) -> tuple[Compositor, Allocator, Renderer, Backend, SubCompositor]:
     """Build and run a compositor
 
@@ -21,6 +24,8 @@ def build_compositor(
     :param backend_type:
         The type of the backend to setup the compositor for, by default use the
         auto-detected backend.
+    :param compositor_version:
+        The version of the wlr_compositor interface to use.
     :return:
         The compositor, allocator, renderer, and the backend.
     """
@@ -28,7 +33,7 @@ def build_compositor(
     renderer = Renderer.autocreate(backend)
     renderer.init_display(display)
     allocator = Allocator.autocreate(backend, renderer)
-    compositor = Compositor(display, renderer)
+    compositor = Compositor(display, compositor_version, renderer)
     subcompositor = SubCompositor(display)
 
     return compositor, allocator, renderer, backend, subcompositor

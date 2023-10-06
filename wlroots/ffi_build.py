@@ -329,7 +329,7 @@ struct wlr_compositor {
 };
 
 struct wlr_compositor *wlr_compositor_create(struct wl_display *display,
-    struct wlr_renderer *renderer);
+    uint32_t version, struct wlr_renderer *renderer);
 
 struct wlr_surface_state {
     uint32_t committed;

@@ -19,19 +19,30 @@ if TYPE_CHECKING:
     from wlroots.renderer import Renderer
 
 
+COMPOSITOR_VERSION = 5
+
+
 class Compositor(Ptr):
-    def __init__(self, display: Display, renderer: Renderer | None = None) -> None:
+    def __init__(
+        self, display: Display, version: int, renderer: Renderer | None = None
+    ) -> None:
         """A compositor for clients to be able to allocate surfaces
 
         :param display:
             The Wayland server display to attach to the compositor.
+        :param version:
+            The version of the wlr_compositor interface to use.
         :param renderer:
             The wlroots renderer to attach the compositor to.
         """
+        if not version <= COMPOSITOR_VERSION:
+            raise ValueError(
+                f"Compositor version must be less than or equal to {COMPOSITOR_VERSION}"
+            )
         if renderer is None:
-            self._ptr = lib.wlr_compositor_create(display._ptr, ffi.NULL)
+            self._ptr = lib.wlr_compositor_create(display._ptr, version, ffi.NULL)
         else:
-            self._ptr = lib.wlr_compositor_create(display._ptr, renderer._ptr)
+            self._ptr = lib.wlr_compositor_create(display._ptr, version, renderer._ptr)
 
 
 class SubCompositor(Ptr):
