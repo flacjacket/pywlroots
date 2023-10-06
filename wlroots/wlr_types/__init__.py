@@ -20,7 +20,7 @@ from .keyboard import Keyboard  # noqa: F401
 from .layer_shell_v1 import LayerShellV1  # noqa: F401
 from .matrix import Matrix  # noqa: F401
 from .output import Output, OutputState  # noqa: F401
-from .output_layout import OutputLayout  # noqa: F401
+from .output_layout import OutputLayout, OutputLayoutOutput  # noqa: F401
 from .pointer import (  # noqa: F401
     PointerAxisEvent,
     PointerButtonEvent,

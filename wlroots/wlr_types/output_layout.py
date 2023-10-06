@@ -31,7 +31,7 @@ class OutputLayout(Ptr):
             ffi.release(self._ptr)
             self._ptr = None
 
-    def add_auto(self, output: Output) -> bool:
+    def add_auto(self, output: Output) -> OutputLayoutOutput | None:
         """
         Add the output to the layout as automatically configured. This will place the
         output in a sensible location in the layout. The coordinates of the output in
@@ -40,7 +40,10 @@ class OutputLayout(Ptr):
 
         Returns true on success, false on a memory allocation error.
         """
-        return lib.wlr_output_layout_add_auto(self._ptr, output._ptr)
+        ptr = lib.wlr_output_layout_add_auto(self._ptr, output._ptr)
+        if ptr == ffi.NULL:
+            return None
+        return OutputLayoutOutput(ptr)
 
     def output_coords(self, output: Output) -> tuple[float, float]:
         """Determine coordinates of the output in the layout
@@ -72,15 +75,16 @@ class OutputLayout(Ptr):
             return None
         return Output(output_ptr)
 
-    def add(self, output: Output, lx: int, ly: int) -> bool:
+    def add(self, output: Output, lx: int, ly: int) -> OutputLayoutOutput | None:
         """
         Add the output to the layout at the specified coordinates. If the output is
         already a part of the output layout, it will become manually configured and will
         be moved to the specified coordinates.
-
-        Returns true on success, false on a memory allocation error.
         """
-        return lib.wlr_output_layout_add(self._ptr, output._ptr, lx, ly)
+        ptr = lib.wlr_output_layout_add(self._ptr, output._ptr, lx, ly)
+        if ptr == ffi.NULL:
+            return None
+        return OutputLayoutOutput(ptr)
 
     def remove(self, output: Output) -> None:
         """Remove an output from the layout."""
@@ -123,3 +127,9 @@ class OutputLayout(Ptr):
             self._ptr, reference_ptr, lx, ly, dest_lx, dest_ly
         )
         return dest_lx[0], dest_ly[0]
+
+
+class OutputLayoutOutput(Ptr):
+    def __init__(self, ptr) -> None:
+        """A `struct wlr_output_layout_output`"""
+        self._ptr = ptr
