@@ -91,9 +91,11 @@ class SceneOutput(Ptr):
         """
         return cls(lib.wlr_scene_output_create(scene._ptr, output._ptr))
 
-    def commit(self) -> None:
+    def commit(self, options: SceneOutputStateOptions | None = None) -> None:
         """Render and commit an output."""
-        if not lib.wlr_scene_output_commit(self._ptr):
+        options_ptr = options._ptr if options is not None else ffi.NULL
+
+        if not lib.wlr_scene_output_commit(self._ptr, options_ptr):
             raise RuntimeError("Unable to commit scene output")
 
     def destroy(self) -> None:
@@ -345,3 +347,9 @@ class SceneLayerSurfaceV1(Ptr):
         lib.wlr_scene_layer_surface_v1_configure(
             self._ptr, full_area._ptr, usable_area._ptr
         )
+
+
+class SceneOutputStateOptions(Ptr):
+    def __init__(self, ptr) -> None:
+        """A `struct wlr_scene_output_state_options`."""
+        self._ptr = ptr
