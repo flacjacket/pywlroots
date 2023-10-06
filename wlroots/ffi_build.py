@@ -385,7 +385,7 @@ struct wlr_surface {
     bool mapped;
 
     const struct wlr_surface_role *role;
-    void *role_data;
+    struct wl_resource *role_resource;
 
     struct {
         struct wl_signal client_commit;
