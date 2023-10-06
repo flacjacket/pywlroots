@@ -29,17 +29,6 @@ class XCursorManager(Ptr):
             ffi.release(self._ptr)
             self._ptr = None
 
-    def set_cursor_image(self, name: str, cursor: Cursor):
-        """Set the cursor image
-
-        Set a Cursor image to the specified cursor name for all scale factors.
-        The wlroots cursor will take over from this point and ensure the
-        correct cursor is used on each output, assuming an output layout is
-        attached to it.
-        """
-        name_cdata = ffi.new("char []", name.encode())
-        lib.wlr_xcursor_manager_set_cursor_image(self._ptr, name_cdata, cursor._ptr)
-
     def get_xcursor(self, name: str, scale: float = 1) -> XCursor | None:
         """
         Retrieves a wlr_xcursor reference for the given cursor name at the given scale
