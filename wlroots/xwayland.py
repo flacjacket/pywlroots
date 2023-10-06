@@ -176,7 +176,6 @@ class Surface(PtrHasData):
         self.set_class_event = Signal(ptr=ffi.addressof(self._ptr.events.set_class))
         self.set_role_event = Signal(ptr=ffi.addressof(self._ptr.events.set_role))
         self.set_parent_event = Signal(ptr=ffi.addressof(self._ptr.events.set_parent))
-        self.set_pid_event = Signal(ptr=ffi.addressof(self._ptr.events.set_pid))
         self.set_startup_id_event = Signal(
             ptr=ffi.addressof(self._ptr.events.set_startup_id)
         )

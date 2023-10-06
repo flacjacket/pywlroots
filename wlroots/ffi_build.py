@@ -3070,7 +3070,6 @@ if has_xwayland():
             struct wl_signal set_class;
             struct wl_signal set_role;
             struct wl_signal set_parent;
-            struct wl_signal set_pid;
             struct wl_signal set_startup_id;
             struct wl_signal set_window_type;
             struct wl_signal set_hints;
