@@ -533,10 +533,7 @@ void wlr_seat_start_pointer_drag(struct wlr_seat *seat, struct wlr_drag *drag,
 struct wlr_drag_icon {
     struct wlr_drag *drag;
     struct wlr_surface *surface;
-    bool mapped;
     struct {
-        struct wl_signal map;
-        struct wl_signal unmap;
         struct wl_signal destroy;
     } events;
     void *data;
