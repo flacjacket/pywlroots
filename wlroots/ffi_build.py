@@ -1896,7 +1896,7 @@ void wlr_scene_output_for_each_buffer(struct wlr_scene_output *scene_output,
 struct wlr_scene_output *wlr_scene_get_scene_output(struct wlr_scene *scene,
     struct wlr_output *output);
 
-bool wlr_scene_attach_output_layout(struct wlr_scene *scene,
+struct wlr_scene_output_layout *wlr_scene_attach_output_layout(struct wlr_scene *scene,
     struct wlr_output_layout *output_layout);
 
 struct wlr_scene_tree *wlr_scene_subsurface_tree_create(

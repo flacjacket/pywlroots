@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Callable, TypeVar
 
 from wlroots import Ptr, PtrHasData, ffi, lib
 from wlroots.util.region import PixmanRegion32
-from wlroots.wlr_types import Surface
+from wlroots.wlr_types import Surface, OutputLayoutOutput
 
 if TYPE_CHECKING:
     from wlroots.util.box import Box
@@ -36,9 +36,14 @@ class Scene(Ptr):
         ptr = ffi.addressof(self._ptr.tree)
         return SceneTree(ptr)
 
-    def attach_output_layout(self, output_layout: OutputLayout) -> bool:
+    def attach_output_layout(
+        self, output_layout: OutputLayout
+    ) -> OutputLayoutOutput | None:
         """Get a scene-graph output from a wlr_output."""
-        return lib.wlr_scene_attach_output_layout(self._ptr, output_layout._ptr)
+        ptr = lib.wlr_scene_attach_output_layout(self._ptr, output_layout._ptr)
+        if ptr == ffi.NULL:
+            return None
+        return OutputLayoutOutput(ptr)
 
     def set_presentation(self, presentation: Presentation) -> None:
         """
