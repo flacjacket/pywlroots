@@ -309,8 +309,25 @@ class OutputMode(Ptr):
 
 
 class OutputState(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData | None = None) -> None:
+        if ptr is None:
+            ptr = ffi.new("struct wlr_output_state *")
         self._ptr = ptr
+
+    def finish(self) -> None:
+        lib.wlr_output_state_finish(self._ptr)
+
+    def set_enabled(self, *, enabled: bool = True) -> None:
+        lib.wlr_output_state_set_enabled(self._ptr, enabled)
+
+    def set_mode(self, mode: OutputMode | None) -> None:
+        if mode is None:
+            lib.wlr_output_state_set_mode(self._ptr, ffi.NULL)
+        else:
+            lib.wlr_output_state_set_mode(self._ptr, mode._ptr)
+
+    def set_custom_mode(self, width: int, height: int, refresh: int) -> None:
+        lib.wlr_output_state_set_custom_mode(self._ptr, width, height, refresh)
 
 
 class OutputEventRequestState(Ptr):
