@@ -523,6 +523,7 @@ struct wlr_drag_icon {
     struct {
         struct wl_signal destroy;
     } events;
+    struct wl_listener surface_destroy;
     void *data;
     ...;
 };
