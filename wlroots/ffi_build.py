@@ -406,8 +406,7 @@ struct wlr_surface {
 typedef void (*wlr_surface_iterator_func_t)(struct wlr_surface *surface,
     int sx, int sy, void *data);
 
-bool wlr_surface_set_role(struct wlr_surface *surface,
-    const struct wlr_surface_role *role, void *role_data,
+bool wlr_surface_set_role(struct wlr_surface *surface, const struct wlr_surface_role *role,
     struct wl_resource *error_resource, uint32_t error_code);
 
 void wlr_surface_destroy_role_object(struct wlr_surface *surface);
