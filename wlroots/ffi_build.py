@@ -3056,6 +3056,8 @@ if has_xwayland():
             struct wl_signal request_maximize;
             struct wl_signal request_fullscreen;
             struct wl_signal request_activate;
+            struct wl_signal associate;
+            struct wl_signal dissociate;
             struct wl_signal map;
             struct wl_signal unmap;
             struct wl_signal set_title;
