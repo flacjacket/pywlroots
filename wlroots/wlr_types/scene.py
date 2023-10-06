@@ -175,6 +175,10 @@ class SceneBuffer(Ptr):
         region_ptr = region._ptr if region else ffi.NULL
         lib.wlr_scene_buffer_set_buffer_with_damage(self._ptr, buffer_ptr, region_ptr)
 
+    def set_opacity(self, opacity: float) -> None:
+        """Sets the opacity of this buffer"""
+        lib.wlr_scene_buffer_set_opacity(self._ptr, opacity)
+
 
 T = TypeVar("T")
 BufferCallback = Callable[[SceneBuffer, int, int, T], None]

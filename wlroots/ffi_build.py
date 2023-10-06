@@ -1863,6 +1863,9 @@ void wlr_scene_buffer_set_transform(struct wlr_scene_buffer *scene_buffer,
 void wlr_scene_buffer_send_frame_done(struct wlr_scene_buffer *scene_buffer,
     struct timespec *now);
 
+void wlr_scene_buffer_set_opacity(struct wlr_scene_buffer *scene_buffer,
+    float opacity);
+
 struct wlr_scene_output *wlr_scene_output_create(struct wlr_scene *scene,
     struct wlr_output *output);
 
