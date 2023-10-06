@@ -3125,13 +3125,11 @@ struct wlr_layer_surface_v1 {
     struct wlr_layer_shell_v1 *shell;
     struct wl_list popups; // wlr_xdg_popup::link
     char *namespace;
-    bool added, configured, mapped;
+    bool added, configured;
     struct wl_list configure_list;
     struct wlr_layer_surface_v1_state current, pending;
     struct {
         struct wl_signal destroy;
-        struct wl_signal map;
-        struct wl_signal unmap;
         struct wl_signal new_popup;
     } events;
 
