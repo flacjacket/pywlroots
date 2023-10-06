@@ -172,8 +172,6 @@ class Surface(PtrHasData):
         self.request_activate_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_activate)
         )
-        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
-        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
         self.set_title_event = Signal(ptr=ffi.addressof(self._ptr.events.set_title))
         self.set_class_event = Signal(ptr=ffi.addressof(self._ptr.events.set_class))
         self.set_role_event = Signal(ptr=ffi.addressof(self._ptr.events.set_role))
@@ -262,10 +260,6 @@ class Surface(PtrHasData):
     @property
     def override_redirect(self) -> bool:
         return self._ptr.override_redirect
-
-    @property
-    def mapped(self) -> bool:
-        return self._ptr.mapped
 
     @property
     def title(self) -> str | None:
