@@ -2265,8 +2265,6 @@ void wlr_xcursor_manager_destroy(struct wlr_xcursor_manager *manager);
 
 int wlr_xcursor_manager_load(struct wlr_xcursor_manager *manager,
     float scale);
-void wlr_xcursor_manager_set_cursor_image(struct wlr_xcursor_manager *manager,
-    const char *name, struct wlr_cursor *cursor);
 struct wlr_xcursor *wlr_xcursor_manager_get_xcursor(
     struct wlr_xcursor_manager *manager, const char *name, float scale);
 """
