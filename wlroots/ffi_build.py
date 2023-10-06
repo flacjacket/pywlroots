@@ -1229,6 +1229,7 @@ enum wl_output_transform wlr_output_transform_invert(
 enum wl_output_transform wlr_output_transform_compose(
     enum wl_output_transform tr_a, enum wl_output_transform tr_b);
 
+void wlr_output_state_init(struct wlr_output_state *state);
 void wlr_output_state_finish(struct wlr_output_state *state);
 void wlr_output_state_set_enabled(struct wlr_output_state *state,
     bool enabled);

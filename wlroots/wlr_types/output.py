@@ -347,6 +347,7 @@ class OutputState(Ptr):
     def __init__(self, ptr: ffi.CData | None = None) -> None:
         if ptr is None:
             ptr = ffi.new("struct wlr_output_state *")
+            lib.wlr_output_state_init(ptr)
         self._ptr = ptr
 
     @property
