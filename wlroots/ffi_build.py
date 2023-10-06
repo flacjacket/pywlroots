@@ -342,6 +342,7 @@ struct wlr_surface_state {
 
 struct wlr_surface_role {
     const char *name;
+    bool no_object;
     void (*commit)(struct wlr_surface *surface);
     void (*unmap)(struct wlr_surface *surface);
     void (*destroy)(struct wlr_surface *surface);
