@@ -1769,7 +1769,7 @@ struct wlr_scene_buffer {
         struct wl_signal outputs_update;
         struct wl_signal output_enter; // struct wlr_scene_output
         struct wl_signal output_leave; // struct wlr_scene_output
-        struct wl_signal output_present; // struct wlr_scene_output
+        struct wl_signal output_sample; // struct wlr_scene_output
         struct wl_signal frame_done; // struct timespec
     } events;
 
