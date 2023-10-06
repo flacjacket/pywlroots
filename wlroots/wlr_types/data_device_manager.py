@@ -86,8 +86,6 @@ class DragIcon(PtrHasData):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_drag_icon *", ptr)
 
-        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
-        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
