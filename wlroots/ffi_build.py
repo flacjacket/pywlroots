@@ -300,6 +300,8 @@ void wlr_cursor_map_to_output(struct wlr_cursor *cur,
     struct wlr_output *output);
 void wlr_cursor_map_input_to_output(struct wlr_cursor *cur,
     struct wlr_input_device *dev, struct wlr_output *output);
+void wlr_cursor_set_xcursor(struct wlr_cursor *cur,
+    struct wlr_xcursor_manager *manager, const char *name);
 """
 
 # types/wlr_compositor.h
