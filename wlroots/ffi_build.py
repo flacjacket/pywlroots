@@ -3009,12 +3009,12 @@ if has_xwayland():
         struct wlr_surface *surface;
         struct wlr_addon surface_addon;
         struct wl_listener surface_commit;
-        struct wl_listener surface_precommit;
+        struct wl_listener surface_map;
+        struct wl_listener surface_unmap;
         int16_t x, y;
         uint16_t width, height;
         uint16_t saved_width, saved_height;
         bool override_redirect;
-        bool mapped;
         char *title;
         char *class;
         char *instance;
@@ -3051,8 +3051,6 @@ if has_xwayland():
             struct wl_signal request_activate;
             struct wl_signal associate;
             struct wl_signal dissociate;
-            struct wl_signal map;
-            struct wl_signal unmap;
             struct wl_signal set_title;
             struct wl_signal set_class;
             struct wl_signal set_role;
