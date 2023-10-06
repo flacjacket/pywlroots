@@ -3301,6 +3301,7 @@ if has_xwayland():
         bool fullscreen;
         bool maximized_vert, maximized_horz;
         bool minimized;
+        bool withdrawn;
         bool has_alpha;
         struct {
             struct wl_signal destroy;
