@@ -143,12 +143,13 @@ jobs:
           - "3.9"
           - "3.10"
           - "3.11"
+          - "3.12"
           - "pypy-3.8"
           - "pypy-3.9"
           - "pypy-3.10"
         wlroots-version: ["0.16.2"]
         include:
-          - python-version: "3.11"
+          - python-version: "3.12"
             wlroots-version: master
     steps:
       - name: Download wayland libraries
@@ -215,7 +216,7 @@ jobs:
     name: mypy tests
     runs-on: ubuntu-22.04
     env:
-      python-version: "3.11"
+      python-version: "3.12"
     steps:
       - name: Install dependencies
         run: |
@@ -242,7 +243,7 @@ jobs:
     name: black tests
     runs-on: ubuntu-22.04
     env:
-      python-version: "3.11"
+      python-version: "3.12"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -260,7 +261,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-wayland
     env:
-      python-version: "3.11"
+      python-version: "3.12"
       wlroots-version: "0.16.2"
     steps:
       - name: Download wayland libraries
@@ -296,7 +297,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-wayland
     env:
-      python-version: "3.11"
+      python-version: "3.12"
       wlroots-version: "0.16.2"
     steps:
       - name: Download wayland libraries
