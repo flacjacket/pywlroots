@@ -125,7 +125,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
       - name: Download wayland libraries
         uses: actions/download-artifact@v3
@@ -176,7 +176,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9"]
+        python-version: ["3.8", "3.9", "3.10"]
         pypy-version: ["7.3"]
     steps:
       - name: Download wayland libraries
@@ -233,8 +233,10 @@ jobs:
           - "3.9"
           - "3.10"
           - "3.11"
+          - "3.12"
           - "pypy-3.8"
           - "pypy-3.9"
+          - "pypy-3.10"
     steps:
       - name: Install dependencies
         run: |
@@ -264,7 +266,7 @@ jobs:
     container: quay.io/pypa/manylinux_2_28_x86_64
     needs: build-wayland
     env:
-      python-version: "3.11"
+      python-version: "3.12"
     steps:
       - name: Download wayland libraries
         uses: actions/download-artifact@v3
@@ -329,6 +331,11 @@ jobs:
         with:
           name: wheels-3.11
           path: dist/
+      - name: Download wheels CPython 3.12
+        uses: actions/download-artifact@v3
+        with:
+          name: wheels-3.12
+          path: dist/
       - name: Download wheels PyPy 3.8
         uses: actions/download-artifact@v3
         with:
@@ -338,6 +345,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: wheels-pypy-3.9
+          path: dist
+      - name: Download wheels PyPy 3.10
+        uses: actions/download-artifact@v3
+        with:
+          name: wheels-pypy-3.10
           path: dist
       - name: Download source
         uses: actions/download-artifact@v3
