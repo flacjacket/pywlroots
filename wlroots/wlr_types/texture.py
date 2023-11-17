@@ -51,6 +51,14 @@ class Texture(Ptr):
         ptr = ffi.gc(ptr, lib.wlr_texture_destroy)
         return Texture(ptr)
 
+    @property
+    def width(self):
+        return self._ptr.width
+
+    @property
+    def height(self):
+        return self._ptr.height
+
     def update_from_buffer(
         self,
         buffer: Buffer,

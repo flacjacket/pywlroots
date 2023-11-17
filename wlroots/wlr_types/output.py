@@ -101,6 +101,14 @@ class Output(PtrHasData):
         return OutputMode(self._ptr.current_mode)
 
     @property
+    def width(self) -> int:
+        return self._ptr.width
+
+    @property
+    def height(self) -> int:
+        return self._ptr.height
+
+    @property
     def scale(self) -> float:
         return self._ptr.scale
 
@@ -112,6 +120,10 @@ class Output(PtrHasData):
     def transform_matrix(self) -> Matrix:
         """The transform matrix giving the projection of the output"""
         return Matrix(self._ptr.transform_matrix)
+
+    @property
+    def needs_frame(self) -> bool:
+        return self._ptr.needs_frame
 
     def enable(self, *, enable: bool = True) -> None:
         """Enables or disables the output
@@ -178,14 +190,16 @@ class Output(PtrHasData):
                 "Output capabilities must match the capabilities of the output's backend."
             )
 
-    def attach_render(self) -> None:
+    def attach_render(self) -> int:
         """Attach the renderer's buffer to the output
 
         Compositors must call this function before rendering. After they are
         done rendering, they should call `.commit()` to submit the new frame.
         """
-        if not lib.wlr_output_attach_render(self._ptr, ffi.NULL):
+        buffer_age_ptr = ffi.new("int *")
+        if not lib.wlr_output_attach_render(self._ptr, buffer_age_ptr):
             raise RuntimeError("Unable to attach render")
+        return buffer_age_ptr[0]
 
     def commit(self) -> None:
         """Commit the pending output state
