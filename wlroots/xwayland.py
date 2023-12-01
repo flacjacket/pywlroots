@@ -71,6 +71,10 @@ class Server(PtrHasData):
         self.ready_event = Signal(ptr=ffi.addressof(self._ptr.events.ready))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
+    @property
+    def ready(self) -> bool:
+        return self._ptr.ready
+
 
 class XWayland(PtrHasData):
     def __init__(self, display: Display, compositor: Compositor, lazy: bool) -> None:
