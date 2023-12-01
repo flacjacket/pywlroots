@@ -10,7 +10,6 @@ from pywayland.server import Signal
 
 from wlroots import PtrHasData, ffi, lib
 
-from .compositor import Surface
 from .xdg_shell import XdgTopLevel
 
 if TYPE_CHECKING:

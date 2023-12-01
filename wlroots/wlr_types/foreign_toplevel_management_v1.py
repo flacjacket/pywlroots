@@ -10,8 +10,8 @@ from pywayland.server import Signal
 
 from wlroots import Ptr, PtrHasData, ffi, lib
 
-from .output import Output
 from .compositor import Surface
+from .output import Output
 
 if TYPE_CHECKING:
     from pywayland.server import Display

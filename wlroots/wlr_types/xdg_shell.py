@@ -12,8 +12,8 @@ from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 from wlroots.util.box import Box
 from wlroots.util.edges import Edges
 
-from .output import Output
 from .compositor import Surface
+from .output import Output
 
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 
