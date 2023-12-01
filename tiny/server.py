@@ -22,9 +22,11 @@ from wlroots.wlr_types import (
     Keyboard,
     Output,
     OutputLayout,
+    OutputState,
     Scene,
     SceneBuffer,
     SceneNodeType,
+    SceneOutput,
     SceneSurface,
     SceneTree,
     Seat,
@@ -51,6 +53,7 @@ from .view import View
 if TYPE_CHECKING:
     from wlroots.wlr_types import InputDevice
     from wlroots.wlr_types.keyboard import KeyboardKeyEvent, KeyboardModifiers
+    from wlroots.wlr_types.output import OutputEventRequestState
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
@@ -213,7 +216,7 @@ class TinywlServer:
         logging.debug("Processing cursor motion: %s, %s", sx, sy)
 
         if view is None:
-            self._cursor_manager.set_cursor_image("left_ptr", self._cursor)
+            self._cursor.set_xcursor(self._cursor_manager, "default")
 
         if surface is None:
             # Clear pointer focus so future button events and such are not sent
@@ -289,8 +292,8 @@ class TinywlServer:
         if previous_surface is not None:
             # Deactivate the previously focused surface
             logging.info("Un-focusing previous")
-            previous_xdg_surface = XdgSurface.from_surface(previous_surface)
-            previous_xdg_surface.set_activated(False)
+            if previous_xdg_surface := XdgSurface.try_from_surface(previous_surface):
+                previous_xdg_surface.set_activated(False)
 
         view.scene_node.raise_to_top()
         # roll the given surface to the front of the list, copy and modify the
@@ -322,10 +325,12 @@ class TinywlServer:
             # we must provide the proper parent scene node of the xdg popup. To
             # enable this, we always set the user data field of xdg_surfaces to
             # the corresponding scene node.
-            parent_xdg_surface = XdgSurface.from_surface(xdg_surface.popup.parent)
-            parent_scene_tree = cast(SceneTree, parent_xdg_surface.data)
-            scene_tree = Scene.xdg_surface_create(parent_scene_tree, xdg_surface)
-            xdg_surface.data = scene_tree
+            if parent_xdg_surface := XdgSurface.try_from_surface(
+                xdg_surface.popup.parent
+            ):
+                parent_scene_tree = cast(SceneTree, parent_xdg_surface.data)
+                scene_tree = Scene.xdg_surface_create(parent_scene_tree, xdg_surface)
+                xdg_surface.data = scene_tree
             return
 
         assert xdg_surface.role == XdgSurfaceRole.TOPLEVEL
@@ -344,16 +349,24 @@ class TinywlServer:
     # output and frame handling callbacks
 
     def server_new_output(self, listener, output: Output) -> None:
+        SceneOutput.create(self._scene, output)
         output.init_render(self._allocator, self._renderer)
 
-        output.set_mode(output.preferred_mode())
-        output.enable()
-        output.commit()
+        state = OutputState()
+        state.set_enabled()
+        if mode := output.preferred_mode():
+            state.set_mode(mode)
+
+        output.commit_state(state)
+        state.finish()
 
         self.outputs.append(output)
-        self._output_layout.add_auto(output)
+        if not self._output_layout.add_auto(output):
+            logging.warning("Failed to add output to layout.")
+            return
 
         output.frame_event.add(Listener(self.output_frame))
+        output.request_state_event.add(Listener(self.output_request_state))
 
     def output_frame(self, listener, data) -> None:
         output = self.outputs[0]
@@ -362,6 +375,10 @@ class TinywlServer:
 
         now = Timespec.get_monotonic_time()
         scene_output.send_frame_done(now)
+
+    def output_request_state(self, listener, request: OutputEventRequestState) -> None:
+        output = self.outputs[0]
+        output.commit_state(request.state)
 
     # #############################################################
     # input handling callbacks
