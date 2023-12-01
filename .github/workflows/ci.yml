@@ -16,7 +16,7 @@ jobs:
       pixman-version: "0.42.0"
       hwdata-version: "0.364"
       wayland-version: "1.22.0"
-      wayland-protocols-version: "1.31"
+      wayland-protocols-version: "1.32"
     strategy:
       fail-fast: false
       matrix:
