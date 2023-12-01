@@ -31,8 +31,8 @@ class View:
         self.x = 0.0
         self.y = 0.0
 
-        xdg_surface.map_event.add(Listener(self.xdg_toplevel_map))
-        xdg_surface.unmap_event.add(Listener(self.xdg_toplevel_unmap))
+        xdg_surface.surface.map_event.add(Listener(self.xdg_toplevel_map))
+        xdg_surface.surface.unmap_event.add(Listener(self.xdg_toplevel_unmap))
         xdg_surface.destroy_event.add(Listener(self.xdg_toplevel_destroy))
 
         toplevel = xdg_surface.toplevel
