@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Callable, TypeVar
 
 from wlroots import Ptr, PtrHasData, ffi, lib
 from wlroots.util.region import PixmanRegion32
-from wlroots.wlr_types import Surface, OutputLayoutOutput
+from wlroots.wlr_types import OutputLayoutOutput, Surface
 
 if TYPE_CHECKING:
     from wlroots.util.box import Box

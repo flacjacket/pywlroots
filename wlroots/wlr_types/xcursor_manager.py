@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING
 
 from wlroots import Ptr, ffi, lib
 
-from .cursor import Cursor
-
 if TYPE_CHECKING:
     from typing import Iterator
 
