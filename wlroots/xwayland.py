@@ -364,7 +364,8 @@ class Surface(PtrHasData):
 
         The iterator is called using the only wlr_surface and it's local coordinates.
         """
-        iterator(self.surface, 0, 0, data)
+        if surface := self.surface:
+            iterator(surface, 0, 0, data)
 
 
 class SurfaceConfigureEvent(Ptr):
