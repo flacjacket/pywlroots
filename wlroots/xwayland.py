@@ -241,7 +241,9 @@ class Surface(PtrHasData):
         return lib.wlr_xwayland_icccm_input_model(self._ptr)
 
     @property
-    def surface(self) -> WlrSurface:
+    def surface(self) -> WlrSurface | None:
+        if self._ptr.surface == ffi.NULL:
+            return None
         return WlrSurface(self._ptr.surface)
 
     @property
