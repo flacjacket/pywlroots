@@ -259,7 +259,9 @@ jobs:
           import wlroots
           print(wlroots.__version__)
           print(wlroots.__wlroots_version__)
-          print(wlroots.lib.WLR_XWAYLAND_SURFACE_DECORATIONS_ALL == 0)
+
+          from wlroots.ffi_build import has_xwayland
+          assert has_xwayland()
   build-source:
     name: Build source package
     runs-on: ubuntu-latest

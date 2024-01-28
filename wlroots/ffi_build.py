@@ -2,7 +2,6 @@
 # Copyright (c) 2022 Aakash Sen Sharma
 
 import importlib.util
-import os
 import sys
 from pathlib import Path
 
@@ -16,10 +15,8 @@ assert include_dir.is_dir(), f"missing {include_dir}"
 
 def load_version():
     """Load the current pywlroots version"""
-    dirname = os.path.dirname(__file__)
-    spec = importlib.util.spec_from_file_location(
-        "wlroots.version", os.path.join(dirname, "version.py")
-    )
+    file_location = Path(__file__).parent / "version.py"
+    spec = importlib.util.spec_from_file_location("wlroots.version", str(file_location))
     assert spec is not None
     assert spec.loader is not None
     version_module = importlib.util.module_from_spec(spec)
@@ -64,10 +61,17 @@ def has_xwayland() -> bool:
     Check for XWayland headers. If present, wlroots was built with XWayland support, so
     pywlroots can be too.
     """
+    file_location = Path(__file__).parent / "_build.py"
+    spec = importlib.util.spec_from_file_location("wlroots._build", str(file_location))
+    assert spec is not None
+    assert spec.loader is not None
+    build_module = importlib.util.module_from_spec(spec)
     try:
-        return importlib.import_module("wlroots._build").has_xwayland
-    except ModuleNotFoundError:
+        spec.loader.exec_module(build_module)
+    except FileNotFoundError:
         pass
+    else:
+        return build_module.has_xwayland
 
     try:
         FFI().verify(
@@ -83,7 +87,7 @@ def has_xwayland() -> bool:
         )
         has_xwayland = False
 
-    with (Path(__file__).parent / "_build.py").open("w") as f:
+    with file_location.open("w") as f:
         f.write(f"has_xwayland = {has_xwayland}\n")
 
     return has_xwayland
