@@ -13,9 +13,9 @@ jobs:
       libdrm-version: "2.4.114"
       seatd-version: "0.6.3"
       pixman-version: "0.42.0"
-      wayland-protocols-version: "1.31"
+      wayland-protocols-version: "1.32"
       wayland-version: "1.22.0"
-      wlroots-version: "0.16.2"
+      wlroots-version: "0.17.0"
     steps:
       - name: Install dependencies
         run: |

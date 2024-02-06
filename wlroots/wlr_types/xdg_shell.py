@@ -12,8 +12,8 @@ from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 from wlroots.util.box import Box
 from wlroots.util.edges import Edges
 
+from .compositor import Surface
 from .output import Output
-from .surface import Surface
 
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 
@@ -72,8 +72,6 @@ class XdgSurface(PtrHasData):
         """
         self._ptr = ffi.cast("struct wlr_xdg_surface *", ptr)
 
-        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
-        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
         self.new_popup_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_popup), data_wrapper=XdgPopup
@@ -88,12 +86,12 @@ class XdgSurface(PtrHasData):
         )
 
     @classmethod
-    def from_surface(cls, surface: Surface) -> XdgSurface:
+    def try_from_surface(cls, surface: Surface) -> XdgSurface | None:
         """Get the xdg surface associated with the given surface"""
-        if not surface.is_xdg_surface:
-            raise RuntimeError("Surface is not XDG surface")
-        surface_ptr = lib.wlr_xdg_surface_from_wlr_surface(surface._ptr)
-        return XdgSurface(surface_ptr)
+        maybe_ptr = lib.wlr_xdg_surface_try_from_wlr_surface(surface._ptr)
+        if maybe_ptr == ffi.NULL:
+            return None
+        return XdgSurface(maybe_ptr)
 
     @property
     def surface(self) -> Surface:

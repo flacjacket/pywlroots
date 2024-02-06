@@ -48,9 +48,11 @@ class Output(PtrHasData):
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
         self.present_event = Signal(ptr=ffi.addressof(self._ptr.events.present))
         self.bind_event = Signal(ptr=ffi.addressof(self._ptr.events.bind))
-        self.enable_event = Signal(ptr=ffi.addressof(self._ptr.events.enable))
-        self.mode_event = Signal(ptr=ffi.addressof(self._ptr.events.mode))
         self.description_event = Signal(ptr=ffi.addressof(self._ptr.events.description))
+        self.request_state_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.request_state),
+            data_wrapper=OutputEventRequestState,
+        )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
@@ -203,6 +205,10 @@ class Output(PtrHasData):
         """Discard the pending output state"""
         lib.wlr_output_rollback(self._ptr)
 
+    def commit_state(self, state: OutputState) -> bool:
+        """Commit requested state"""
+        return lib.wlr_output_commit_state(self._ptr, state._ptr)
+
     def effective_resolution(self) -> tuple[int, int]:
         """Computes the transformed and scaled output resolution"""
         width_ptr = ffi.new("int *")
@@ -300,3 +306,39 @@ class OutputMode(Ptr):
     @property
     def preferred(self) -> int:
         return self._ptr.preferred
+
+
+class OutputState(Ptr):
+    def __init__(self, ptr: ffi.CData | None = None) -> None:
+        if ptr is None:
+            ptr = ffi.new("struct wlr_output_state *")
+            lib.wlr_output_state_init(ptr)
+        self._ptr = ptr
+
+    def finish(self) -> None:
+        lib.wlr_output_state_finish(self._ptr)
+
+    def set_enabled(self, *, enabled: bool = True) -> None:
+        lib.wlr_output_state_set_enabled(self._ptr, enabled)
+
+    def set_mode(self, mode: OutputMode | None) -> None:
+        if mode is None:
+            lib.wlr_output_state_set_mode(self._ptr, ffi.NULL)
+        else:
+            lib.wlr_output_state_set_mode(self._ptr, mode._ptr)
+
+    def set_custom_mode(self, width: int, height: int, refresh: int) -> None:
+        lib.wlr_output_state_set_custom_mode(self._ptr, width, height, refresh)
+
+
+class OutputEventRequestState(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_output_event_request_state *", ptr)
+
+    @property
+    def output(self) -> Output:
+        return Output(self._ptr.output)
+
+    @property
+    def state(self) -> OutputState:
+        return OutputState(self._ptr.state)

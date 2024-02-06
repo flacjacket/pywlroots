@@ -9,7 +9,7 @@ from pywayland.server import Signal
 
 from wlroots import Ptr, ffi, lib
 
-from .surface import Surface
+from .compositor import Surface
 
 if TYPE_CHECKING:
     from pywayland.server import Display

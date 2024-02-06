@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from pywayland.server import Signal
 
 from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
-from wlroots.wlr_types.surface import Surface as WlrSurface
+from wlroots.wlr_types.compositor import Surface as WlrSurface
 
 if TYPE_CHECKING:
     from typing import TypeVar
@@ -70,6 +70,10 @@ class Server(PtrHasData):
 
         self.ready_event = Signal(ptr=ffi.addressof(self._ptr.events.ready))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
+
+    @property
+    def ready(self) -> bool:
+        return self._ptr.ready
 
 
 class XWayland(PtrHasData):
@@ -172,13 +176,12 @@ class Surface(PtrHasData):
         self.request_activate_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_activate)
         )
-        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
-        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
+        self.associate_event = Signal(ptr=ffi.addressof(self._ptr.events.associate))
+        self.dissociate_event = Signal(ptr=ffi.addressof(self._ptr.events.dissociate))
         self.set_title_event = Signal(ptr=ffi.addressof(self._ptr.events.set_title))
         self.set_class_event = Signal(ptr=ffi.addressof(self._ptr.events.set_class))
         self.set_role_event = Signal(ptr=ffi.addressof(self._ptr.events.set_role))
         self.set_parent_event = Signal(ptr=ffi.addressof(self._ptr.events.set_parent))
-        self.set_pid_event = Signal(ptr=ffi.addressof(self._ptr.events.set_pid))
         self.set_startup_id_event = Signal(
             ptr=ffi.addressof(self._ptr.events.set_startup_id)
         )
@@ -224,8 +227,11 @@ class Surface(PtrHasData):
         lib.wlr_xwayland_surface_set_fullscreen(self._ptr, fullscreen)
 
     @classmethod
-    def from_wlr_surface(cls, surface: WlrSurface) -> Surface:
-        return cls(lib.wlr_xwayland_surface_from_wlr_surface(surface._ptr))
+    def try_from_wlr_surface(cls, surface: WlrSurface) -> Surface | None:
+        maybe_ptr = lib.wlr_xwayland_surface_try_from_wlr_surface(surface._ptr)
+        if maybe_ptr == ffi.NULL:
+            return None
+        return cls(maybe_ptr)
 
     def ping(self) -> None:
         lib.wlr_xwayland_surface_ping(self._ptr)
@@ -237,7 +243,9 @@ class Surface(PtrHasData):
         return lib.wlr_xwayland_icccm_input_model(self._ptr)
 
     @property
-    def surface(self) -> WlrSurface:
+    def surface(self) -> WlrSurface | None:
+        if self._ptr.surface == ffi.NULL:
+            return None
         return WlrSurface(self._ptr.surface)
 
     @property
@@ -259,10 +267,6 @@ class Surface(PtrHasData):
     @property
     def override_redirect(self) -> bool:
         return self._ptr.override_redirect
-
-    @property
-    def mapped(self) -> bool:
-        return self._ptr.mapped
 
     @property
     def title(self) -> str | None:
@@ -360,7 +364,8 @@ class Surface(PtrHasData):
 
         The iterator is called using the only wlr_surface and it's local coordinates.
         """
-        iterator(self.surface, 0, 0, data)
+        if surface := self.surface:
+            iterator(surface, 0, 0, data)
 
 
 class SurfaceConfigureEvent(Ptr):

@@ -114,11 +114,11 @@ struct wlr_backend
     ...;
 };
 
-struct wlr_backend *wlr_backend_autocreate(struct wl_display *display);
+struct wlr_backend *wlr_backend_autocreate(struct wl_display *display,
+    struct wlr_session **session_ptr);
 
 bool wlr_backend_start(struct wlr_backend *backend);
 void wlr_backend_destroy(struct wlr_backend *backend);
-struct wlr_session *wlr_backend_get_session(struct wlr_backend *backend);
 """
 
 # backend/libinput.h
@@ -149,7 +149,7 @@ struct wlr_buffer *wlr_allocator_create_buffer(struct wlr_allocator *alloc,
 CDEF += """
 struct wlr_renderer *wlr_renderer_autocreate(struct wlr_backend *backend);
 
-void wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
+bool wlr_renderer_begin(struct wlr_renderer *r, int width, int height);
 void wlr_renderer_end(struct wlr_renderer *r);
 void wlr_renderer_clear(struct wlr_renderer *r, const float color[static 4]);
 
@@ -304,6 +304,8 @@ void wlr_cursor_map_to_output(struct wlr_cursor *cur,
     struct wlr_output *output);
 void wlr_cursor_map_input_to_output(struct wlr_cursor *cur,
     struct wlr_input_device *dev, struct wlr_output *output);
+void wlr_cursor_set_xcursor(struct wlr_cursor *cur,
+    struct wlr_xcursor_manager *manager, const char *name);
 """
 
 # types/wlr_compositor.h
@@ -322,7 +324,7 @@ struct wlr_compositor {
 };
 
 struct wlr_compositor *wlr_compositor_create(struct wl_display *display,
-    struct wlr_renderer *renderer);
+    uint32_t version, struct wlr_renderer *renderer);
 
 struct wlr_surface_state {
     uint32_t committed;
@@ -346,9 +348,9 @@ struct wlr_surface_state {
 
 struct wlr_surface_role {
     const char *name;
+    bool no_object;
     void (*commit)(struct wlr_surface *surface);
-    void (*precommit)(struct wlr_surface *surface,
-        const struct wlr_surface_state *state);
+    void (*unmap)(struct wlr_surface *surface);
     void (*destroy)(struct wlr_surface *surface);
     ...;
 };
@@ -366,7 +368,6 @@ struct wlr_surface {
     struct wl_resource *resource;
     struct wlr_renderer *renderer;
     struct wlr_client_buffer *buffer;
-    int sx, sy;
     struct pixman_region32 buffer_damage;
     struct pixman_region32 external_damage;
     struct pixman_region32 opaque_region;
@@ -374,13 +375,17 @@ struct wlr_surface {
     struct wlr_surface_state current, pending;
 
     struct wl_list cached;
+    bool mapped;
 
     const struct wlr_surface_role *role;
-    void *role_data;
+    struct wl_resource *role_resource;
 
     struct {
         struct wl_signal client_commit;
+        struct wl_signal precommit;
         struct wl_signal commit;
+        struct wl_signal map;
+        struct wl_signal unmap;
         struct wl_signal new_subsurface;
         struct wl_signal destroy;
     } events;
@@ -388,18 +393,14 @@ struct wlr_surface {
     struct wl_list current_outputs;
     struct wlr_addon_set addons;
     void *data;
-    struct wl_listener renderer_destroy;
     ...;
 };
 
 typedef void (*wlr_surface_iterator_func_t)(struct wlr_surface *surface,
     int sx, int sy, void *data);
 
-bool wlr_surface_set_role(struct wlr_surface *surface,
-    const struct wlr_surface_role *role, void *role_data,
+bool wlr_surface_set_role(struct wlr_surface *surface, const struct wlr_surface_role *role,
     struct wl_resource *error_resource, uint32_t error_code);
-
-void wlr_surface_destroy_role_object(struct wlr_surface *surface);
 
 bool wlr_surface_has_buffer(struct wlr_surface *surface);
 
@@ -461,7 +462,6 @@ struct wlr_subsurface {
 
     bool synchronized;
     bool reordered;
-    bool mapped;
     bool added;
 
     struct wl_listener surface_client_commit;
@@ -469,8 +469,6 @@ struct wlr_subsurface {
 
     struct {
         struct wl_signal destroy;
-        struct wl_signal map;
-        struct wl_signal unmap;
     } events;
 
     void *data;
@@ -481,11 +479,6 @@ struct wlr_subcompositor {
     struct wl_global *global;
     ...;
 };
-
-bool wlr_surface_is_subsurface(struct wlr_surface *surface);
-
-struct wlr_subsurface *wlr_subsurface_from_wlr_surface(
-    struct wlr_surface *surface);
 
 struct wlr_subcompositor *wlr_subcompositor_create(struct wl_display *display);
 """
@@ -531,12 +524,10 @@ void wlr_seat_start_pointer_drag(struct wlr_seat *seat, struct wlr_drag *drag,
 struct wlr_drag_icon {
     struct wlr_drag *drag;
     struct wlr_surface *surface;
-    bool mapped;
     struct {
-        struct wl_signal map;
-        struct wl_signal unmap;
         struct wl_signal destroy;
     } events;
+    struct wl_listener surface_destroy;
     void *data;
     ...;
 };
@@ -747,6 +738,7 @@ struct wlr_gamma_control_manager_v1 {
 
     struct {
         struct wl_signal destroy;
+        struct wl_signal set_gamma;
     } events;
 
     void *data;
@@ -754,73 +746,6 @@ struct wlr_gamma_control_manager_v1 {
 };
 struct wlr_gamma_control_manager_v1 *wlr_gamma_control_manager_v1_create(
     struct wl_display *display);
-"""
-
-# types/wlr_idle.h
-CDEF += """
-struct wlr_idle {
-    struct wl_global *global;
-    struct wl_list idle_timers; // wlr_idle_timeout::link
-    struct wl_event_loop *event_loop;
-    bool enabled;
-
-    struct wl_listener display_destroy;
-    struct {
-        struct wl_signal activity_notify;
-        struct wl_signal destroy;
-    } events;
-
-    void *data;
-    ...;
-};
-
-struct wlr_idle_timeout {
-    struct wl_resource *resource;
-    struct wl_list link;
-    struct wlr_seat *seat;
-
-    struct wl_event_source *idle_source;
-    bool idle_state;
-    bool enabled;
-    uint32_t timeout; // milliseconds
-
-    struct {
-        struct wl_signal idle;
-        struct wl_signal resume;
-        struct wl_signal destroy;
-    } events;
-
-    struct wl_listener input_listener;
-    struct wl_listener seat_destroy;
-
-    void *data;
-    ...;
-};
-
-struct wlr_idle *wlr_idle_create(struct wl_display *display);
-
-/**
- * Send notification to restart all timers for the given seat. Called by
- * compositor when there is an user activity event on that seat.
- */
-void wlr_idle_notify_activity(struct wlr_idle *idle, struct wlr_seat *seat);
-
-/**
- * Enable or disable timers for a given idle resource by seat.
- * Passing a NULL seat means update timers for all seats.
- */
-void wlr_idle_set_enabled(struct wlr_idle *idle, struct wlr_seat *seat,
-    bool enabled);
-
-/**
- * Create a new timer on the given seat. The idle event will be called after
- * the given amount of milliseconds of inactivity, and the resumed event will
- * be sent at the first user activity after the fired event.
- */
-struct wlr_idle_timeout *wlr_idle_timeout_create(struct wlr_idle *idle,
-    struct wlr_seat *seat, uint32_t timeout);
-
-void wlr_idle_timeout_destroy(struct wlr_idle_timeout *timeout);
 """
 
 # types/wlr_input_inhibit_v1.h
@@ -967,11 +892,13 @@ struct wlr_keyboard {
 
     char *keymap_string;
     size_t keymap_size;
+    int keymap_fd;
     struct xkb_keymap *keymap;
     struct xkb_state *xkb_state;
     xkb_led_index_t led_indexes[WLR_LED_COUNT];
     xkb_mod_index_t mod_indexes[WLR_MODIFIER_COUNT];
 
+    uint32_t leds;
     uint32_t keycodes[WLR_KEYBOARD_KEYS_CAP];
     size_t num_keycodes;
     struct wlr_keyboard_modifiers modifiers;
@@ -1019,7 +946,7 @@ void wlr_keyboard_notify_modifiers(struct wlr_keyboard *keyboard,
 # types/wlr_linux_dmabuf_v1.h
 CDEF += """
 struct wlr_linux_dmabuf_v1 *wlr_linux_dmabuf_v1_create(struct wl_display *display,
-    struct wlr_renderer *renderer);
+    uint32_t version, const struct wlr_linux_dmabuf_feedback_v1 *default_feedback);
 """
 
 # types/wlr_matrix.h
@@ -1106,12 +1033,18 @@ struct wlr_output {
     float scale;
     enum wl_output_subpixel subpixel;
     enum wl_output_transform transform;
+    enum wlr_output_adaptive_sync_status adaptive_sync_status;
+    uint32_t render_format;
 
     bool needs_frame;
     bool frame_pending;
     float transform_matrix[9];
+    bool non_desktop;
 
     struct wlr_output_state pending;
+
+    // Commit sequence number. Incremented on each commit, may overflow.
+    uint32_t commit_seq;
 
     struct {
         struct wl_signal frame;
@@ -1121,24 +1054,33 @@ struct wlr_output {
         struct wl_signal commit;
         struct wl_signal present;
         struct wl_signal bind;
-        struct wl_signal enable;
-        struct wl_signal mode;
         struct wl_signal description;
+        struct wl_signal request_state;
         struct wl_signal destroy;
     } events;
 
     struct wl_event_source *idle_frame;
     struct wl_event_source *idle_done;
-
-    int attach_render_locks; // number of locks forcing rendering
-
-    struct wl_list cursors; // wlr_output_cursor::link
+    int attach_render_locks;
+    struct wl_list cursors;
     struct wlr_output_cursor *hardware_cursor;
+    struct wlr_swapchain *cursor_swapchain;
+    struct wlr_buffer *cursor_front_buffer;
     int software_cursor_locks;
-
+    struct wlr_allocator *allocator;
+    struct wlr_renderer *renderer;
+    struct wlr_swapchain *swapchain;
+    struct wlr_buffer *back_buffer;
     struct wl_listener display_destroy;
+    struct wlr_addon_set addons;
 
     void *data;
+    ...;
+};
+
+struct wlr_output_event_request_state {
+    struct wlr_output *output;
+    const struct wlr_output_state *state;
     ...;
 };
 
@@ -1169,55 +1111,23 @@ void wlr_output_set_damage(struct wlr_output *output,
 bool wlr_output_test(struct wlr_output *output);
 bool wlr_output_commit(struct wlr_output *output);
 void wlr_output_rollback(struct wlr_output *output);
+bool wlr_output_commit_state(struct wlr_output *output,
+    const struct wlr_output_state *state);
 
 void wlr_output_render_software_cursors(struct wlr_output *output,
     struct pixman_region32 *damage);
 
 enum wl_output_transform wlr_output_transform_invert(
     enum wl_output_transform tr);
-"""
 
-# types/wlr_output_damage.h
-CDEF += """
-#define WLR_OUTPUT_DAMAGE_PREVIOUS_LEN 2
-
-struct wlr_output_damage {
-    struct wlr_output *output;
-    int max_rects; // max number of damaged rectangles
-
-    struct pixman_region32 current; // in output-local coordinates
-
-    // circular queue for previous damage
-    struct pixman_region32 previous[WLR_OUTPUT_DAMAGE_PREVIOUS_LEN];
-    size_t previous_idx;
-
-    struct {
-        struct wl_signal frame;
-        struct wl_signal destroy;
-    } events;
-
-    struct wl_listener output_destroy;
-    struct wl_listener output_mode;
-    struct wl_listener output_needs_frame;
-    struct wl_listener output_damage;
-    struct wl_listener output_frame;
-    struct wl_listener output_commit;
-    ...;
-};
-
-struct wlr_output_damage *wlr_output_damage_create(struct wlr_output *output);
-void wlr_output_damage_destroy(struct wlr_output_damage *output_damage);
-
-bool wlr_output_damage_attach_render(struct wlr_output_damage *output_damage,
-    bool *needs_frame, struct pixman_region32  *buffer_damage);
-
-void wlr_output_damage_add(struct wlr_output_damage *output_damage,
-    struct pixman_region32 *damage);
-
-void wlr_output_damage_add_whole(struct wlr_output_damage *output_damage);
-
-void wlr_output_damage_add_box(struct wlr_output_damage *output_damage,
-    struct wlr_box *box);
+void wlr_output_state_init(struct wlr_output_state *state);
+void wlr_output_state_finish(struct wlr_output_state *state);
+void wlr_output_state_set_enabled(struct wlr_output_state *state,
+    bool enabled);
+void wlr_output_state_set_mode(struct wlr_output_state *state,
+    struct wlr_output_mode *mode);
+void wlr_output_state_set_custom_mode(struct wlr_output_state *state,
+        int32_t width, int32_t height, int32_t refresh);
 """
 
 # types/wlr_output_layout.h
@@ -1244,10 +1154,7 @@ void wlr_output_layout_closest_point(struct wlr_output_layout *layout,
     struct wlr_output *reference, double lx, double ly, double *dest_lx,
     double *dest_ly);
 
-void wlr_output_layout_add(struct wlr_output_layout *layout,
-    struct wlr_output *output, int lx, int ly);
-
-void wlr_output_layout_move(struct wlr_output_layout *layout,
+struct wlr_output_layout_output *wlr_output_layout_add(struct wlr_output_layout *layout,
     struct wlr_output *output, int lx, int ly);
 
 void wlr_output_layout_remove(struct wlr_output_layout *layout,
@@ -1256,7 +1163,7 @@ void wlr_output_layout_remove(struct wlr_output_layout *layout,
 void wlr_output_layout_get_box(struct wlr_output_layout *layout,
     struct wlr_output *reference, struct wlr_box *dest_box);
 
-void wlr_output_layout_add_auto(struct wlr_output_layout *layout,
+struct wlr_output_layout_output *wlr_output_layout_add_auto(struct wlr_output_layout *layout,
     struct wlr_output *output);
 
 struct wlr_output *wlr_output_layout_output_at(struct wlr_output_layout *layout,
@@ -1733,7 +1640,7 @@ void wlr_relative_pointer_manager_v1_send_relative_motion(
 # types/wlr_scene.h
 CDEF += """
 typedef bool (*wlr_scene_buffer_point_accepts_input_func_t)(
-    struct wlr_scene_buffer *buffer, int sx, int sy);
+    struct wlr_scene_buffer *buffer, double *sx, double *sy);
 typedef void (*wlr_scene_buffer_iterator_func_t)(
     struct wlr_scene_buffer *buffer, int sx, int sy, void *user_data);
 extern "Python" void buffer_iterator_callback(
@@ -1794,9 +1701,10 @@ struct wlr_scene_buffer {
     struct wlr_buffer *buffer;
 
     struct {
+        struct wl_signal outputs_update;
         struct wl_signal output_enter; // struct wlr_scene_output
         struct wl_signal output_leave; // struct wlr_scene_output
-        struct wl_signal output_present; // struct wlr_scene_output
+        struct wl_signal output_sample; // struct wlr_scene_output
         struct wl_signal frame_done; // struct timespec
     } events;
 
@@ -1823,6 +1731,10 @@ struct wlr_scene_layer_surface_v1 {
     struct wlr_scene_tree *tree;
     struct wlr_layer_surface_v1 *layer_surface;
     ...;
+};
+
+struct wlr_scene_output_state_options {
+    struct wlr_scene_timer *timer;
 };
 
 void wlr_scene_node_destroy(struct wlr_scene_node *node);
@@ -1864,7 +1776,7 @@ struct wlr_scene_surface *wlr_scene_surface_create(struct wlr_scene_tree *parent
 
 struct wlr_scene_buffer *wlr_scene_buffer_from_node(struct wlr_scene_node *node);
 
-struct wlr_scene_surface *wlr_scene_surface_from_buffer(
+struct wlr_scene_surface *wlr_scene_surface_try_from_buffer(
     struct wlr_scene_buffer *scene_buffer);
 
 struct wlr_scene_rect *wlr_scene_rect_create(struct wlr_scene_tree *parent,
@@ -1898,6 +1810,9 @@ void wlr_scene_buffer_set_transform(struct wlr_scene_buffer *scene_buffer,
 void wlr_scene_buffer_send_frame_done(struct wlr_scene_buffer *scene_buffer,
     struct timespec *now);
 
+void wlr_scene_buffer_set_opacity(struct wlr_scene_buffer *scene_buffer,
+    float opacity);
+
 struct wlr_scene_output *wlr_scene_output_create(struct wlr_scene *scene,
     struct wlr_output *output);
 
@@ -1906,7 +1821,8 @@ void wlr_scene_output_destroy(struct wlr_scene_output *scene_output);
 void wlr_scene_output_set_position(struct wlr_scene_output *scene_output,
     int lx, int ly);
 
-bool wlr_scene_output_commit(struct wlr_scene_output *scene_output);
+bool wlr_scene_output_commit(struct wlr_scene_output *scene_output,
+    const struct wlr_scene_output_state_options *options);
 
 void wlr_scene_output_send_frame_done(struct wlr_scene_output *scene_output,
     struct timespec *now);
@@ -1917,7 +1833,7 @@ void wlr_scene_output_for_each_buffer(struct wlr_scene_output *scene_output,
 struct wlr_scene_output *wlr_scene_get_scene_output(struct wlr_scene *scene,
     struct wlr_output *output);
 
-bool wlr_scene_attach_output_layout(struct wlr_scene *scene,
+struct wlr_scene_output_layout *wlr_scene_attach_output_layout(struct wlr_scene *scene,
     struct wlr_output_layout *output_layout);
 
 struct wlr_scene_tree *wlr_scene_subsurface_tree_create(
@@ -1932,6 +1848,9 @@ struct wlr_scene_layer_surface_v1 *wlr_scene_layer_surface_v1_create(
 void wlr_scene_layer_surface_v1_configure(
     struct wlr_scene_layer_surface_v1 *scene_layer_surface,
     const struct wlr_box *full_area, struct wlr_box *usable_area);
+
+struct wlr_scene_tree *wlr_scene_drag_icon_create(
+    struct wlr_scene_tree *parent, struct wlr_drag_icon *drag_icon);
 """
 
 # types/wlr_screencopy_v1.h
@@ -2286,8 +2205,6 @@ void wlr_xcursor_manager_destroy(struct wlr_xcursor_manager *manager);
 
 int wlr_xcursor_manager_load(struct wlr_xcursor_manager *manager,
     float scale);
-void wlr_xcursor_manager_set_cursor_image(struct wlr_xcursor_manager *manager,
-    const char *name, struct wlr_cursor *cursor);
 struct wlr_xcursor *wlr_xcursor_manager_get_xcursor(
     struct wlr_xcursor_manager *manager, const char *name, float scale);
 """
@@ -2319,6 +2236,7 @@ struct wlr_xdg_activation_v1 {
     struct {
         struct wl_signal destroy;
         struct wl_signal request_activate;
+        struct wl_signal new_token;
     } events;
     ...;
 };
@@ -2370,7 +2288,7 @@ struct wlr_xdg_toplevel_decoration_v1_state {
 
 struct wlr_xdg_toplevel_decoration_v1 {
     struct wl_resource *resource;
-    struct wlr_xdg_surface *surface;
+    struct wlr_xdg_toplevel *toplevel;
     struct wlr_xdg_decoration_manager_v1 *manager;
     struct wl_list link; // wlr_xdg_decoration_manager_v1::link
 
@@ -2517,7 +2435,7 @@ struct wlr_xdg_popup {
     struct wl_list link;
 
     struct wl_resource *resource;
-    bool committed;
+    bool sent_initial_configure;
     struct wlr_surface *parent;
     struct wlr_seat *seat;
 
@@ -2562,7 +2480,6 @@ struct wlr_xdg_toplevel_requested {
 struct wlr_xdg_toplevel {
     struct wl_resource *resource;
     struct wlr_xdg_surface *base;
-    bool added;
 
     struct wlr_xdg_toplevel *parent;
     struct wl_listener parent_unmap;
@@ -2610,6 +2527,7 @@ struct wlr_xdg_surface {
     struct wlr_surface *surface;
     struct wl_list link; // wlr_xdg_client::surfaces
     enum wlr_xdg_surface_role role;
+    struct wl_resource *role_resource;
 
     union {
         struct wlr_xdg_toplevel *toplevel;
@@ -2618,21 +2536,20 @@ struct wlr_xdg_surface {
 
     struct wl_list popups; // wlr_xdg_popup::link
 
-    bool added, configured, mapped;
+    bool added, configured;
     struct wl_event_source *configure_idle;
     uint32_t scheduled_serial;
     struct wl_list configure_list;
 
     struct wlr_xdg_surface_state current, pending;
 
-    struct wl_listener surface_commit;
+    bool initialized;
+    bool initial_commit;
 
     struct {
         struct wl_signal destroy;
         struct wl_signal ping_timeout;
         struct wl_signal new_popup;
-        struct wl_signal map;
-        struct wl_signal unmap;
 
         struct wl_signal configure; // wlr_xdg_surface_configure
         struct wl_signal ack_configure; // wlr_xdg_surface_configure
@@ -2708,9 +2625,8 @@ void wlr_xdg_popup_destroy(struct wlr_xdg_popup *popup);
 struct wlr_surface *wlr_xdg_surface_surface_at(
     struct wlr_xdg_surface *surface, double sx, double sy,
     double *sub_x, double *sub_y);
-bool wlr_surface_is_xdg_surface(struct wlr_surface *surface);
 
-struct wlr_xdg_surface *wlr_xdg_surface_from_wlr_surface(
+struct wlr_xdg_surface *wlr_xdg_surface_try_from_wlr_surface(
     struct wlr_surface *surface);
 
 void wlr_xdg_surface_get_geometry(struct wlr_xdg_surface *surface,
@@ -2797,7 +2713,6 @@ SOURCE = """
 #include <wlr/types/wlr_viewporter.h>
 #include <wlr/types/wlr_foreign_toplevel_management_v1.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
-#include <wlr/types/wlr_idle.h>
 #include <wlr/types/wlr_idle_inhibit_v1.h>
 #include <wlr/types/wlr_idle_notify_v1.h>
 #include <wlr/types/wlr_input_inhibitor.h>
@@ -2806,7 +2721,6 @@ SOURCE = """
 #include <wlr/types/wlr_linux_dmabuf_v1.h>
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output.h>
-#include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_output_power_management_v1.h>
@@ -2905,13 +2819,11 @@ struct wlr_layer_surface_v1 {
     struct wlr_layer_shell_v1 *shell;
     struct wl_list popups; // wlr_xdg_popup::link
     char *namespace;
-    bool added, configured, mapped;
+    bool added, configured;
     struct wl_list configure_list;
     struct wlr_layer_surface_v1_state current, pending;
     struct {
         struct wl_signal destroy;
-        struct wl_signal map;
-        struct wl_signal unmap;
         struct wl_signal new_popup;
     } events;
 
@@ -2919,16 +2831,15 @@ struct wlr_layer_surface_v1 {
     ...;
 };
 
-struct wlr_layer_shell_v1 *wlr_layer_shell_v1_create(struct wl_display *display);
+struct wlr_layer_shell_v1 *wlr_layer_shell_v1_create(struct wl_display *display,
+    uint32_t version);
 
 void wlr_layer_surface_v1_configure(struct wlr_layer_surface_v1 *surface,
     uint32_t width, uint32_t height);
 
 void wlr_layer_surface_v1_destroy(struct wlr_layer_surface_v1 *surface);
 
-bool wlr_surface_is_layer_surface(struct wlr_surface *surface);
-
-struct wlr_layer_surface_v1 *wlr_layer_surface_v1_from_wlr_surface(
+struct wlr_layer_surface_v1 *wlr_layer_surface_v1_try_from_wlr_surface(
     struct wlr_surface *surface);
 
 void wlr_layer_surface_v1_for_each_surface(struct wlr_layer_surface_v1 *surface,
@@ -2954,6 +2865,9 @@ if has_xwayland():
     typedef struct {
         ...;
     } xcb_generic_event_t;
+    typedef struct {
+        ...;
+    } xcb_ewmh_wm_strut_partial_t;
     typedef uint32_t xcb_pixmap_t;
     typedef uint32_t xcb_window_t;
     typedef uint32_t xcb_atom_t;
@@ -2986,6 +2900,7 @@ if has_xwayland():
         struct wl_client *client;
         struct wl_event_source *pipe_source;
         int wm_fd[2], wl_fd[2];
+        bool ready;
         time_t server_start;
         int display;
         char display_name[16];
@@ -3037,15 +2952,19 @@ if has_xwayland():
         xcb_window_t window_id;
         struct wlr_xwm *xwm;
         uint32_t surface_id;
+        uint64_t serial;
         struct wl_list link;
         struct wl_list stack_link;
         struct wl_list unpaired_link;
         struct wlr_surface *surface;
+        struct wlr_addon surface_addon;
+        struct wl_listener surface_commit;
+        struct wl_listener surface_map;
+        struct wl_listener surface_unmap;
         int16_t x, y;
         uint16_t width, height;
         uint16_t saved_width, saved_height;
         bool override_redirect;
-        bool mapped;
         char *title;
         char *class;
         char *instance;
@@ -3063,13 +2982,14 @@ if has_xwayland():
         uint32_t decorations;
         xcb_icccm_wm_hints_t *hints;
         xcb_size_hints_t *size_hints;
+        xcb_ewmh_wm_strut_partial_t *strut_partial;
         bool pinging;
         struct wl_event_source *ping_timer;
-        // _NET_WM_STATE
         bool modal;
         bool fullscreen;
         bool maximized_vert, maximized_horz;
         bool minimized;
+        bool withdrawn;
         bool has_alpha;
         struct {
             struct wl_signal destroy;
@@ -3080,17 +3000,17 @@ if has_xwayland():
             struct wl_signal request_maximize;
             struct wl_signal request_fullscreen;
             struct wl_signal request_activate;
-            struct wl_signal map;
-            struct wl_signal unmap;
+            struct wl_signal associate;
+            struct wl_signal dissociate;
             struct wl_signal set_title;
             struct wl_signal set_class;
             struct wl_signal set_role;
             struct wl_signal set_parent;
-            struct wl_signal set_pid;
             struct wl_signal set_startup_id;
             struct wl_signal set_window_type;
             struct wl_signal set_hints;
             struct wl_signal set_decorations;
+            struct wl_signal set_strut_partial;
             struct wl_signal set_override_redirect;
             struct wl_signal set_geometry;
             struct wl_signal ping_timeout;
@@ -3103,10 +3023,6 @@ if has_xwayland():
         int16_t x, y;
         uint16_t width, height;
         uint16_t mask; // xcb_config_window_t
-        ...;
-    };
-    struct wlr_xwayland_move_event {
-        struct wlr_xwayland_surface *surface;
         ...;
     };
     struct wlr_xwayland_remove_startup_info_event  {
@@ -3148,8 +3064,7 @@ if has_xwayland():
         bool fullscreen);
     void wlr_xwayland_set_seat(struct wlr_xwayland *xwayland,
         struct wlr_seat *seat);
-    bool wlr_surface_is_xwayland_surface(struct wlr_surface *surface);
-    struct wlr_xwayland_surface *wlr_xwayland_surface_from_wlr_surface(
+    struct wlr_xwayland_surface *wlr_xwayland_surface_try_from_wlr_surface(
         struct wlr_surface *surface);
     void wlr_xwayland_surface_ping(struct wlr_xwayland_surface *surface);
     bool wlr_xwayland_or_surface_wants_focus(
