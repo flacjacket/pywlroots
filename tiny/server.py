@@ -228,7 +228,7 @@ class TinywlServer:
         self, modifiers: KeyboardModifiers, input_device: InputDevice
     ) -> None:
         keyboard = Keyboard.from_input_device(input_device)
-        self._seat.set_keyboard(keyboard)
+        self._seat.keyboard = keyboard
         self._seat.keyboard_notify_modifiers(modifiers)
 
     def send_key(self, key_event: KeyboardKeyEvent, input_device: InputDevice) -> None:
@@ -254,7 +254,7 @@ class TinywlServer:
 
         # Otherwise, we pass it along to the client
         if not handled:
-            self._seat.set_keyboard(keyboard)
+            self._seat.keyboard = keyboard
             self._seat.keyboard_notify_key(key_event)
 
     def handle_keybinding(self, keysym: int) -> bool:
@@ -396,7 +396,7 @@ class TinywlServer:
         keyboard_handler = KeyboardHandler(keyboard, input_device, self)
         self.keyboards.append(keyboard_handler)
 
-        self._seat.set_keyboard(keyboard)
+        self._seat.keyboard = keyboard
 
     # #############################################################
     # cursor motion callbacks
