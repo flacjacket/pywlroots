@@ -153,9 +153,9 @@ class OutputConfigurationHeadV1(Ptr):
         """An instance of wlr_output_configuration_head_v1"""
         self._ptr = ptr
 
-    @classmethod
+    @staticmethod
     def create(
-        cls, config: OutputConfigurationV1, output: Output
+        config: OutputConfigurationV1, output: Output
     ) -> OutputConfigurationHeadV1:
         """Create a new wlr_output_configuration_head_v1"""
         ptr = lib.wlr_output_configuration_head_v1_create(config._ptr, output._ptr)

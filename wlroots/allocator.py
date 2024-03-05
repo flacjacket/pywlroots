@@ -18,8 +18,8 @@ class Allocator(Ptr):
         """
         self._ptr = ptr
 
-    @classmethod
-    def autocreate(cls, backend: Backend, renderer: Renderer) -> Allocator:
+    @staticmethod
+    def autocreate(backend: Backend, renderer: Renderer) -> Allocator:
         """Creates the adequate allocator given a backend and a renderer."""
         ret = lib.wlr_allocator_autocreate(backend._ptr, renderer._ptr)
         if not ret:

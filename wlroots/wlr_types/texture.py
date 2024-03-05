@@ -17,9 +17,8 @@ class Texture(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
 
-    @classmethod
+    @staticmethod
     def from_pixels(
-        cls,
         renderer: Renderer,
         fmt: int,
         stride: int,
@@ -40,9 +39,8 @@ class Texture(Ptr):
         ptr = ffi.gc(ptr, lib.wlr_texture_destroy)
         return Texture(ptr)
 
-    @classmethod
+    @staticmethod
     def from_buffer(
-        cls,
         renderer: Renderer,
         buffer: Buffer,
     ) -> Texture:
