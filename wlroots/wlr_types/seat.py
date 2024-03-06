@@ -126,8 +126,7 @@ class Seat(PtrHasData):
 
     @keyboard.setter
     def keyboard(self, keyboard: Keyboard | None) -> None:
-        """Set this keyboard as the active keyboard for the seat
-        """
+        """Set this keyboard as the active keyboard for the seat"""
         if keyboard is None:
             lib.wlr_seat_set_keyboard(self._ptr, ffi.NULL)
         else:
