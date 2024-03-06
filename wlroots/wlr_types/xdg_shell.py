@@ -87,8 +87,8 @@ class XdgSurface(PtrHasData):
             data_wrapper=XdgSurfaceConfigure,
         )
 
-    @classmethod
-    def from_surface(cls, surface: Surface) -> XdgSurface:
+    @staticmethod
+    def from_surface(surface: Surface) -> XdgSurface:
         """Get the xdg surface associated with the given surface"""
         if not surface.is_xdg_surface:
             raise RuntimeError("Surface is not XDG surface")

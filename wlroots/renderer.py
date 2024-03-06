@@ -23,8 +23,8 @@ class Renderer(Ptr):
         """
         self._ptr = ptr
 
-    @classmethod
-    def autocreate(cls, backend: Backend) -> Renderer:
+    @staticmethod
+    def autocreate(backend: Backend) -> Renderer:
         """Creates a suitable renderer for a backend."""
         ret = lib.wlr_renderer_autocreate(backend._ptr)
         if not ret:

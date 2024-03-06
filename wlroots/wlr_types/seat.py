@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from weakref import WeakKeyDictionary
 
 from pywayland.protocol.wayland import WlSeat
@@ -123,6 +124,15 @@ class Seat(PtrHasData):
             return None
         return Keyboard(keyboard_ptr)
 
+    @keyboard.setter
+    def keyboard(self, keyboard: Keyboard | None) -> None:
+        """Set this keyboard as the active keyboard for the seat
+        """
+        if keyboard is None:
+            lib.wlr_seat_set_keyboard(self._ptr, ffi.NULL)
+        else:
+            lib.wlr_seat_set_keyboard(self._ptr, keyboard._ptr)
+
     def destroy(self) -> None:
         """Clean up the seat"""
         if self._ptr is not None:
@@ -229,13 +239,20 @@ class Seat(PtrHasData):
         """Whether or not the pointer has a grab other than the default grab"""
         lib.wlr_seat_pointer_has_grab(self._ptr)
 
-    def set_keyboard(self, keyboard: Keyboard) -> None:
+    def set_keyboard(self, keyboard: Keyboard | None) -> None:
         """Set this keyboard as the active keyboard for the seat
+
+        Deprecated: Use the keyboard property.
 
         :param keyboard:
             The keyboard to set as active.
         """
-        lib.wlr_seat_set_keyboard(self._ptr, keyboard._ptr)
+        warnings.warn(
+            "Use the keyboard property of the seat, this method will be removed in the future.",
+            DeprecationWarning,
+            stacklevel=1,
+        )
+        self.keyboard = keyboard
 
     def grab(self) -> KeyboardGrab:
         """Start a grab of the keyboard of this seat"""

@@ -162,8 +162,8 @@ class LayerSurfaceV1(PtrHasData):
     def destroy(self) -> None:
         lib.wlr_layer_surface_v1_destroy(self._ptr)
 
-    @classmethod
-    def from_wlr_surface(cls, surface: Surface):
+    @staticmethod
+    def from_wlr_surface(surface: Surface):
         surface_ptr = lib.wlr_layer_surface_v1_from_wlr_surface(surface._ptr)
         _weakkeydict[surface_ptr] = surface._ptr
         return LayerSurfaceV1(surface_ptr)

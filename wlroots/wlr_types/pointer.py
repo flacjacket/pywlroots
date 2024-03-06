@@ -31,8 +31,8 @@ class Pointer(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
 
-    @classmethod
-    def from_input_device(cls, input_device: InputDevice) -> Pointer:
+    @staticmethod
+    def from_input_device(input_device: InputDevice) -> Pointer:
         return Pointer(lib.wlr_pointer_from_input_device(input_device._ptr))
 
     @property
