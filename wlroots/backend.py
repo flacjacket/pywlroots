@@ -72,20 +72,19 @@ class Backend(Ptr):
 
             self._ptr = None
 
-    def start(self) -> None:
+    def start(self) -> bool:
         """Start the backend
 
         This may signal new_input or new_output immediately, but may also wait
         until the display's event loop begins.
         """
-        ret = lib.wlr_backend_start(self._ptr)
-        if not ret:
-            self.destroy()
-            raise RuntimeError("Unable to start backend")
+        return lib.wlr_backend_start(self._ptr)
 
     def __enter__(self) -> Backend:
         """Context manager to create and clean-up the backend"""
-        self.start()
+        if not self.start():
+            self.destroy()
+            raise RuntimeError("Unable to start backend")
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
