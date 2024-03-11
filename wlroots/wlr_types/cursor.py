@@ -117,6 +117,9 @@ class Cursor(PtrHasData):
             ptr=ffi.addressof(self._ptr.events.touch_cancel),
             data_wrapper=TouchCancelEvent,
         )
+        self.touch_frame_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.touch_frame),
+        )
 
     @property
     def x(self) -> float:
