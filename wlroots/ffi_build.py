@@ -2213,6 +2213,62 @@ void wlr_server_decoration_manager_set_default_mode(
     struct wlr_server_decoration_manager *manager, uint32_t default_mode);
 """
 
+#types/wlr_touch.h
+CDEF += """
+struct wlr_touch {
+	struct wlr_input_device base;
+	const struct wlr_touch_impl *impl;
+	char *output_name;
+	double width_mm, height_mm;
+	struct {
+		struct wl_signal down; // struct wlr_touch_down_event
+		struct wl_signal up; // struct wlr_touch_up_event
+		struct wl_signal motion; // struct wlr_touch_motion_event
+		struct wl_signal cancel; // struct wlr_touch_cancel_event
+		struct wl_signal frame;
+	} events;
+
+	void *data;
+
+    ...;
+};
+
+struct wlr_touch_down_event {
+	struct wlr_touch *touch;
+	uint32_t time_msec;
+	int32_t touch_id;
+	// From 0..1
+	double x, y;
+    ...;
+};
+
+struct wlr_touch_up_event {
+	struct wlr_touch *touch;
+	uint32_t time_msec;
+	int32_t touch_id;
+    ...;
+};
+
+struct wlr_touch_motion_event {
+	struct wlr_touch *touch;
+	uint32_t time_msec;
+	int32_t touch_id;
+	// From 0..1
+	double x, y;
+    ...;
+};
+
+struct wlr_touch_cancel_event {
+	struct wlr_touch *touch;
+	uint32_t time_msec;
+	int32_t touch_id;
+    ...;
+};
+
+struct wlr_touch *wlr_touch_from_input_device(
+	struct wlr_input_device *input_device);
+"""
+
 # types/wlr_virtual_keyboard_v1.h
 CDEF += """
 struct wlr_virtual_keyboard_manager_v1 {
@@ -2822,6 +2878,7 @@ SOURCE = """
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_server_decoration.h>
+#include <wlr/types/wlr_touch.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_virtual_pointer_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
