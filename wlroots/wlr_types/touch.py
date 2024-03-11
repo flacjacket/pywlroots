@@ -1,11 +1,9 @@
 # Copyright (c) Matt Colligan 2021
 from __future__ import annotations
 
-import warnings
+from weakref import WeakKeyDictionary
 
 from wlroots import Ptr, ffi, lib, str_or_none
-
-from weakref import WeakKeyDictionary
 
 from .input_device import InputDevice
 
