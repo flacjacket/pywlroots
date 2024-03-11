@@ -2213,7 +2213,7 @@ void wlr_server_decoration_manager_set_default_mode(
     struct wlr_server_decoration_manager *manager, uint32_t default_mode);
 """
 
-#types/wlr_touch.h
+# types/wlr_touch.h
 CDEF += """
 struct wlr_touch {
 	struct wlr_input_device base;
