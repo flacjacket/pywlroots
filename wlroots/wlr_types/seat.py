@@ -235,7 +235,7 @@ class Seat(PtrHasData):
 
     def pointer_has_grab(self) -> bool:
         """Whether or not the pointer has a grab other than the default grab"""
-        lib.wlr_seat_pointer_has_grab(self._ptr)
+        return lib.wlr_seat_pointer_has_grab(self._ptr)
 
     def set_keyboard(self, keyboard: Keyboard | None) -> None:
         """Set this keyboard as the active keyboard for the seat
