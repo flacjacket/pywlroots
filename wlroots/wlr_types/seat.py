@@ -32,7 +32,7 @@ class KeyboardGrab(Ptr):
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         """End the grab of the keyboard of this seat"""
-        lib.wlr_seat_keyboard_end_grab(self._seat)
+        lib.wlr_seat_keyboard_end_grab(self._seat._ptr)
 
 
 class Seat(PtrHasData):
@@ -170,7 +170,6 @@ class Seat(PtrHasData):
         This function does not respect pointer grabs: you probably want
         `pointer_notify_clear_focus()` instead.
         """
-
         return lib.wlr_seat_pointer_clear_focus(self._ptr)
 
     def pointer_notify_clear_focus(self) -> None:
@@ -234,7 +233,7 @@ class Seat(PtrHasData):
         """
         lib.wlr_seat_pointer_notify_frame(self._ptr)
 
-    def pointer_has_grab(self):
+    def pointer_has_grab(self) -> bool:
         """Whether or not the pointer has a grab other than the default grab"""
         lib.wlr_seat_pointer_has_grab(self._ptr)
 
@@ -335,6 +334,55 @@ class Seat(PtrHasData):
         lib.wlr_seat_touch_notify_motion(
             self._ptr, time_msec, touch_id, surface_x, surface_y
         )
+
+    def touch_point_focus(
+        self,
+        surface: Surface,
+        time_msec: int,
+        touch_id: int,
+        surface_x: float,
+        surface_y: float,
+    ) -> None:
+        """
+        Notify the seat that the touch point given by `touch_id` has entered a new
+        surface. The surface is required. To clear focus, use touch_point_clear_focus().
+        """
+        lib.wlr_seat_touch_point_focus(
+            self._ptr, surface._ptr, time_msec, touch_id, surface_x, surface_y
+        )
+
+    def touch_point_clear_focus(
+        self,
+        surface: Surface,
+        time_msec: int,
+        touch_id: int,
+        surface_x: float,
+        surface_y: float,
+    ) -> None:
+        """Clear the focused surface for the touch point given by `touch_id`."""
+        lib.wlr_seat_touch_point_clear_focus(
+            self._ptr, Surface._ptr, time_msec, touch_id, surface_x, surface_y
+        )
+
+    def touch_notify_cancel(self, surface: Surface):
+        """Notify the seat that this is a global gesture and the client should
+        cancel processing it. Defers to any grab of the touch device."""
+        lib.wlr_seat_touch_notify_cancel(self._ptr, surface._ptr)
+
+    def touch_notify_frame(self) -> None:
+        lib.wlr_seat_touch_notify_frame(self._ptr)
+
+    def touch_num_points(self) -> int:
+        """
+        How many touch points are currently down for the seat.
+        """
+        return lib.wlr_seat_touch_num_points(self._ptr)
+
+    def touch_has_grab(self) -> bool:
+        """
+        Whether or not the seat has a touch grab other than the default grab.
+        """
+        return lib.wlr_seat_touch_has_grab(self._ptr)
 
     def set_selection(self, source, serial: int) -> None:
         """Sets the current selection for the seat
