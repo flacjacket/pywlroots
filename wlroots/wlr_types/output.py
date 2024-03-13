@@ -160,7 +160,8 @@ class Output(PtrHasData):
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         """Stop rendering frame, commit when exiting normally, otherwise rollback"""
         if exc_type is None:
-            self.commit()
+            if not self.commit():
+                raise RuntimeError("Unable to commit output")
         else:
             self.rollback()
 
@@ -187,17 +188,13 @@ class Output(PtrHasData):
         if not lib.wlr_output_attach_render(self._ptr, ffi.NULL):
             raise RuntimeError("Unable to attach render")
 
-    def commit(self) -> None:
+    def commit(self) -> bool:
         """Commit the pending output state
 
         If `.attach_render` has been called, the pending frame will be
         submitted for display.
         """
-        if not lib.wlr_output_test(self._ptr):
-            self.rollback()
-            raise RuntimeError("Rendering on output failed")
-        if not lib.wlr_output_commit(self._ptr):
-            raise RuntimeError("Unable to commit output")
+        return lib.wlr_output_commit(self._ptr)
 
     def rollback(self) -> None:
         """Discard the pending output state"""
