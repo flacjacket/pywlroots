@@ -160,9 +160,6 @@ class Output(PtrHasData):
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         """Stop rendering frame, commit when exiting normally, otherwise rollback"""
         if exc_type is None:
-            if not self.test():
-                self.rollback()
-                raise RuntimeError("Rendering on output failed")
             if not self.commit():
                 raise RuntimeError("Unable to commit output")
         else:
