@@ -361,7 +361,7 @@ class Seat(PtrHasData):
     ) -> None:
         """Clear the focused surface for the touch point given by `touch_id`."""
         lib.wlr_seat_touch_point_clear_focus(
-            self._ptr, Surface._ptr, time_msec, touch_id, surface_x, surface_y
+            self._ptr, surface._ptr, time_msec, touch_id, surface_x, surface_y
         )
 
     def touch_notify_cancel(self, surface: Surface):
