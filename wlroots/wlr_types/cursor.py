@@ -26,10 +26,10 @@ from .pointer import (
 )
 from .surface import Surface
 from .touch import (
-    TouchEventCancel,
-    TouchEventDown,
-    TouchEventMotion,
-    TouchEventUp,
+    TouchCancelEvent,
+    TouchDownEvent,
+    TouchMotionEvent,
+    TouchUpEvent,
 )
 
 
@@ -103,19 +103,22 @@ class Cursor(PtrHasData):
         )
         self.touch_up_event = Signal(
             ptr=ffi.addressof(self._ptr.events.touch_up),
-            data_wrapper=TouchEventUp,
+            data_wrapper=TouchUpEvent,
         )
         self.touch_down_event = Signal(
             ptr=ffi.addressof(self._ptr.events.touch_down),
-            data_wrapper=TouchEventDown,
+            data_wrapper=TouchDownEvent,
         )
         self.touch_motion_event = Signal(
             ptr=ffi.addressof(self._ptr.events.touch_motion),
-            data_wrapper=TouchEventMotion,
+            data_wrapper=TouchMotionEvent,
         )
         self.touch_cancel_event = Signal(
             ptr=ffi.addressof(self._ptr.events.touch_cancel),
-            data_wrapper=TouchEventCancel,
+            data_wrapper=TouchCancelEvent,
+        )
+        self.touch_frame_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.touch_frame),
         )
 
     @property
