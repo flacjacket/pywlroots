@@ -64,11 +64,11 @@ version = {attr = "version.version"}
 # N pep8 naming
 # UP pyupgrade
 # RUF ruff specific rules
-select = ['E', 'F', 'I', 'N', 'W', 'UP', 'RUF']
+lint.select = ['E', 'F', 'I', 'N', 'W', 'UP', 'RUF']
+lint.ignore = ["E501"]
 # Match black line length
 line-length = 88
 target-version = "py38"
-ignore = ["E501"]
 
 [tool.black]
 line-length = 88
