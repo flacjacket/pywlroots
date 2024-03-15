@@ -1157,6 +1157,7 @@ void wlr_output_set_custom_mode(struct wlr_output *output, int32_t width,
     int32_t height, int32_t refresh);
 void wlr_output_set_transform(struct wlr_output *output,
     enum wl_output_transform transform);
+void wlr_output_enable_adaptive_sync(struct wlr_output *output, bool enabled);
 void wlr_output_set_scale(struct wlr_output *output, float scale);
 
 bool wlr_output_attach_render(struct wlr_output *output, int *buffer_age);

@@ -273,6 +273,21 @@ class Output(PtrHasData):
         """
         return lib.wlr_output_test(self._ptr)
 
+    def enable_adaptive_sync(self, enable: bool = True) -> None:
+        """
+        Enables or disables adaptive sync (ie. variable refresh rate) on this
+        output. On some backends, this is just a hint and may be ignored.
+        Compositors can inspect `wlr_output.adaptive_sync_status` to query the
+        effective status. Backends that don't support adaptive sync will reject
+        the output commit.
+
+        When enabled, compositors can submit frames a little bit later than the
+        deadline without dropping a frame.
+
+        Adaptive sync is double-buffered state, see commit().
+        """
+        lib.wlr_output_enable_adaptive_sync(self._ptr, enable)
+
     @property
     def is_headless(self) -> bool:
         return lib.wlr_output_is_headless(self._ptr)
