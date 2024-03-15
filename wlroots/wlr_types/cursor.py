@@ -39,6 +39,22 @@ class WarpMode(enum.Enum):
     AbsoluteClosest = enum.auto()
 
 
+def _ensure_attachable(input_device: InputDevice) -> None:
+    """Helper for cursor.attach_input_device and detach_input_device.
+
+    :raises ValueError: If the input device is not allowed.
+    """
+    allowed_device_types = (
+        InputDeviceType.POINTER,
+        InputDeviceType.TOUCH,
+        InputDeviceType.TABLET_TOOL,
+    )
+    if input_device.type not in allowed_device_types:
+        raise ValueError(
+            f"Input device must be one of pointer, touch, or tablet tool, got: {input_device.type}"
+        )
+
+
 class Cursor(PtrHasData):
     def __init__(self, output_layout: OutputLayout) -> None:
         """Manage a cursor attached to the given output layout
@@ -148,17 +164,19 @@ class Cursor(PtrHasData):
         :param input_device:
             The input device to attach to the cursor
         """
-        allowed_device_types = (
-            InputDeviceType.POINTER,
-            InputDeviceType.TOUCH,
-            InputDeviceType.TABLET_TOOL,
-        )
-        if input_device.type not in allowed_device_types:
-            raise ValueError(
-                f"Input device must be one of pointer, touch, or tablet tool, got: {input_device.type}"
-            )
-
+        _ensure_attachable(input_device)
         lib.wlr_cursor_attach_input_device(self._ptr, input_device._ptr)
+
+    def detach_input_device(self, input_device: InputDevice) -> None:
+        """Detaches the provided input device from this cursor
+
+        See attach_input_device() for allowed types of input devices.
+
+        :param input_device:
+            The input device to detach from the cursor.
+        """
+        _ensure_attachable(input_device)
+        lib.wlr_cursor_detach_input_device(self._ptr, input_device._ptr)
 
     def move(
         self,
