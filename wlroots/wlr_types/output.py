@@ -273,7 +273,7 @@ class Output(PtrHasData):
         """
         return lib.wlr_output_test(self._ptr)
 
-    def enable_adaptive_sync(self, enable: bool = True) -> None:
+    def enable_adaptive_sync(self, *, enable: bool = True) -> None:
         """
         Enables or disables adaptive sync (ie. variable refresh rate) on this
         output. On some backends, this is just a hint and may be ignored.
