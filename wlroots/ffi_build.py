@@ -2226,6 +2226,12 @@ void wlr_server_decoration_manager_set_default_mode(
     struct wlr_server_decoration_manager *manager, uint32_t default_mode);
 """
 
+# types/wlr_single_pixel_buffer_v1.h
+CDEF += """
+struct wlr_single_pixel_buffer_manager_v1 *wlr_single_pixel_buffer_manager_v1_create(
+    struct wl_display *display);
+"""
+
 # types/wlr_touch.h
 CDEF += """
 struct wlr_touch {
@@ -2891,6 +2897,7 @@ SOURCE = """
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_server_decoration.h>
+#include <wlr/types/wlr_single_pixel_buffer_v1.h>
 #include <wlr/types/wlr_touch.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_virtual_pointer_v1.h>
