@@ -79,3 +79,11 @@ def str_or_none(member: ffi.CData) -> str | None:
     if member:
         return ffi.string(member).decode(errors="backslashreplace")
     return None
+
+
+def ptr_or_null(obj: Ptr | None) -> ffi.CData:
+    """
+    Helper function to check if the object is None, returning ffi.NULL,
+    otherwise the _ptr attribute of the object
+    """
+    return obj._ptr if obj is not None else ffi.NULL
