@@ -256,11 +256,6 @@ class Seat(PtrHasData):
         """Start a grab of the keyboard of this seat"""
         return KeyboardGrab(self)
 
-    @property
-    def has_grab(self) -> bool:
-        """Whether or not the keyboard has a grab other than the default grab"""
-        return lib.wlr_seat_keyboard_has_grab(self._ptr)
-
     def keyboard_notify_key(self, key_event: KeyboardKeyEvent) -> None:
         """Notify the seat that a key has been pressed on the keyboard
 
