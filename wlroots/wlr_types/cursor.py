@@ -5,7 +5,7 @@ import enum
 
 from pywayland.server import Signal
 
-from wlroots import PtrHasData, ffi, lib
+from wlroots import PtrHasData, ffi, lib, ptr_or_null
 
 from .input_device import InputDevice, InputDeviceType
 from .output import Output
@@ -51,7 +51,7 @@ def _ensure_attachable(input_device: InputDevice) -> None:
     )
     if input_device.type not in allowed_device_types:
         raise ValueError(
-            f"Input device must be one of pointer, touch, or tablet tool, got: {input_device.type}"
+            f"Input device must be one of pointer, touch, or tablet tool, got: {input_device.type.name}"
         )
 
 
@@ -192,11 +192,7 @@ class Cursor(PtrHasData):
         The `input_device` may be passed to respect device mapping constraints.
         If `input_device` is None, device mapping constraints will be ignored.
         """
-        if input_device is None:
-            input_device_ptr = ffi.NULL
-        else:
-            input_device_ptr = input_device._ptr
-
+        input_device_ptr = ptr_or_null(input_device)
         lib.wlr_cursor_move(self._ptr, input_device_ptr, delta_x, delta_y)
 
     def warp(
@@ -228,10 +224,7 @@ class Cursor(PtrHasData):
         if y is None:
             y = float("NaN")
 
-        if input_device is None:
-            input_device_ptr = ffi.NULL
-        else:
-            input_device_ptr = input_device._ptr
+        input_device_ptr = ptr_or_null(input_device)
 
         if warp_mode == WarpMode.Layout:
             return lib.wlr_cursor_warp(self._ptr, input_device_ptr, x, y)
@@ -253,10 +246,7 @@ class Cursor(PtrHasData):
         If `input_device` is `None`, device mapping constraints will be
         ignored.
         """
-        if input_device is None:
-            input_device_ptr = ffi.NULL
-        else:
-            input_device_ptr = input_device._ptr
+        input_device_ptr = ptr_or_null(input_device)
 
         xy_ptr = ffi.new("double[2]")
         lib.wlr_cursor_absolute_to_layout_coords(
@@ -272,11 +262,7 @@ class Cursor(PtrHasData):
         position is subtracted from the hotspot. A None surface commit hides
         the cursor.
         """
-        if surface is None:
-            surface_ptr = ffi.NULL
-        else:
-            surface_ptr = surface._ptr
-
+        surface_ptr = ptr_or_null(surface)
         lib.wlr_cursor_set_surface(self._ptr, surface_ptr, hotspot[0], hotspot[1])
 
     def __enter__(self) -> Cursor:
@@ -293,11 +279,7 @@ class Cursor(PtrHasData):
         current output_layout for this cursor. This call is invalid for a cursor without
         an associated output layout.
         """
-        if output is None:
-            output_ptr = ffi.NULL
-        else:
-            output_ptr = output._ptr
-
+        output_ptr = ptr_or_null(output)
         lib.wlr_cursor_map_to_output(self._ptr, output_ptr)
 
     def map_input_to_output(
@@ -308,9 +290,5 @@ class Cursor(PtrHasData):
         must be attached to this cursor and the output must be among the outputs in the
         attached output layout.
         """
-        if output is None:
-            output_ptr = ffi.NULL
-        else:
-            output_ptr = output._ptr
-
+        output_ptr = ptr_or_null(output)
         lib.wlr_cursor_map_input_to_output(self._ptr, input_device._ptr, output_ptr)
