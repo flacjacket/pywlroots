@@ -118,7 +118,12 @@ class SessionLockSurfaceV1(PtrHasData):
     def pending_state(self) -> SessionLockSurfaceV1State:
         return SessionLockSurfaceV1State(self._ptr.pending)
 
-    def configure(self, width: int, height) -> int:
+    def configure(self, width: int, height: int) -> int:
+        """
+        Configures the width and height of the surface.
+
+        Returns the configure serial.
+        """
         return lib.wlr_session_lock_surface_v1_configure(self._ptr, width, height)
 
     @staticmethod
