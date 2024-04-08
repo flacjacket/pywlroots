@@ -1082,6 +1082,17 @@ struct wlr_output_mode {
 };
 
 struct wlr_output_state {
+    bool enabled;
+    float scale;
+    enum wl_output_transform transform;
+    bool adaptive_sync_enabled;
+    uint32_t render_format;
+    enum wl_output_subpixel subpixel;
+    struct wlr_output_mode *mode;
+    struct {
+        int32_t width, height;
+        int32_t refresh; // mHz, may be zero
+    } custom_mode;
     ...;
 };
 
