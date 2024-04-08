@@ -2263,11 +2263,6 @@ struct wlr_session_lock_v1 {
     void *data;
 };
 
-struct wlr_session_lock_surface_v1_state {
-    uint32_t width, height;
-    uint32_t configure_serial;
-};
-
 struct wlr_session_lock_surface_v1 {
     struct wl_resource *resource;
     struct wl_list link; // wlr_session_lock_v1.surfaces
@@ -2276,11 +2271,6 @@ struct wlr_session_lock_surface_v1 {
     struct wlr_surface *surface;
 
     bool configured, mapped;
-
-    struct wl_list configure_list; // wlr_session_lock_surface_v1_configure.link
-
-    struct wlr_session_lock_surface_v1_state current;
-    struct wlr_session_lock_surface_v1_state pending;
 
     struct {
         struct wl_signal map;

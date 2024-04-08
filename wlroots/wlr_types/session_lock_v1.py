@@ -22,7 +22,7 @@ from weakref import WeakKeyDictionary
 
 from pywayland.server import Display, Signal
 
-from wlroots import Ptr, PtrHasData, ffi, lib
+from wlroots import PtrHasData, ffi, lib
 from wlroots.wlr_types.output import Output
 
 from .compositor import Surface
@@ -58,28 +58,6 @@ class SessionLockV1(PtrHasData):
         lib.wlr_session_lock_v1_destroy(self._ptr)
 
 
-# TODO: Maybe get rid of this class and add the properties to SessionLockSurface?
-class SessionLockSurfaceV1State(Ptr):
-    """
-    Provides information about the surface lock state.
-    """
-
-    def __init__(self, ptr):
-        self._ptr = ffi.cast("struct wlr_session_lock_surface_v1_state *", ptr)
-
-    @property
-    def width(self) -> int:
-        return self._ptr.width
-
-    @property
-    def height(self) -> int:
-        return self._ptr.height
-
-    @property
-    def configure_serial(self) -> int:
-        return self._ptr.configure_serial
-
-
 class SessionLockSurfaceV1(PtrHasData):
     """
     A surface displayed while the session is locked
@@ -109,14 +87,6 @@ class SessionLockSurfaceV1(PtrHasData):
     @property
     def mapped(self) -> bool:
         return self._ptr.mapped
-
-    @property
-    def current_state(self) -> SessionLockSurfaceV1State:
-        return SessionLockSurfaceV1State(self._ptr.current)
-
-    @property
-    def pending_state(self) -> SessionLockSurfaceV1State:
-        return SessionLockSurfaceV1State(self._ptr.pending)
 
     def configure(self, width: int, height: int) -> int:
         """
