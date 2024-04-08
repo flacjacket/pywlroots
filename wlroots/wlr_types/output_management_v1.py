@@ -1,25 +1,15 @@
 # Copyright (c) Matt Colligan 2021
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Iterator
 
 from pywayland.protocol.wayland import WlOutput
 from pywayland.server import Display, Signal
 from pywayland.utils import wl_list_for_each
 
-from wlroots import Ptr, ffi, lib
+from wlroots import Ptr, PtrHasData, ffi, lib, ptr_or_null
 
-from .output import Output, OutputMode
-
-
-@dataclass
-class CustomMode:
-    """The custom_mode struct member of wlr_output_state"""
-
-    width: int
-    height: int
-    refresh: int
+from .output import CustomMode, Output, OutputMode, OutputState
 
 
 class OutputHeadV1State(Ptr):
@@ -71,24 +61,18 @@ class OutputHeadV1State(Ptr):
 
     @mode.setter
     def mode(self, mode: OutputMode | None) -> None:
-        if mode is None:
-            self._ptr.mode = ffi.NULL
-        else:
-            self._ptr.mode = mode._ptr
+        self._ptr.mode = ptr_or_null(mode)
 
     @property
-    def custom_mode(self):
-        width = self._ptr.custom_mode.width
-        height = self._ptr.custom_mode.height
-        refresh = self._ptr.custom_mode.refresh
-        return CustomMode(width, height, refresh)
+    def custom_mode(self) -> CustomMode:
+        mode = self._ptr.custom_mode
+        return CustomMode(width=mode.width, height=mode.height, refresh=mode.refresh)
 
     @custom_mode.setter
-    def custom_mode(self):
-        width = self._ptr.custom_mode.width
-        height = self._ptr.custom_mode.height
-        refresh = self._ptr.custom_mode.refresh
-        return CustomMode(width, height, refresh)
+    def custom_mode(self, mode: CustomMode):
+        self._ptr.custom_mode.width = mode.width
+        self._ptr.custom_mode.height = mode.height
+        self._ptr.custom_mode.refresh = mode.refresh
 
     @property
     def transform(self) -> WlOutput.transform:
@@ -105,6 +89,17 @@ class OutputHeadV1State(Ptr):
     @adaptive_sync_enabled.setter
     def adaptive_sync_enabled(self, value: bool) -> None:
         self._ptr.adaptive_sync_enabled = value
+
+    def apply(self, output_state: OutputState) -> None:
+        """
+        Apply the head state on the supplied OutputState.
+
+        Compositors can then pass the resulting OutputState to
+        Output.commit(output_state) or Output.test(output_state).
+        
+        The position needs to be applied manually by the caller.
+        """
+        lib.wlr_output_head_v1_state_apply(self._ptr, output_state._ptr)
 
 
 class OutputConfigurationV1(Ptr):
@@ -166,7 +161,7 @@ class OutputConfigurationHeadV1(Ptr):
         return OutputHeadV1State(self._ptr.state)
 
 
-class OutputManagerV1(Ptr):
+class OutputManagerV1(PtrHasData):
     def __init__(self, display: Display) -> None:
         """Create a wlr_output_manager_v1
 
