@@ -3,13 +3,13 @@
 
 from __future__ import annotations
 
-from typing import NamedTuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from pywayland.protocol.wayland import WlOutput
 from pywayland.server import Signal
 from pywayland.utils import wl_list_for_each
 
-from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none, ptr_or_null
+from wlroots import Ptr, PtrHasData, ffi, lib, ptr_or_null, str_or_none
 from wlroots.util.region import PixmanRegion32
 
 from .matrix import Matrix
@@ -231,7 +231,9 @@ class Output(PtrHasData):
         return WlOutput.transform(lib.wlr_output_transform_invert(transform))
 
     @staticmethod
-    def transform_compose(tr_a: WlOutput.transform, tr_b: WlOutput.transform) -> WlOutput.transform:
+    def transform_compose(
+        tr_a: WlOutput.transform, tr_b: WlOutput.transform
+    ) -> WlOutput.transform:
         """
         Returns a transform that, when applied, has the same effect as applying
         sequentially `tr_a` and `tr_b`.
@@ -329,6 +331,7 @@ class CustomMode(NamedTuple):
 
     If refresh is zero (default), the backend uses a reasonable default value.
     """
+
     width: int
     height: int
     refresh: int = 0
@@ -405,4 +408,6 @@ class OutputState(Ptr):
 
     @custom_mode.setter
     def custom_mode(self, mode: CustomMode) -> None:
-        lib.wlr_output_state_set_custom_mode(self._ptr, mode.width, mode.height, mode.refresh)
+        lib.wlr_output_state_set_custom_mode(
+            self._ptr, mode.width, mode.height, mode.refresh
+        )

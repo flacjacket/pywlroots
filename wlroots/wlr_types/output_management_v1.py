@@ -96,7 +96,7 @@ class OutputHeadV1State(Ptr):
 
         Compositors can then pass the resulting OutputState to
         Output.commit(output_state) or Output.test(output_state).
-        
+
         The position needs to be applied manually by the caller.
         """
         lib.wlr_output_head_v1_state_apply(self._ptr, output_state._ptr)
