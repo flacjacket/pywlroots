@@ -346,7 +346,7 @@ class TinywlServer:
 
     def server_new_output(self, listener, output: Output) -> None:
         output.init_render(self._allocator, self._renderer)
-        
+
         state = OutputState()
         state.enabled = True
         state.mode = output.preferred_mode()
