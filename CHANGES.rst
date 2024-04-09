@@ -4,7 +4,7 @@
 * Added ``enable_adaptive_sync(bool)`` to Output
 * Removed ``Seat.has_grab()``: Use the explicit methods like
   ``Seat.keyboard_has_grab()``, ``Seat.pointer_has_grab()`` or 
-  ``Seat.touch_has_grab``
+  ``Seat.touch_has_grab()``
 * Added support for ``wlr_touch``
 * Renamed the touch events to maintain a consistent naming scheme:
   ``TouchEventUp`` -> ``TouchUpEvent``, ``TouchEventDown`` -> ``TouchDownEvent``,
@@ -13,6 +13,7 @@
 * The following methods don't throw a RuntimeException anymore, but return a 
   boolean value like the wlroots API: ``Backend.start()``, ``Òutput.commit()``
 * Deprecated ``Seat.set_keyboard()``: Use the ``Seat.keyboard`` property
+* ``Seat.keyboard`` (and ``Seat.set_keyboard()``) accept ``None`` as valid value.
 * Added ``Cursor.detach_input_device()``
 
 
