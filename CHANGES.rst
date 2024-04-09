@@ -11,9 +11,9 @@
   ``TouchEventMotion`` -> ``TouchMotionEvent``, 
   ``TouchEventCancel`` -> ``TouchCancelEvent``
 * The following methods don't throw a RuntimeException anymore, but return a 
-  boolean value like the wlroots API: ``Backend.start()``, ``Òutput.commit()``
+  boolean value like the wlroots API: ``Backend.start()``, ``Output.commit()``
 * Deprecated ``Seat.set_keyboard()``: Use the ``Seat.keyboard`` property
-* ``Seat.keyboard`` (and ``Seat.set_keyboard()``) accept ``None`` as valid value.
+* ``Seat.keyboard`` (and ``Seat.set_keyboard()``) accepts ``None`` as valid value.
 * Added ``Cursor.detach_input_device()``
 
 
@@ -79,21 +79,21 @@
 
 0.15.24 -- 2022-10-29
 ---------------------
-* Drag.icon can also return None if clients don't provide icons to render
+* Drag.icon can also return ``None`` if clients don't provide icons to render
   implemented by `Matt Colligan <https://github.com/m-col>`_
   (PR `#107 <https://github.com/flacjacket/pywlroots/pull/107>`_)
 
 
 0.15.23 -- 2022-10-28
 ---------------------
-* Add handlers for wlr_pointer_gestures_v1
+* Add handlers for ``wlr_pointer_gestures_v1``
   implemented by `Matt Colligan <https://github.com/m-col>`_
   (PR `#106 <https://github.com/flacjacket/pywlroots/pull/106>`_)
 
 
 0.15.22 -- 2022-09-20
 ---------------------
-* Add method to XCursorManager for wlr_xcursor_manager_load
+* Add method to ``XCursorManager`` for ``wlr_xcursor_manager_load``
   implemented by `Matt Colligan <https://github.com/m-col>`_
   (PR `#104 <https://github.com/flacjacket/pywlroots/pull/104>`_)
 * Bump libdrm version to 2.4.113 in CI to fix build agaist wlroots master
@@ -103,7 +103,7 @@
 
 0.15.21 -- 2022-09-08
 ---------------------
-* Add signals for wlr_input_device events
+* Add signals for ``wlr_input_device`` events
   implemented by `Matt Colligan <https://github.com/m-col>`_
   (PR `#101 <https://github.com/flacjacket/pywlroots/pull/101>`_)
 * Fix up some output code
@@ -127,7 +127,7 @@
 
 0.15.19 -- 2022-07-24
 ---------------------
-* Added support for wlr_viewported
+* Added support for ``wlr_viewporter``
   implemented by `Aakash Sen Sharma <https://github.com/Shinyzenith>`_
   (PR `#94 <https://github.com/flacjacket/pywlroots/pull/94>`_)
 * Wrap input inhibitor active client in pywayland Client
