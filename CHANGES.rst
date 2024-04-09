@@ -1,5 +1,5 @@
 0.16.7 -- 2024-mm-dd
----------------------
+--------------------
 * Added support for the Single-pixel buffer protocol.
 * Added ``enable_adaptive_sync(bool)`` to Output
 * Removed ``Seat.has_grab()``: Use the explicit methods like
@@ -18,7 +18,7 @@
 
 
 0.16.6 -- 2023-10-08
----------------------
+--------------------
 * Add missing include
   implemented by `VladislavGrudinin <https://github.com/VladislavGrudinin>`_
   (PR `#127 <https://github.com/flacjacket/pywlroots/pull/127>`_)
@@ -28,7 +28,7 @@
 
 
 0.16.5 -- 2023-09-11
----------------------
+--------------------
 * Update wlroots url in ``README.rst``
   implemented by `cooki35 <https://github.com/cooki35>`_
   (PR `#124 <https://github.com/flacjacket/pywlroots/pull/124>`_)
@@ -39,28 +39,28 @@
 
 
 0.16.4 -- 2023-04-08
----------------------
+--------------------
 * Added idle_notify_v1 protocol
   implemented by `Charbel Assaad <https://github.com/Sydiepus>`_
   (PR `#118 <https://github.com/flacjacket/pywlroots/pull/118>`_)
 
 
 0.16.3 -- 2023-03-23
----------------------
+--------------------
 * Add helpers for XDG activation V1 and presentation time protocols
   implemented by `Matt Colligan <https://github.com/m-col>`_
   (PR `#117 <https://github.com/flacjacket/pywlroots/pull/117>`_)
 
 
 0.16.2 -- 2023-03-18
----------------------
+--------------------
 * Add helpers for mapping input devices to outputs
   implemented by `Matt Colligan <https://github.com/m-col>`_
   (PR `#116 <https://github.com/flacjacket/pywlroots/pull/116>`_)
 
 
 0.16.1 -- 2023-02-21
----------------------
+--------------------
 * Minor keyboard handling improvements
   implemented by `Matt Colligan <https://github.com/m-col>`_
   (PR `#114 <https://github.com/flacjacket/pywlroots/pull/114>`_)
@@ -70,7 +70,7 @@
 
 
 0.16.0 -- 2023-02-20
----------------------
+--------------------
 * Support for wlroots 0.16.x
   implemented by `Matt Colligan <https://github.com/m-col>`_
   (PR `#109 <https://github.com/flacjacket/pywlroots/pull/109>`_)
