@@ -76,7 +76,6 @@
   (PR `#109 <https://github.com/flacjacket/pywlroots/pull/109>`_)
 
 
-
 0.15.24 -- 2022-10-29
 ---------------------
 * Drag.icon can also return ``None`` if clients don't provide icons to render
@@ -112,7 +111,6 @@
 * Add wlr_xdg_surface_schedule_configure as XdgSurface method
   implemented by `Matt Colligan <https://github.com/m-col>`_
   (PR `#103 <https://github.com/flacjacket/pywlroots/pull/103>`_)
-
 
 
 0.15.20 -- 2022-08-20
@@ -304,14 +302,13 @@
 --------------------
 * Redirect internal Box import to avoid deprecation warning on correctly used
   imports
-* Add wlr_relative_pointer_v1
-
+* Add ``wlr_relative_pointer_v1``
 
 
 0.14.4 -- 2021-09-17
 --------------------
 * Update Box type to be more in line with 0.15 and add deprecation.
-* Add closest_point and __repr__ for Box
+* Add ``closest_point`` and ``__repr__`` for Box
 * Add wlr_xdg_surface_configure and corresponding events
 * Add wlr_pointer_constraints_v1
 
@@ -323,7 +320,7 @@
 
 0.14.2 -- 2021-07-09
 --------------------
-* Let wlr_output_layout_get_box return extents of whole layout.
+* Let ``wlr_output_layout_get_box`` return extents of whole layout.
 * Add is_headless properties to Output and Backend.
 * Reduce severity of wlroots version mismatch, just print error at build time 
   rather than failing.
@@ -352,15 +349,15 @@
 0.13.4 -- 2021-06-11
 --------------------
 * Add parent method to xdg-shell toplevels
-* Add wlr_data_control_v1 interface
+* Add ``wlr_data_control_v1`` interface
 
 
 0.13.3 -- 2021-06-02
 --------------------
-* Add wlr_primary_selection_v1
+* Add ``wlr_primary_selection_v1``
 * Add str_or_none helper to better decode ffi char strings
 * Expose libinput handles
-* Fixes: Fix wlroots version and remove wl_shm_format enum
+* Fixes: Fix wlroots version and remove ``wl_shm_format`` enum
 
 
 0.13.2 -- 2021-05-28
@@ -381,7 +378,7 @@
   minor version of pywlroots will match the version of wlroots that is supported. 
   The patch version of pywlroots will be incremented for various additions, 
   changes, and bug fix versions to support the designated wlroots version.
-* Bug fix for set_custom_mode
+* Bug fix for ``set_custom_mode``
 
 
 0.2.9 -- 2021-05-15
