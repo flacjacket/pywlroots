@@ -1,7 +1,7 @@
 0.16.7 -- 2024-mm-dd
 --------------------
 * Added support for the Single-pixel buffer protocol.
-* Added ``enable_adaptive_sync(bool)`` to Output
+* Added ``Output.enable_adaptive_sync(bool)``
 * Removed ``Seat.has_grab()``: Use the explicit methods like
   ``Seat.keyboard_has_grab()``, ``Seat.pointer_has_grab()`` or 
   ``Seat.touch_has_grab()``
@@ -10,7 +10,7 @@
   ``TouchEventUp`` -> ``TouchUpEvent``, ``TouchEventDown`` -> ``TouchDownEvent``,
   ``TouchEventMotion`` -> ``TouchMotionEvent``, 
   ``TouchEventCancel`` -> ``TouchCancelEvent``
-* The following methods don't throw a RuntimeException anymore, but return a 
+* The following methods don't throw a ``RuntimeError`` anymore, but return a 
   boolean value like the wlroots API: ``Backend.start()``, ``Output.commit()``
 * Deprecated ``Seat.set_keyboard()``: Use the ``Seat.keyboard`` property
 * ``Seat.keyboard`` (and ``Seat.set_keyboard()``) accepts ``None`` as valid value.
