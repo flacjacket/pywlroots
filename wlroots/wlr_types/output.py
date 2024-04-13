@@ -381,7 +381,7 @@ class OutputState(Ptr):
 
     @render_format.setter
     def render_format(self, format: int) -> None:
-        lib.wlr_output_state_set_render_format(format)
+        lib.wlr_output_state_set_render_format(self._ptr, format)
 
     @property
     def subpixel(self) -> WlOutput.subpixel:
