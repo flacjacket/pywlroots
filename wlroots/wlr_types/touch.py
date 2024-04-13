@@ -3,14 +3,14 @@ from __future__ import annotations
 
 from weakref import WeakKeyDictionary
 
-from wlroots import Ptr, ffi, lib, str_or_none
+from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 
 from .input_device import InputDevice
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
-class Touch(Ptr):
+class Touch(PtrHasData):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
 
