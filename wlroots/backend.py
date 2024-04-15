@@ -98,6 +98,16 @@ class Backend(Ptr):
     def is_headless(self) -> bool:
         return lib.wlr_backend_is_headless(self._ptr)
 
+    @property
+    def is_multi(self) -> bool:
+        """
+        Returns if this backend represents a multi-backend.
+
+        Multi-backends wrap an arbitrary number of backends and aggregate
+        their new_output/new_input signals.
+        """
+        return lib.wlr_backend_is_multi(self._ptr)
+
 
 class Session:
     def __init__(self, backend: Backend) -> None:

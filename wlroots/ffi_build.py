@@ -121,10 +121,15 @@ void wlr_backend_destroy(struct wlr_backend *backend);
 struct wlr_session *wlr_backend_get_session(struct wlr_backend *backend);
 """
 
-# backend/libinput.h
+# wlr/backend/libinput.h
 CDEF += """
 struct libinput_device *wlr_libinput_get_device_handle(struct wlr_input_device *dev);
 bool wlr_input_device_is_libinput(struct wlr_input_device *device);
+"""
+
+# wlr/backend/multi.h
+CDEF += """
+bool wlr_backend_is_multi(struct wlr_backend *backend);
 """
 
 # backend/session.h
@@ -2166,23 +2171,23 @@ void wlr_seat_set_keyboard(struct wlr_seat *seat, struct wlr_keyboard *keyboard)
 struct wlr_keyboard *wlr_seat_get_keyboard(struct wlr_seat *seat);
 
 void wlr_seat_touch_point_focus(struct wlr_seat *seat,
-		struct wlr_surface *surface, uint32_t time_msec,
-		int32_t touch_id, double sx, double sy);
+        struct wlr_surface *surface, uint32_t time_msec,
+        int32_t touch_id, double sx, double sy);
 void wlr_seat_touch_point_clear_focus(struct wlr_seat *seat, uint32_t time_msec,
-		int32_t touch_id);
+        int32_t touch_id);
 uint32_t wlr_seat_touch_notify_down(struct wlr_seat *seat,
-		struct wlr_surface *surface, uint32_t time_msec,
-		int32_t touch_id, double sx, double sy);
+        struct wlr_surface *surface, uint32_t time_msec,
+        int32_t touch_id, double sx, double sy);
 void wlr_seat_touch_notify_up(struct wlr_seat *seat, uint32_t time_msec,
-		int32_t touch_id);
+        int32_t touch_id);
 void wlr_seat_touch_notify_motion(struct wlr_seat *seat, uint32_t time_msec,
-		int32_t touch_id, double sx, double sy);
+        int32_t touch_id, double sx, double sy);
 void wlr_seat_touch_notify_cancel(struct wlr_seat *seat,
-		struct wlr_surface *surface);
+        struct wlr_surface *surface);
 void wlr_seat_touch_notify_frame(struct wlr_seat *seat);
 int wlr_seat_touch_num_points(struct wlr_seat *seat);
 void wlr_seat_touch_start_grab(struct wlr_seat *wlr_seat,
-		struct wlr_seat_touch_grab *grab);
+        struct wlr_seat_touch_grab *grab);
 void wlr_seat_touch_end_grab(struct wlr_seat *wlr_seat);
 bool wlr_seat_touch_has_grab(struct wlr_seat *seat);
 
@@ -2238,57 +2243,57 @@ struct wlr_single_pixel_buffer_manager_v1 *wlr_single_pixel_buffer_manager_v1_cr
 # types/wlr_touch.h
 CDEF += """
 struct wlr_touch {
-	struct wlr_input_device base;
-	const struct wlr_touch_impl *impl;
-	char *output_name;
-	double width_mm, height_mm;
-	struct {
-		struct wl_signal down; // struct wlr_touch_down_event
-		struct wl_signal up; // struct wlr_touch_up_event
-		struct wl_signal motion; // struct wlr_touch_motion_event
-		struct wl_signal cancel; // struct wlr_touch_cancel_event
-		struct wl_signal frame;
-	} events;
+    struct wlr_input_device base;
+    const struct wlr_touch_impl *impl;
+    char *output_name;
+    double width_mm, height_mm;
+    struct {
+        struct wl_signal down; // struct wlr_touch_down_event
+        struct wl_signal up; // struct wlr_touch_up_event
+        struct wl_signal motion; // struct wlr_touch_motion_event
+        struct wl_signal cancel; // struct wlr_touch_cancel_event
+        struct wl_signal frame;
+    } events;
 
-	void *data;
+    void *data;
 
     ...;
 };
 
 struct wlr_touch_down_event {
-	struct wlr_touch *touch;
-	uint32_t time_msec;
-	int32_t touch_id;
-	// From 0..1
-	double x, y;
+    struct wlr_touch *touch;
+    uint32_t time_msec;
+    int32_t touch_id;
+    // From 0..1
+    double x, y;
     ...;
 };
 
 struct wlr_touch_up_event {
-	struct wlr_touch *touch;
-	uint32_t time_msec;
-	int32_t touch_id;
+    struct wlr_touch *touch;
+    uint32_t time_msec;
+    int32_t touch_id;
     ...;
 };
 
 struct wlr_touch_motion_event {
-	struct wlr_touch *touch;
-	uint32_t time_msec;
-	int32_t touch_id;
-	// From 0..1
-	double x, y;
+    struct wlr_touch *touch;
+    uint32_t time_msec;
+    int32_t touch_id;
+    // From 0..1
+    double x, y;
     ...;
 };
 
 struct wlr_touch_cancel_event {
-	struct wlr_touch *touch;
-	uint32_t time_msec;
-	int32_t touch_id;
+    struct wlr_touch *touch;
+    uint32_t time_msec;
+    int32_t touch_id;
     ...;
 };
 
 struct wlr_touch *wlr_touch_from_input_device(
-	struct wlr_input_device *input_device);
+    struct wlr_input_device *input_device);
 """
 
 # types/wlr_virtual_keyboard_v1.h
@@ -2861,6 +2866,7 @@ SOURCE = """
 #include <wlr/backend.h>
 #include <wlr/backend/headless.h>
 #include <wlr/backend/libinput.h>
+#include <wlr/backend/multi.h>
 #include <wlr/interfaces/wlr_keyboard.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/drm_format_set.h>
