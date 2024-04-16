@@ -90,10 +90,9 @@ class SceneOutput(Ptr):
         """
         return cls(lib.wlr_scene_output_create(scene._ptr, output._ptr))
 
-    def commit(self) -> None:
+    def commit(self) -> bool:
         """Render and commit an output."""
-        if not lib.wlr_scene_output_commit(self._ptr):
-            raise RuntimeError("Unable to commit scene output")
+        return lib.wlr_scene_output_commit(self._ptr)
 
     def destroy(self) -> None:
         """Destroy a scene-graph output."""
