@@ -6,7 +6,7 @@ from __future__ import annotations
 import enum
 from weakref import WeakKeyDictionary
 
-from wlroots import Ptr, ffi, lib, str_or_none
+from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 
 from .input_device import ButtonState, InputDevice
 
@@ -27,7 +27,7 @@ class AxisOrientation(enum.IntEnum):
     HORIZONTAL = lib.WLR_AXIS_ORIENTATION_HORIZONTAL
 
 
-class Pointer(Ptr):
+class Pointer(PtrHasData):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
 
