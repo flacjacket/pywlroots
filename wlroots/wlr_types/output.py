@@ -3,13 +3,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from pywayland.protocol.wayland import WlOutput
 from pywayland.server import Signal
 from pywayland.utils import wl_list_for_each
 
-from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
+from wlroots import Ptr, PtrHasData, ffi, lib, ptr_or_null, str_or_none
 from wlroots.util.region import PixmanRegion32
 
 from .matrix import Matrix
@@ -136,10 +136,7 @@ class Output(PtrHasData):
 
         The output needs to be enabled.
         """
-        if mode is None:
-            lib.wlr_output_set_mode(self._ptr, ffi.NULL)
-        else:
-            lib.wlr_output_set_mode(self._ptr, mode._ptr)
+        lib.wlr_output_set_mode(self._ptr, ptr_or_null(mode))
 
     def set_custom_mode(self, width: int, height: int, refresh: int) -> None:
         """
@@ -188,13 +185,16 @@ class Output(PtrHasData):
         if not lib.wlr_output_attach_render(self._ptr, ffi.NULL):
             raise RuntimeError("Unable to attach render")
 
-    def commit(self) -> bool:
+    def commit(self, output_state: OutputState | None = None) -> bool:
         """Commit the pending output state
 
         If `.attach_render` has been called, the pending frame will be
         submitted for display.
         """
-        return lib.wlr_output_commit(self._ptr)
+        if output_state is None:
+            return lib.wlr_output_commit(self._ptr)
+        else:
+            return lib.wlr_output_commit_state(self._ptr, output_state._ptr)
 
     def rollback(self) -> None:
         """Discard the pending output state"""
@@ -223,15 +223,22 @@ class Output(PtrHasData):
 
         This is a utility function that can be called when compositors render.
         """
-        if damage is None:
-            lib.wlr_output_render_software_cursors(self._ptr, ffi.NULL)
-        else:
-            lib.wlr_output_render_software_cursors(self._ptr, damage._ptr)
+        lib.wlr_output_render_software_cursors(self._ptr, ptr_or_null(damage))
 
     @staticmethod
     def transform_invert(transform: WlOutput.transform) -> WlOutput.transform:
         """Returns the transform that, when composed with transform gives transform.normal"""
         return WlOutput.transform(lib.wlr_output_transform_invert(transform))
+
+    @staticmethod
+    def transform_compose(
+        tr_a: WlOutput.transform, tr_b: WlOutput.transform
+    ) -> WlOutput.transform:
+        """
+        Returns a transform that, when applied, has the same effect as applying
+        sequentially `tr_a` and `tr_b`.
+        """
+        return WlOutput.transform(lib.wlr_output_transform_compose(tr_a, tr_b))
 
     def set_damage(self, damage: PixmanRegion32) -> None:
         """
@@ -263,7 +270,7 @@ class Output(PtrHasData):
         """
         lib.wlr_output_set_scale(self._ptr, scale)
 
-    def test(self) -> bool:
+    def test(self, output_state: OutputState | None = None) -> bool:
         """
         Test whether the pending output state would be accepted by the backend. If
         this function returns true, `wlr_output_commit` can only fail due to a
@@ -271,7 +278,10 @@ class Output(PtrHasData):
 
         This function doesn't mutate the pending state.
         """
-        return lib.wlr_output_test(self._ptr)
+        if output_state is None:
+            return lib.wlr_output_test(self._ptr)
+        else:
+            return lib.wlr_output_test_state(self._ptr, output_state._ptr)
 
     def enable_adaptive_sync(self, *, enable: bool = True) -> None:
         """
@@ -312,3 +322,91 @@ class OutputMode(Ptr):
     @property
     def preferred(self) -> int:
         return self._ptr.preferred
+
+
+class CustomMode(NamedTuple):
+    """
+    Custom mode which specifies the width and height, and the refresh rate
+    of an Output.
+
+    If refresh is zero (default), the backend uses a reasonable default value.
+    """
+
+    width: int
+    height: int
+    refresh: int = 0
+
+
+class OutputState(Ptr):
+    def __init__(self, ptr: ffi.CData | None = None) -> None:
+        if ptr is None:
+            ptr = ffi.new("struct wlr_output_state *")
+        self._ptr = ptr
+
+    @property
+    def enabled(self) -> bool:
+        return self._ptr.enabled
+
+    @enabled.setter
+    def enabled(self, enabled: bool) -> None:
+        lib.wlr_output_state_set_enabled(self._ptr, enabled)
+
+    @property
+    def scale(self) -> float:
+        return self._ptr.scale
+
+    @scale.setter
+    def scale(self, scale: float) -> None:
+        lib.wlr_output_state_set_scale(self._ptr, scale)
+
+    @property
+    def transform(self) -> WlOutput.transform:
+        return WlOutput.transform(self._ptr.transform)
+
+    @transform.setter
+    def transform(self, transform: WlOutput.transform) -> None:
+        lib.wlr_output_state_set_transform(self._ptr, transform)
+
+    @property
+    def adaptive_sync_enabled(self) -> bool:
+        return self._ptr.adaptive_sync_enabled
+
+    @adaptive_sync_enabled.setter
+    def adaptive_sync_enabled(self, enabled: bool) -> None:
+        lib.wlr_output_state_set_adaptive_sync_enabled(self._ptr, enabled)
+
+    @property
+    def render_format(self) -> int:
+        return self._ptr.render_format
+
+    @render_format.setter
+    def render_format(self, format: int) -> None:
+        lib.wlr_output_state_set_render_format(self._ptr, format)
+
+    @property
+    def subpixel(self) -> WlOutput.subpixel:
+        return WlOutput.subpixel(self._ptr.subpixel)
+
+    @subpixel.setter
+    def subpixel(self, subpixel: WlOutput.subpixel) -> None:
+        lib.wlr_output_state_set_subpixel(self._ptr, subpixel)
+
+    @property
+    def mode(self) -> OutputMode | None:
+        mode_ptr = self._ptr.mode
+        return OutputMode(mode_ptr) if mode_ptr != ffi.NULL else None
+
+    @mode.setter
+    def mode(self, mode: OutputMode | None) -> None:
+        lib.wlr_output_state_set_mode(self._ptr, ptr_or_null(mode))
+
+    @property
+    def custom_mode(self) -> CustomMode:
+        mode = self._ptr.custom_mode
+        return CustomMode(width=mode.width, height=mode.height, refresh=mode.refresh)
+
+    @custom_mode.setter
+    def custom_mode(self, mode: CustomMode) -> None:
+        lib.wlr_output_state_set_custom_mode(
+            self._ptr, mode.width, mode.height, mode.refresh
+        )

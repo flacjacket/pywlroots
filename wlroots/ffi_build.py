@@ -1082,6 +1082,17 @@ struct wlr_output_mode {
 };
 
 struct wlr_output_state {
+    bool enabled;
+    float scale;
+    enum wl_output_transform transform;
+    bool adaptive_sync_enabled;
+    uint32_t render_format;
+    enum wl_output_subpixel subpixel;
+    struct wlr_output_mode *mode;
+    struct {
+        int32_t width, height;
+        int32_t refresh; // mHz, may be zero
+    } custom_mode;
     ...;
 };
 
@@ -1172,12 +1183,36 @@ void wlr_output_set_damage(struct wlr_output *output,
 bool wlr_output_test(struct wlr_output *output);
 bool wlr_output_commit(struct wlr_output *output);
 void wlr_output_rollback(struct wlr_output *output);
+bool wlr_output_test_state(struct wlr_output *output,
+    const struct wlr_output_state *state);
+bool wlr_output_commit_state(struct wlr_output *output,
+    const struct wlr_output_state *state);
+
+void wlr_output_state_set_enabled(struct wlr_output_state *state,
+    bool enabled);
+void wlr_output_state_set_mode(struct wlr_output_state *state,
+    struct wlr_output_mode *mode);
+void wlr_output_state_set_custom_mode(struct wlr_output_state *state,
+    int32_t width, int32_t height, int32_t refresh);
+void wlr_output_state_set_scale(struct wlr_output_state *state, float scale);
+void wlr_output_state_set_transform(struct wlr_output_state *state,
+    enum wl_output_transform transform);
+void wlr_output_state_set_adaptive_sync_enabled(struct wlr_output_state *state,
+    bool enabled);
+void wlr_output_state_set_render_format(struct wlr_output_state *state,
+    uint32_t format);
+void wlr_output_state_set_subpixel(struct wlr_output_state *state,
+    enum wl_output_subpixel subpixel);
 
 void wlr_output_render_software_cursors(struct wlr_output *output,
     struct pixman_region32 *damage);
 
 enum wl_output_transform wlr_output_transform_invert(
     enum wl_output_transform tr);
+
+enum wl_output_transform wlr_output_transform_compose(
+    enum wl_output_transform tr_a, enum wl_output_transform tr_b);
+
 """
 
 # types/wlr_output_damage.h
@@ -1341,6 +1376,10 @@ struct wlr_output_configuration_head_v1 *
     struct wlr_output_configuration_v1 *config, struct wlr_output *output);
 void wlr_output_configuration_v1_destroy(
     struct wlr_output_configuration_v1 *config);
+
+void wlr_output_head_v1_state_apply(
+    const struct wlr_output_head_v1_state *head_state,
+    struct wlr_output_state *output_state);
 """
 
 # types/wlr_output_powewr_management_v1.h

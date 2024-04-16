@@ -22,6 +22,7 @@ from wlroots.wlr_types import (
     Keyboard,
     Output,
     OutputLayout,
+    OutputState,
     Scene,
     SceneBuffer,
     SceneNodeType,
@@ -346,9 +347,11 @@ class TinywlServer:
     def server_new_output(self, listener, output: Output) -> None:
         output.init_render(self._allocator, self._renderer)
 
-        output.set_mode(output.preferred_mode())
-        output.enable()
-        output.commit()
+        state = OutputState()
+        state.enabled = True
+        state.mode = output.preferred_mode()
+
+        output.commit(state)
 
         self.outputs.append(output)
         self._output_layout.add_auto(output)
