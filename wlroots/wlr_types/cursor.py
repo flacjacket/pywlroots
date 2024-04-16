@@ -7,6 +7,7 @@ from pywayland.server import Signal
 
 from wlroots import PtrHasData, ffi, lib, ptr_or_null
 
+from .compositor import Surface
 from .input_device import InputDevice, InputDeviceType
 from .output import Output
 from .output_layout import OutputLayout
@@ -24,7 +25,6 @@ from .pointer import (
     PointerSwipeEndEvent,
     PointerSwipeUpdateEvent,
 )
-from .surface import Surface
 from .touch import (
     TouchCancelEvent,
     TouchDownEvent,

@@ -10,8 +10,8 @@ from pywayland.server import Signal
 
 from wlroots import Ptr, PtrHasData, ffi, lib
 
+from .compositor import Surface
 from .output import Output
-from .surface import Surface
 from .xdg_shell import SurfaceCallback, T
 
 if TYPE_CHECKING:
