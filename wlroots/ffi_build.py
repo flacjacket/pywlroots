@@ -121,10 +121,15 @@ void wlr_backend_destroy(struct wlr_backend *backend);
 struct wlr_session *wlr_backend_get_session(struct wlr_backend *backend);
 """
 
-# backend/libinput.h
+# wlr/backend/libinput.h
 CDEF += """
 struct libinput_device *wlr_libinput_get_device_handle(struct wlr_input_device *dev);
 bool wlr_input_device_is_libinput(struct wlr_input_device *device);
+"""
+
+# wlr/backend/multi.h
+CDEF += """
+bool wlr_backend_is_multi(struct wlr_backend *backend);
 """
 
 # backend/session.h
@@ -2963,6 +2968,7 @@ SOURCE = """
 #include <wlr/backend.h>
 #include <wlr/backend/headless.h>
 #include <wlr/backend/libinput.h>
+#include <wlr/backend/multi.h>
 #include <wlr/interfaces/wlr_keyboard.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/drm_format_set.h>
