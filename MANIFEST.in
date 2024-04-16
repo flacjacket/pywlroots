@@ -1,6 +1,7 @@
 include *.py
 include *.txt
 include *.yaml
+include *.rst
 include tiny/*.py
 recursive-include tests *.py
 recursive-include wlroots *.h
