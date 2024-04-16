@@ -1,20 +1,31 @@
 0.16.7 -- 2024-mm-dd
 --------------------
-* Added support for the Single-pixel buffer protocol.
+* Added support for the 
+  `Single-pixel buffer <https://wayland.app/protocols/single-pixel-buffer-v1>`_ 
+  protocol.
+* Added (experimental) support for the 
+  `Session lock V1 <https://wayland.app/protocols/ext-session-lock-v1>`_
+  protocol
 * Added ``Output.enable_adaptive_sync(bool)``
+* Added ``Cursor.detach_input_device()``
+* Added ``Backend.is_multi`` property which indicates if the backend represents
+  a multi-backend
+* Added ``Pointer.data`` property
+* Added support for ``wlr_touch``
+* Added support for ``OutputState`` which simplifies the configuration of 
+  ``Output``
 * Removed ``Seat.has_grab()``: Use the explicit methods like
   ``Seat.keyboard_has_grab()``, ``Seat.pointer_has_grab()`` or 
   ``Seat.touch_has_grab()``
-* Added support for ``wlr_touch``
 * Renamed the touch events to maintain a consistent naming scheme:
   ``TouchEventUp`` -> ``TouchUpEvent``, ``TouchEventDown`` -> ``TouchDownEvent``,
   ``TouchEventMotion`` -> ``TouchMotionEvent``, 
   ``TouchEventCancel`` -> ``TouchCancelEvent``
 * The following methods don't throw a ``RuntimeError`` anymore, but return a 
-  boolean value like the wlroots API: ``Backend.start()``, ``Output.commit()``
+  boolean value like the wlroots API: ``Backend.start()``, ``Output.commit()``,
+  and ``SceneOutput.commit()``
 * Deprecated ``Seat.set_keyboard()``: Use the ``Seat.keyboard`` property
 * ``Seat.keyboard`` (and ``Seat.set_keyboard()``) accepts ``None`` as valid value.
-* Added ``Cursor.detach_input_device()``
 
 
 0.16.6 -- 2023-10-08
