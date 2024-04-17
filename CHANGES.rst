@@ -1,4 +1,4 @@
-0.16.7 -- 2024-mm-dd
+0.16.7 -- 2024-04-16
 --------------------
 * Added support for the 
   `Single-pixel buffer <https://wayland.app/protocols/single-pixel-buffer-v1>`_ 
