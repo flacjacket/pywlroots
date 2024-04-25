@@ -276,7 +276,7 @@ class XdgTopLevel(Ptr):
     def parent(self) -> XdgTopLevel | None:
         """The parent of this toplevel"""
         parent_ptr = self._ptr.parent
-        if parent_ptr is None:
+        if parent_ptr == ffi.NULL:
             return None
         return XdgTopLevel(parent_ptr)
 
