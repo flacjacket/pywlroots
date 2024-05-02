@@ -4,6 +4,7 @@ import enum
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
+
 from wlroots import Ptr, PtrHasData, ffi, lib
 
 from .input_device import InputDevice
