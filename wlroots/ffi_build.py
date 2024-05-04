@@ -2076,7 +2076,18 @@ struct wlr_seat_keyboard_state {
     } events;
     ...;
 };
-struct wlr_seat_touch_state { ...; };
+
+struct wlr_seat_touch_state {
+    struct wlr_seat *seat;
+    struct wl_list touch_points; // wlr_touch_point.link
+
+    uint32_t grab_serial;
+    uint32_t grab_id;
+
+    struct wlr_seat_touch_grab *grab;
+    struct wlr_seat_touch_grab *default_grab;
+    ...;
+};
 
 struct wlr_seat {
     struct wl_global *global;
@@ -2209,11 +2220,22 @@ bool wlr_seat_pointer_has_grab(struct wlr_seat *seat);
 void wlr_seat_set_keyboard(struct wlr_seat *seat, struct wlr_keyboard *keyboard);
 struct wlr_keyboard *wlr_seat_get_keyboard(struct wlr_seat *seat);
 
+struct wlr_touch_point *wlr_seat_touch_get_point(struct wlr_seat *seat,
+        int32_t touch_id);
 void wlr_seat_touch_point_focus(struct wlr_seat *seat,
         struct wlr_surface *surface, uint32_t time_msec,
         int32_t touch_id, double sx, double sy);
 void wlr_seat_touch_point_clear_focus(struct wlr_seat *seat, uint32_t time_msec,
         int32_t touch_id);
+uint32_t wlr_seat_touch_send_down(struct wlr_seat *seat,
+        struct wlr_surface *surface, uint32_t time_msec,
+        int32_t touch_id, double sx, double sy);
+void wlr_seat_touch_send_up(struct wlr_seat *seat, uint32_t time_msec,
+        int32_t touch_id);
+void wlr_seat_touch_send_motion(struct wlr_seat *seat, uint32_t time_msec,
+        int32_t touch_id, double sx, double sy);
+void wlr_seat_touch_send_cancel(struct wlr_seat *seat, struct wlr_surface *surface);
+void wlr_seat_touch_send_frame(struct wlr_seat *seat);
 uint32_t wlr_seat_touch_notify_down(struct wlr_seat *seat,
         struct wlr_surface *surface, uint32_t time_msec,
         int32_t touch_id, double sx, double sy);
@@ -2245,6 +2267,8 @@ void wlr_seat_pointer_notify_clear_focus(struct wlr_seat *wlr_seat);
 bool wlr_seat_keyboard_has_grab(struct wlr_seat *seat);
 bool wlr_seat_validate_pointer_grab_serial(struct wlr_seat *seat,
     struct wlr_surface *origin, uint32_t serial);
+
+bool wlr_surface_accepts_touch(struct wlr_seat *wlr_seat, struct wlr_surface *surface);
 """
 
 # types/wlr_server_decoration.h

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from weakref import WeakKeyDictionary
 
+from pywayland.server import Signal
+
 from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 
 from .input_device import InputDevice
@@ -13,6 +15,20 @@ _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 class Touch(PtrHasData):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
+
+        self.down_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.down), data_wrapper=TouchDownEvent
+        )
+        self.up_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.up), data_wrapper=TouchUpEvent
+        )
+        self.motion_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.motion), data_wrapper=TouchMotionEvent
+        )
+        self.cancel_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.cancel), data_wrapper=TouchCancelEvent
+        )
+        self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
 
     @staticmethod
     def from_input_device(input_device: InputDevice) -> Touch:
@@ -55,7 +71,7 @@ class _TouchEvent(Ptr):
 
 class TouchDownEvent(_TouchEvent):
     def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_event_touch_down *", ptr)
+        self._ptr = ffi.cast("struct wlr_touch_down_event *", ptr)
 
     @property
     def x(self) -> float:
@@ -68,12 +84,12 @@ class TouchDownEvent(_TouchEvent):
 
 class TouchUpEvent(_TouchEvent):
     def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_event_touch_up *", ptr)
+        self._ptr = ffi.cast("struct wlr_touch_up_event *", ptr)
 
 
 class TouchMotionEvent(_TouchEvent):
     def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_event_touch_motion *", ptr)
+        self._ptr = ffi.cast("struct wlr_touch_motion_event *", ptr)
 
     @property
     def x(self) -> float:
@@ -86,4 +102,4 @@ class TouchMotionEvent(_TouchEvent):
 
 class TouchCancelEvent(_TouchEvent):
     def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_event_touch_cancel *", ptr)
+        self._ptr = ffi.cast("struct wlr_touch_cancel_event *", ptr)
