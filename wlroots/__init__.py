@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import weakref
-from typing import Callable, Any, TypeVar
+from typing import Any, Callable, TypeVar
 
 from ._ffi import ffi, lib
 from .version import version as _version
@@ -17,6 +17,7 @@ __version__ = _version
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
 
 T = TypeVar("T")
+
 
 class Ptr:
     """Add equality checks for objects holding the same cdata
@@ -88,6 +89,7 @@ def ptr_or_null(obj: Ptr | None) -> ffi.CData:
     otherwise the _ptr attribute of the object
     """
     return obj._ptr if obj is not None else ffi.NULL
+
 
 def instance_or_none(cls: Callable[[ffi.CData], T], ptr: ffi.CData) -> T | None:
     """
