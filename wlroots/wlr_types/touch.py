@@ -3,8 +3,6 @@ from __future__ import annotations
 
 from weakref import WeakKeyDictionary
 
-from pywayland.server import Signal
-
 from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 
 from .input_device import InputDevice
@@ -15,20 +13,6 @@ _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 class Touch(PtrHasData):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
-
-        self.down_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.down), data_wrapper=TouchDownEvent
-        )
-        self.up_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.up), data_wrapper=TouchUpEvent
-        )
-        self.motion_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.motion), data_wrapper=TouchMotionEvent
-        )
-        self.cancel_event = Signal(
-            ptr=ffi.addressof(self._ptr.events.cancel), data_wrapper=TouchCancelEvent
-        )
-        self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
 
     @staticmethod
     def from_input_device(input_device: InputDevice) -> Touch:
