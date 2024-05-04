@@ -1,3 +1,14 @@
+0.16.8 -- 2024-05-dd
+--------------------
+* Fixed: ``XdgTopLevel.parent`` always returnd a parent even if the parent is NULL.
+* Fixed return type of ``Seat.touch_notify_down``: Returns an integer now (the
+  serial identifier)
+* Added support for ``wlr_switch``
+* Added ``Seat.touch_send_*`` methods
+* Added ``TouchPoint`` class
+* Real support for ``wlr_touch``. The previous implementations were not usable. 
+
+
 0.16.7 -- 2024-04-16
 --------------------
 * Added support for the 
