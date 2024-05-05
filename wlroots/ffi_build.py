@@ -2267,25 +2267,6 @@ struct wlr_session_lock_v1 {
     void *data;
 };
 
-struct wlr_session_lock_surface_v1 {
-    struct wl_resource *resource;
-    struct wl_list link; // wlr_session_lock_v1.surfaces
-
-    struct wlr_output *output;
-    struct wlr_surface *surface;
-
-    bool configured, mapped;
-
-    struct {
-        struct wl_signal map;
-        struct wl_signal destroy;
-    } events;
-
-    void *data;
-
-    ...;
-};
-
 struct wlr_session_lock_manager_v1 *wlr_session_lock_manager_v1_create(
     struct wl_display *display);
 
@@ -2296,9 +2277,7 @@ uint32_t wlr_session_lock_surface_v1_configure(
     struct wlr_session_lock_surface_v1 *lock_surface,
     uint32_t width, uint32_t height);
 
-bool wlr_surface_is_session_lock_surface_v1(struct wlr_surface *surface);
-
-struct wlr_session_lock_surface_v1 *wlr_session_lock_surface_v1_from_wlr_surface(
+struct wlr_session_lock_surface_v1 *wlr_session_lock_surface_v1_try_from_wlr_surface(
     struct wlr_surface *surface);
 """
 
