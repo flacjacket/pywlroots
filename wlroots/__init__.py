@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import weakref
-from typing import Any
+from typing import Any, Callable, TypeVar
 
 from ._ffi import ffi, lib
 from .version import version as _version
@@ -15,6 +15,8 @@ __wlroots_version__ = (
 __version__ = _version
 
 _weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+
+T = TypeVar("T")
 
 
 class Ptr:
@@ -87,3 +89,13 @@ def ptr_or_null(obj: Ptr | None) -> ffi.CData:
     otherwise the _ptr attribute of the object
     """
     return obj._ptr if obj is not None else ffi.NULL
+
+
+def instance_or_none(cls: Callable[[ffi.CData], T], ptr: ffi.CData) -> T | None:
+    """
+    A factory function which returns eiher an instance of T or None.
+
+    The result depends on ``ptr`` if it is ffi.NULL, None will be returned,
+    otherwise the result of T(ptr)
+    """
+    return cls(ptr) if ptr != ffi.NULL else None

@@ -6,6 +6,9 @@
 *.c
 _build.py
 
+# Virtual environment
+.venv
+
 # Test output
 .coverage
 .cache

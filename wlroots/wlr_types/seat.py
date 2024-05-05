@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import warnings
+from typing import Iterator
 from weakref import WeakKeyDictionary
 
 from pywayland.protocol.wayland import WlSeat
 from pywayland.server import Display, Signal
+from pywayland.utils import wl_list_for_each
 
-from wlroots import Ptr, PtrHasData, ffi, lib
+from wlroots import Ptr, PtrHasData, ffi, instance_or_none, lib, ptr_or_null
 
 from .compositor import Surface
 from .data_device_manager import Drag
@@ -119,18 +121,12 @@ class Seat(PtrHasData):
     @property
     def keyboard(self) -> Keyboard | None:
         """Get the active keyboard for the seat."""
-        keyboard_ptr = lib.wlr_seat_get_keyboard(self._ptr)
-        if keyboard_ptr == ffi.NULL:
-            return None
-        return Keyboard(keyboard_ptr)
+        return instance_or_none(Keyboard, lib.wlr_seat_get_keyboard(self._ptr))
 
     @keyboard.setter
     def keyboard(self, keyboard: Keyboard | None) -> None:
         """Set this keyboard as the active keyboard for the seat"""
-        if keyboard is None:
-            lib.wlr_seat_set_keyboard(self._ptr, ffi.NULL)
-        else:
-            lib.wlr_seat_set_keyboard(self._ptr, keyboard._ptr)
+        lib.wlr_seat_set_keyboard(self._ptr, ptr_or_null(keyboard))
 
     def destroy(self) -> None:
         """Clean up the seat"""
@@ -295,6 +291,60 @@ class Seat(PtrHasData):
         """Whether or not the keyboard has a grab other than the default grab"""
         return lib.wlr_seat_keyboard_has_grab(self._ptr)
 
+    def touch_send_down(
+        self,
+        surface: Surface,
+        time_msec: int,
+        touch_id: int,
+        surface_x: float,
+        surface_y: float,
+    ) -> int:
+        """
+        Send a touch down event to the client of the given surface. All future touch
+        events for this point will go to this surface. If the touch down is valid,
+        this will add a new touch point with the given `touch_id`. The touch down may
+        not be valid if the surface seat client does not accept touch input.
+        Coordinates are surface-local. This function does not respect touch grabs:
+        you probably want `touch_notify_down()` instead.
+        """
+        return lib.wlr_seat_touch_send_down(
+            self._ptr, surface._ptr, time_msec, touch_id, surface_x, surface_y
+        )
+
+    def touch_send_up(self, time_msec: int, touch_id: int) -> None:
+        """
+        Send a touch up event for the touch point given by the `touch_id`. The event
+        will go to the client for the surface given in the corresponding touch down
+        event. This will remove the touch point. This function does not respect touch
+        grabs: you probably want `touch_notify_up()` instead.
+        """
+        lib.wlr_seat_touch_send_up(self._ptr, time_msec, touch_id)
+
+    def touch_send_motion(
+        self, time_msec: int, touch_id: int, surface_x: float, surface_y: float
+    ) -> None:
+        """
+        Send a touch motion event for the touch point given by the `touch_id`. The
+        event will go to the client for the surface given in the corresponding touch
+        down event. This function does not respect touch grabs: you probably want
+        `touch_notify_motion()` instead.
+        """
+        lib.wlr_seat_touch_send_motion(
+            self._ptr, time_msec, touch_id, surface_x, surface_y
+        )
+
+    def touch_send_cancel(self, surface: Surface) -> None:
+        """
+        Notify the seat that this is a global gesture and the client should cancel
+        processing it. The event will go to the client for the surface given.
+        This function does not respect touch grabs: you probably want
+        `touch_notify_cancel()` instead.
+        """
+        lib.wlr_seat_touch_send_cancel(self._ptr, surface._ptr)
+
+    def touch_send_frame(self) -> None:
+        lib.wlr_seat_touch_send_frame(self._ptr)
+
     def touch_notify_down(
         self,
         surface: Surface,
@@ -302,12 +352,14 @@ class Seat(PtrHasData):
         touch_id: int,
         surface_x: float,
         surface_y: float,
-    ) -> None:
+    ) -> int:
         """
         Notify the seat of a touch down on the given surface. Defers to any grab of the
         touch device.
+
+        Returns the serial id.
         """
-        lib.wlr_seat_touch_notify_down(
+        return lib.wlr_seat_touch_notify_down(
             self._ptr, surface._ptr, time_msec, touch_id, surface_x, surface_y
         )
 
@@ -379,6 +431,15 @@ class Seat(PtrHasData):
         """
         return lib.wlr_seat_touch_has_grab(self._ptr)
 
+    def touch_get_point(self, touch_id: int) -> TouchPoint | None:
+        """
+        Get the active touch point with the given `touch_id`.
+
+        If the touch point does not exist or is no longer active, returns None.
+        """
+        ptr = lib.wlr_seat_touch_get_point(self._ptr, touch_id)
+        return instance_or_none(TouchPoint, ptr)
+
     def set_selection(self, source, serial: int) -> None:
         """Sets the current selection for the seat
 
@@ -415,6 +476,9 @@ class Seat(PtrHasData):
         grabs.
         """
         lib.wlr_seat_start_pointer_drag(self._ptr, drag._ptr, serial)
+
+    def surface_accepts_touch(self, surface: Surface) -> bool:
+        return lib.wlr_surface_accepts_touch(self._ptr, surface._ptr)
 
     def __enter__(self) -> Seat:
         """Context manager to clean up the seat"""
@@ -486,18 +550,39 @@ class RequestStartDragEvent(Ptr):
         return self._ptr.serial
 
 
-class PointerFocusChangeEvent(Ptr):
+class _FocusChangeEvent(Ptr):
+    """
+    Base class for ...FocusChangeEvents which provides common properties.
+    """
+
+    # TODO: wlr_seat *seat
+
+    @property
+    def old_surface(self) -> Surface:
+        # TODO: May old_surface be NULL?
+        return Surface(self._ptr.old_surface)
+
+    @property
+    def new_surface(self) -> Surface:
+        return Surface(self._ptr.new_surface)
+
+
+class PointerFocusChangeEvent(_FocusChangeEvent):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_seat_pointer_focus_change_event *", ptr)
 
-    # TODO
+    @property
+    def surface_x(self) -> float:
+        return self._ptr.sx
+
+    @property
+    def surface_y(self) -> float:
+        return self._ptr.sy
 
 
-class KeyboardFocusChangeEvent(Ptr):
+class KeyboardFocusChangeEvent(_FocusChangeEvent):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_seat_keyboard_focus_change_event *", ptr)
-
-    # TODO
 
 
 class SeatPointerState(Ptr):
@@ -511,12 +596,17 @@ class SeatPointerState(Ptr):
         )
 
     @property
+    def surface_x(self) -> float:
+        return self._ptr.sx
+
+    @property
+    def surface_y(self) -> float:
+        return self._ptr.sy
+
+    @property
     def focused_surface(self) -> Surface | None:
         """The surface that currently has keyboard focus"""
-        focused_surface = self._ptr.focused_surface
-        if focused_surface == ffi.NULL:
-            return None
-        return Surface(focused_surface)
+        return instance_or_none(Surface, self._ptr.focused_surface)
 
 
 class SeatKeyboardState(Ptr):
@@ -532,7 +622,57 @@ class SeatKeyboardState(Ptr):
     @property
     def focused_surface(self) -> Surface | None:
         """The surface that is currently focused"""
-        focused_surface = self._ptr.focused_surface
-        if focused_surface == ffi.NULL:
-            return None
-        return Surface(focused_surface)
+        return instance_or_none(Surface, self._ptr.focused_surface)
+
+
+class SeatTouchState(Ptr):
+    def __init__(self, ptr) -> None:
+        """The current state of touch on the seat"""
+        self._ptr = ptr
+
+    @property
+    def grab_serial(self) -> int:
+        return self._ptr.grab_serial
+
+    def grab_id(self) -> int:
+        return self._ptr.grab_id
+
+    @property
+    def touch_points(self) -> Iterator[TouchPoint]:
+        for ptr in wl_list_for_each(
+            "struct wlr_touch_point *",
+            self._ptr.touch_points,
+            "link",
+            ffi=ffi,
+        ):
+            yield TouchPoint(ptr)
+
+
+class TouchPoint(Ptr):
+    def __init__(self, ptr):
+        self._ptr = ptr
+
+    @property
+    def touch_id(self) -> int:
+        return self._ptr.touch_id
+
+    @property
+    def surface_x(self) -> float:
+        return self._ptr.sx
+
+    @property
+    def surface_y(self) -> float:
+        return self._ptr.sy
+
+    @property
+    def surface(self) -> Surface | None:
+        return instance_or_none(Surface, self._ptr.surface)
+
+    @property
+    def focused_surface(self) -> Surface | None:
+        """The surface that is currently focused
+
+        Note: wlroot calls it "focus_surface" renamed it to "focused_surface"
+        to keep the name aligned to "SeatKeyboardState" and "SeatPointerState".
+        """
+        return instance_or_none(Surface, self._ptr.focus_surface)
