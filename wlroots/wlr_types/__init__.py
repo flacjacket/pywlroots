@@ -13,6 +13,7 @@ from .data_control_v1 import DataControlManagerV1  # noqa: F401
 from .data_device_manager import DataDeviceManager  # noqa: F401
 from .export_dmabuf_v1 import ExportDmabufManagerV1  # noqa: F401
 from .foreign_toplevel_management_v1 import ForeignToplevelManagerV1  # noqa: F401
+from .fractional_scale_v1 import FractionalScaleManagerV1  # noqa: F401
 from .gamma_control_v1 import GammaControlManagerV1  # noqa: F401
 from .input_device import InputDevice  # noqa: F401
 from .input_inhibit import InputInhibitManager  # noqa: F401
