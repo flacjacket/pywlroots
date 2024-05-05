@@ -2342,6 +2342,42 @@ struct wlr_session_lock_surface_v1 *wlr_session_lock_surface_v1_from_wlr_surface
     struct wlr_surface *surface);
 """
 
+
+# types/wlr_switch.h
+CDEF += """
+struct wlr_switch {
+    struct wlr_input_device base;
+
+    struct {
+        struct wl_signal toggle;
+    } events;
+
+    void *data;
+
+    ...;
+};
+
+enum wlr_switch_type {
+    WLR_SWITCH_TYPE_LID,
+    WLR_SWITCH_TYPE_TABLET_MODE,
+};
+
+enum wlr_switch_state {
+    WLR_SWITCH_STATE_OFF = 0,
+    WLR_SWITCH_STATE_ON,
+};
+
+struct wlr_switch_toggle_event {
+    uint32_t time_msec;
+    enum wlr_switch_type switch_type;
+    enum wlr_switch_state switch_state;
+};
+
+struct wlr_switch *wlr_switch_from_input_device(
+    struct wlr_input_device *input_device);
+"""
+
+
 # types/wlr_touch.h
 CDEF += """
 struct wlr_touch {
@@ -3010,6 +3046,7 @@ SOURCE = """
 #include <wlr/types/wlr_server_decoration.h>
 #include <wlr/types/wlr_session_lock_v1.h>
 #include <wlr/types/wlr_single_pixel_buffer_v1.h>
+#include <wlr/types/wlr_switch.h>
 #include <wlr/types/wlr_touch.h>
 #include <wlr/types/wlr_virtual_keyboard_v1.h>
 #include <wlr/types/wlr_virtual_pointer_v1.h>
