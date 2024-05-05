@@ -1,4 +1,4 @@
-0.16.8 -- 2024-05-dd
+0.16.8 -- 2024-05-04
 --------------------
 * Fixed: ``XdgTopLevel.parent`` always returnd a parent even if the parent is NULL.
 * Fixed return type of ``Seat.touch_notify_down``: Returns an integer now (the
