@@ -2260,6 +2260,40 @@ struct wlr_session_lock_v1 {
     void *data;
 };
 
+struct wlr_session_lock_surface_v1_state {
+	uint32_t width, height;
+	uint32_t configure_serial;
+};
+
+struct wlr_session_lock_surface_v1_configure {
+	struct wl_list link; // wlr_session_lock_surface_v1.configure_list
+	uint32_t serial;
+
+	uint32_t width, height;
+};
+
+struct wlr_session_lock_surface_v1 {
+    struct wl_resource *resource;
+    struct wl_list link; // wlr_session_lock_v1.surfaces
+
+    struct wlr_output *output;
+    struct wlr_surface *surface;
+
+    bool configured;
+
+    struct wl_list configure_list; // wlr_session_lock_surface_v1_configure.link
+
+    struct wlr_session_lock_surface_v1_state current;
+    struct wlr_session_lock_surface_v1_state pending;
+
+    struct {
+            struct wl_signal destroy;
+    } events;
+
+    void *data;
+    ...;
+};
+
 struct wlr_session_lock_manager_v1 *wlr_session_lock_manager_v1_create(
     struct wl_display *display);
 
