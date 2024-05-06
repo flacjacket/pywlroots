@@ -378,7 +378,7 @@ class TinywlServer:
 
     def output_request_state(self, listener, request: OutputEventRequestState) -> None:
         output = self.outputs[0]
-        output.commit_state(request.state)
+        output.commit(request.state)
 
     # #############################################################
     # input handling callbacks
