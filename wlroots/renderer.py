@@ -86,6 +86,17 @@ class Renderer(Ptr):
             # TODO: get a better exception type
             raise Exception("Bad render")
 
+    def render_subtexture_with_matrix(
+        self, texture: Texture, box: Ptr, matrix: Matrix, alpha: float
+    ) -> None:
+        """Renders the requested subtexture using the provided matrix"""
+        ret = lib.wlr_render_subtexture_with_matrix(
+            self._ptr, texture._ptr, box, matrix._ptr, alpha
+        )
+        if not ret:
+            # TODO: get a better exception type
+            raise Exception("Bad render")
+
     def render_rect(self, box: Box, color: ColorType, projection: Matrix) -> None:
         """Renders a solid rectangle in the specified color."""
         if not isinstance(color, ffi.CData):

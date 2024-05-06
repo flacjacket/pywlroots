@@ -16,6 +16,14 @@ class Buffer(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
 
+    @property
+    def width(self) -> int:
+        return self._ptr.width;
+
+    @property
+    def height(self) -> int:
+        return self._ptr.height;
+
     def drop(self) -> None:
         """Destroys this wlr_texture."""
         lib.wlr_buffer_drop(self._ptr)
