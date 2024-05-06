@@ -1,3 +1,9 @@
+0.17.0
+------
+* Support for wlroots 0.17.x
+* rename all declarations of XdgTopLevel.* to XdgToplevel.*
+
+
 0.16.8 -- 2024-05-04
 --------------------
 * Fixed: ``XdgTopLevel.parent`` always returnd a parent even if the parent is NULL.
