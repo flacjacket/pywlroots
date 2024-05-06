@@ -35,7 +35,7 @@ class XdgSurfaceRole(enum.IntEnum):
     POPUP = lib.WLR_XDG_SURFACE_ROLE_POPUP
 
 
-class XdgTopLevelWMCapabilities(enum.IntFlag):
+class XdgToplevelWMCapabilities(enum.IntFlag):
     WINDOW_MENU = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_WINDOW_MENU
     MAXIMIZE = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_MAXIMIZE
     FULLSCREEN = lib.WLR_XDG_TOPLEVEL_WM_CAPABILITIES_FULLSCREEN
@@ -104,7 +104,7 @@ class XdgSurface(PtrHasData):
         return XdgSurfaceRole(self._ptr.role)
 
     @property
-    def toplevel(self) -> XdgTopLevel:
+    def toplevel(self) -> XdgToplevel:
         """Return the top level xdg object
 
         This shell must be a top level role
@@ -112,7 +112,7 @@ class XdgSurface(PtrHasData):
         if self.role != XdgSurfaceRole.TOPLEVEL:
             raise ValueError(f"xdg surface must be top-level, got: {self.role}")
 
-        toplevel = XdgTopLevel(self._ptr.toplevel)
+        toplevel = XdgToplevel(self._ptr.toplevel)
 
         # the toplevel does not own the ptr data, ensure the underlying cdata
         # is kept alive
@@ -170,7 +170,7 @@ class XdgSurface(PtrHasData):
     def set_bounds(self, width: int, height: int) -> int:
         return lib.wlr_xdg_toplevel_set_bounds(self._ptr.toplevel, width, height)
 
-    def set_wm_capabilities(self, caps: XdgTopLevelWMCapabilities) -> int:
+    def set_wm_capabilities(self, caps: XdgToplevelWMCapabilities) -> int:
         return lib.wlr_xdg_toplevel_set_wm_capabilities(self._ptr.toplevel, caps)
 
     def send_close(self) -> int:
@@ -236,7 +236,7 @@ class XdgSurfaceConfigure(Ptr):
         return self._ptr.serial
 
 
-class XdgTopLevel(Ptr):
+class XdgToplevel(Ptr):
     def __init__(self, ptr) -> None:
         """A top level surface object
 
@@ -256,27 +256,27 @@ class XdgTopLevel(Ptr):
         )
         self.request_move_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_move),
-            data_wrapper=XdgTopLevelMoveEvent,
+            data_wrapper=XdgToplevelMoveEvent,
         )
         self.request_resize_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_resize),
-            data_wrapper=XdgTopLevelResizeEvent,
+            data_wrapper=XdgToplevelResizeEvent,
         )
         self.request_show_window_menu_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_show_window_menu),
-            data_wrapper=XdgTopLevelShowWindowMenuEvent,
+            data_wrapper=XdgToplevelShowWindowMenuEvent,
         )
         self.set_parent_event = Signal(ptr=ffi.addressof(self._ptr.events.set_parent))
         self.set_title_event = Signal(ptr=ffi.addressof(self._ptr.events.set_title))
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
 
     @property
-    def parent(self) -> XdgTopLevel | None:
+    def parent(self) -> XdgToplevel | None:
         """The parent of this toplevel"""
         parent_ptr = self._ptr.parent
         if parent_ptr == ffi.NULL:
             return None
-        return XdgTopLevel(parent_ptr)
+        return XdgToplevel(parent_ptr)
 
     @property
     def title(self) -> str | None:
@@ -289,19 +289,19 @@ class XdgTopLevel(Ptr):
         return str_or_none(self._ptr.app_id)
 
     @property
-    def requested(self) -> XdgTopLevelRequested:
+    def requested(self) -> XdgToplevelRequested:
         """Requested initial state"""
-        return XdgTopLevelRequested(self._ptr.requested)
+        return XdgToplevelRequested(self._ptr.requested)
 
 
-class XdgTopLevelMoveEvent(Ptr):
+class XdgToplevelMoveEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_move_event *", ptr)
 
     @property
-    def toplevel(self) -> XdgTopLevel:
+    def toplevel(self) -> XdgToplevel:
         # TODO: keep weakref
-        return XdgTopLevel(self._ptr.toplevel)
+        return XdgToplevel(self._ptr.toplevel)
 
     # TODO: seat client
 
@@ -310,14 +310,14 @@ class XdgTopLevelMoveEvent(Ptr):
         return self._ptr.serial
 
 
-class XdgTopLevelResizeEvent(Ptr):
+class XdgToplevelResizeEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_resize_event *", ptr)
 
     @property
-    def toplevel(self) -> XdgTopLevel:
+    def toplevel(self) -> XdgToplevel:
         # TODO: keep weakref
-        return XdgTopLevel(self._ptr.toplevel)
+        return XdgToplevel(self._ptr.toplevel)
 
     # TODO: seat client
 
@@ -330,14 +330,14 @@ class XdgTopLevelResizeEvent(Ptr):
         return self._ptr.edges
 
 
-class XdgTopLevelShowWindowMenuEvent(Ptr):
+class XdgToplevelShowWindowMenuEvent(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_show_window_menu_event *", ptr)
 
     @property
-    def toplevel(self) -> XdgTopLevel:
+    def toplevel(self) -> XdgToplevel:
         # TODO: keep weakref
-        return XdgTopLevel(self._ptr.toplevel)
+        return XdgToplevel(self._ptr.toplevel)
 
     # TODO: seat client
 
@@ -420,7 +420,7 @@ class XdgPopupState(Ptr):
         return self._ptr.reactive
 
 
-class XdgTopLevelRequested(Ptr):
+class XdgToplevelRequested(Ptr):
     def __init__(self, ptr) -> None:
         self._ptr = ptr
 

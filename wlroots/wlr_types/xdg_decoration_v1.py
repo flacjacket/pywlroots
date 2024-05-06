@@ -10,7 +10,7 @@ from pywayland.server import Signal
 
 from wlroots import PtrHasData, ffi, lib
 
-from .xdg_shell import XdgTopLevel
+from .xdg_shell import XdgToplevel
 
 if TYPE_CHECKING:
     from pywayland.server import Display
@@ -53,10 +53,10 @@ class XdgToplevelDecorationV1(PtrHasData):
         )
 
     @property
-    def toplevel(self) -> XdgTopLevel:
+    def toplevel(self) -> XdgToplevel:
         toplevel_ptr = self._ptr.toplevel
         _weakkeydict[toplevel_ptr] = self._ptr
-        return XdgTopLevel(toplevel_ptr)
+        return XdgToplevel(toplevel_ptr)
 
     @property
     def manager(self) -> XdgDecorationManagerV1:
