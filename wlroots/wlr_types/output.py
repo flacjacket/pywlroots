@@ -140,13 +140,13 @@ class Output(PtrHasData):
         """
         lib.wlr_output_set_mode(self._ptr, ptr_or_null(mode))
 
-    def set_custom_mode(self, width: int, height: int, refresh: int) -> None:
+    def set_custom_mode(self, custom_mode: CustomMode) -> None:
         """
         Sets a custom mode on the output. If modes are available, they are preferred.
         Setting `refresh` to zero lets the backend pick a preferred value. The
         output needs to be enabled.
         """
-        lib.wlr_output_set_custom_mode(self._ptr, width, height, refresh)
+        lib.wlr_output_set_custom_mode(self._ptr, custom_mode.width, custom_mode.height, custom_mode.refresh)
 
     def create_global(self) -> None:
         """Create the global corresponding to the output"""
@@ -350,48 +350,42 @@ class OutputState(Ptr):
     def enabled(self) -> bool:
         return self._ptr.enabled
 
-    @enabled.setter
-    def enabled(self, enabled: bool) -> None:
+    def set_enabled(self, enabled: bool) -> None:
         lib.wlr_output_state_set_enabled(self._ptr, enabled)
 
     @property
     def scale(self) -> float:
         return self._ptr.scale
 
-    @scale.setter
-    def scale(self, scale: float) -> None:
+    def set_scale(self, scale: float) -> None:
         lib.wlr_output_state_set_scale(self._ptr, scale)
 
     @property
     def transform(self) -> WlOutput.transform:
         return WlOutput.transform(self._ptr.transform)
 
-    @transform.setter
-    def transform(self, transform: WlOutput.transform) -> None:
+    def set_transform(self, transform: WlOutput.transform) -> None:
         lib.wlr_output_state_set_transform(self._ptr, transform)
 
     @property
     def adaptive_sync_enabled(self) -> bool:
         return self._ptr.adaptive_sync_enabled
 
-    @adaptive_sync_enabled.setter
-    def adaptive_sync_enabled(self, enabled: bool) -> None:
+    def set_adaptive_sync_enabled(self, enabled: bool) -> None:
         lib.wlr_output_state_set_adaptive_sync_enabled(self._ptr, enabled)
 
     @property
     def render_format(self) -> int:
         return self._ptr.render_format
 
-    @render_format.setter
-    def render_format(self, format: int) -> None:
+    def set_render_format(self, format: int) -> None:
         lib.wlr_output_state_set_render_format(self._ptr, format)
 
     @property
     def subpixel(self) -> WlOutput.subpixel:
         return WlOutput.subpixel(self._ptr.subpixel)
 
-    @subpixel.setter
-    def subpixel(self, subpixel: WlOutput.subpixel) -> None:
+    def set_subpixel(self, subpixel: WlOutput.subpixel) -> None:
         lib.wlr_output_state_set_subpixel(self._ptr, subpixel)
 
     @property
@@ -399,8 +393,7 @@ class OutputState(Ptr):
         mode_ptr = self._ptr.mode
         return OutputMode(mode_ptr) if mode_ptr != ffi.NULL else None
 
-    @mode.setter
-    def mode(self, mode: OutputMode | None) -> None:
+    def set_mode(self, mode: OutputMode | None) -> None:
         lib.wlr_output_state_set_mode(self._ptr, ptr_or_null(mode))
 
     @property
@@ -408,8 +401,7 @@ class OutputState(Ptr):
         mode = self._ptr.custom_mode
         return CustomMode(width=mode.width, height=mode.height, refresh=mode.refresh)
 
-    @custom_mode.setter
-    def custom_mode(self, mode: CustomMode) -> None:
+    def set_custom_mode(self, mode: CustomMode) -> None:
         lib.wlr_output_state_set_custom_mode(
             self._ptr, mode.width, mode.height, mode.refresh
         )

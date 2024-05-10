@@ -355,9 +355,9 @@ class TinywlServer:
         output.init_render(self._allocator, self._renderer)
 
         state = OutputState()
-        state.enabled = True
+        state.set_enabled(True)
         if mode := output.preferred_mode():
-            state.mode = mode
+            state.set_mode(mode)
 
         output.commit(state)
         state.finish()
