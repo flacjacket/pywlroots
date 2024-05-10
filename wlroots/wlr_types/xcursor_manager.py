@@ -11,12 +11,15 @@ if TYPE_CHECKING:
 
 
 class XCursorManager(Ptr):
-    def __init__(self, size, scale=1):
-        """Creates a new XCursor manager
+    def __init__(self, theme: str | None, size: int = 24, scale: float = 1.0):
+        """Creates a new XCursor manager using the theme and size
 
-        Create cursor with base size and scale.
+        and ensures an xcursor with scale is loaded
         """
-        ptr = lib.wlr_xcursor_manager_create(ffi.NULL, size)
+        theme_ptr = ffi.NULL
+        if theme is not None:
+            theme_ptr = theme.encode()
+        ptr = lib.wlr_xcursor_manager_create(theme_ptr, size)
         self._ptr = ffi.gc(ptr, lib.wlr_xcursor_manager_destroy)
 
         lib.wlr_xcursor_manager_load(self._ptr, scale)

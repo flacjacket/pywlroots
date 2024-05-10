@@ -35,7 +35,7 @@ def main(argv) -> None:
         xdg_shell = XdgShell(display)
         with OutputLayout() as output_layout, Cursor(
             output_layout
-        ) as cursor, XCursorManager(24) as xcursor_manager, Seat(
+        ) as cursor, XCursorManager(None, 24) as xcursor_manager, Seat(
             display, "seat0"
         ) as seat:
             scene = Scene()
