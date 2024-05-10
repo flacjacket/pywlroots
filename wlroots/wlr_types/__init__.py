@@ -42,6 +42,7 @@ from .scene import (  # noqa: F401
     SceneNode,
     SceneNodeType,
     SceneOutput,
+    SceneOutputLayout,
     SceneSurface,
     SceneTree,
 )

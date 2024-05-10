@@ -18,6 +18,7 @@ from wlroots.wlr_types import (
     DataDeviceManager,
     OutputLayout,
     Scene,
+    SceneOutputLayout,
     Seat,
     XCursorManager,
     XdgShell,
@@ -39,7 +40,7 @@ def main(argv) -> None:
             display, "seat0"
         ) as seat:
             scene = Scene()
-            scene.attach_output_layout(output_layout)
+            scene_layout = scene.attach_output_layout(output_layout)
             tinywl_server = TinywlServer(  # noqa: F841
                 display=display,
                 backend=backend,
@@ -51,6 +52,7 @@ def main(argv) -> None:
                 cursor_manager=xcursor_manager,
                 seat=seat,
                 output_layout=output_layout,
+                scene_layout=scene_layout,
             )
 
             socket = display.add_socket()

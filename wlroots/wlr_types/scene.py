@@ -38,12 +38,12 @@ class Scene(Ptr):
 
     def attach_output_layout(
         self, output_layout: OutputLayout
-    ) -> OutputLayoutOutput | None:
-        """Get a scene-graph output from a wlr_output."""
+    ) -> SceneOutputLayout | None:
+        """Attach an output layout to a scene."""
         ptr = lib.wlr_scene_attach_output_layout(self._ptr, output_layout._ptr)
         if ptr == ffi.NULL:
             return None
-        return OutputLayoutOutput(ptr)
+        return SceneOutputLayout(ptr)
 
     def set_presentation(self, presentation: Presentation) -> None:
         """
@@ -350,6 +350,20 @@ class SceneLayerSurfaceV1(Ptr):
         """
         lib.wlr_scene_layer_surface_v1_configure(
             self._ptr, full_area._ptr, usable_area._ptr
+        )
+
+
+class SceneOutputLayout(Ptr):
+    def __init__(self, ptr) -> None:
+        """A `struct wlr_scene_output_layout_scene`"""
+        self._ptr = ptr
+
+    def add_output(
+        self, output_layout_output: OutputLayoutOutput, scene_output: SceneOutput
+    ) -> None:
+        """Add an output to the scene output layout."""
+        lib.wlr_scene_output_layout_add_output(
+            self._ptr, output_layout_output._ptr, scene_output._ptr
         )
 
 

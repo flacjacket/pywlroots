@@ -27,6 +27,7 @@ from wlroots.wlr_types import (
     SceneBuffer,
     SceneNodeType,
     SceneOutput,
+    SceneOutputLayout,
     SceneSurface,
     SceneTree,
     Seat,
@@ -83,6 +84,7 @@ class TinywlServer:
         cursor_manager: XCursorManager,
         seat: Seat,
         output_layout: OutputLayout,
+        scene_layout: SceneOutputLayout,
     ) -> None:
         # elements that we need to hold on to
         self._display = display
@@ -118,6 +120,7 @@ class TinywlServer:
         self.resize_edges: Edges = Edges.NONE
 
         self._output_layout = output_layout
+        self._scene_layout = scene_layout
         self.outputs: list[Output] = []
 
         xdg_shell.new_surface_event.add(Listener(self.server_new_xdg_surface))
@@ -349,7 +352,6 @@ class TinywlServer:
     # output and frame handling callbacks
 
     def server_new_output(self, listener, output: Output) -> None:
-        SceneOutput.create(self._scene, output)
         output.init_render(self._allocator, self._renderer)
 
         state = OutputState()
@@ -361,12 +363,16 @@ class TinywlServer:
         state.finish()
 
         self.outputs.append(output)
-        if not self._output_layout.add_auto(output):
+        l_output = self._output_layout.add_auto(output)
+        if not l_output:
             logging.warning("Failed to add output to layout.")
             return
 
         output.frame_event.add(Listener(self.output_frame))
         output.request_state_event.add(Listener(self.output_request_state))
+
+        scene_output = SceneOutput.create(self._scene, output)
+        self._scene_layout.add_output(l_output, scene_output)
 
     def output_frame(self, listener, data) -> None:
         output = self.outputs[0]
