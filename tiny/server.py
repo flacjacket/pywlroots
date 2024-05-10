@@ -84,7 +84,7 @@ class TinywlServer:
         cursor_manager: XCursorManager,
         seat: Seat,
         output_layout: OutputLayout,
-        scene_layout: SceneOutputLayout,
+        scene_layout: Optional[SceneOutputLayout],
     ) -> None:
         # elements that we need to hold on to
         self._display = display
@@ -372,7 +372,8 @@ class TinywlServer:
         output.request_state_event.add(Listener(self.output_request_state))
 
         scene_output = SceneOutput.create(self._scene, output)
-        self._scene_layout.add_output(l_output, scene_output)
+        if self._scene_layout:
+            self._scene_layout.add_output(l_output, scene_output)
 
     def output_frame(self, listener, data) -> None:
         output = self.outputs[0]

@@ -18,7 +18,6 @@ from wlroots.wlr_types import (
     DataDeviceManager,
     OutputLayout,
     Scene,
-    SceneOutputLayout,
     Seat,
     XCursorManager,
     XdgShell,

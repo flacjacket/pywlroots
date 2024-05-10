@@ -146,7 +146,9 @@ class Output(PtrHasData):
         Setting `refresh` to zero lets the backend pick a preferred value. The
         output needs to be enabled.
         """
-        lib.wlr_output_set_custom_mode(self._ptr, custom_mode.width, custom_mode.height, custom_mode.refresh)
+        lib.wlr_output_set_custom_mode(
+            self._ptr, custom_mode.width, custom_mode.height, custom_mode.refresh
+        )
 
     def create_global(self) -> None:
         """Create the global corresponding to the output"""
