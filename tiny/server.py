@@ -84,7 +84,7 @@ class TinywlServer:
         cursor_manager: XCursorManager,
         seat: Seat,
         output_layout: OutputLayout,
-        scene_layout: Optional[SceneOutputLayout],
+        scene_layout: SceneOutputLayout | None,
     ) -> None:
         # elements that we need to hold on to
         self._display = display
