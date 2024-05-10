@@ -85,8 +85,8 @@ class XdgSurface(PtrHasData):
             data_wrapper=XdgSurfaceConfigure,
         )
 
-    @classmethod
-    def try_from_surface(cls, surface: Surface) -> XdgSurface | None:
+    @staticmethod
+    def try_from_surface(surface: Surface) -> XdgSurface | None:
         """Get the xdg surface associated with the given surface"""
         maybe_ptr = lib.wlr_xdg_surface_try_from_wlr_surface(surface._ptr)
         if maybe_ptr == ffi.NULL:

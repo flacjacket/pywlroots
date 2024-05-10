@@ -160,8 +160,8 @@ class LayerSurfaceV1(PtrHasData):
     def destroy(self) -> None:
         lib.wlr_layer_surface_v1_destroy(self._ptr)
 
-    @classmethod
-    def try_from_wlr_surface(cls, surface: Surface) -> LayerSurfaceV1 | None:
+    @staticmethod
+    def try_from_wlr_surface(surface: Surface) -> LayerSurfaceV1 | None:
         maybe_ptr = lib.wlr_layer_surface_v1_try_from_wlr_surface(surface._ptr)
         if maybe_ptr == ffi.NULL:
             return None
