@@ -110,7 +110,7 @@ class XdgSurface(PtrHasData):
         This shell must be a top level role
         """
         if self.role != XdgSurfaceRole.TOPLEVEL:
-            raise ValueError(f"xdg surface must be top-level, got: {self.role}")
+            raise ValueError(f"xdg surface must be top-level, got: {self.role.name}")
 
         toplevel = XdgToplevel(self._ptr.toplevel)
 
@@ -151,7 +151,7 @@ class XdgSurface(PtrHasData):
 
     def set_activated(self, activated: bool) -> int:
         if self.role != XdgSurfaceRole.TOPLEVEL:
-            raise ValueError(f"xdg surface must be top-level, got: {self.role}")
+            raise ValueError(f"xdg surface must be top-level, got: {self.role.name}")
 
         return lib.wlr_xdg_toplevel_set_activated(self._ptr.toplevel, activated)
 
@@ -269,6 +269,11 @@ class XdgToplevel(Ptr):
         self.set_parent_event = Signal(ptr=ffi.addressof(self._ptr.events.set_parent))
         self.set_title_event = Signal(ptr=ffi.addressof(self._ptr.events.set_title))
         self.set_app_id_event = Signal(ptr=ffi.addressof(self._ptr.events.set_app_id))
+
+    @property
+    def base(self) -> XdgSurface:
+        """The XDG surface associated with this toplevel"""
+        return XdgSurface(self._ptr.base)
 
     @property
     def parent(self) -> XdgToplevel | None:
