@@ -68,6 +68,7 @@ class _PointerEvent(Ptr):
 
 class PointerMotionEvent(_PointerEvent):
     """A relative motion pointer event"""
+
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_motion_event *", ptr)
 
@@ -102,6 +103,7 @@ class PointerMotionEvent(_PointerEvent):
 
 class PointerMotionAbsoluteEvent(_PointerEvent):
     """A absolute motion pointer event"""
+
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_motion_absolute_event *", ptr)
 
@@ -116,6 +118,7 @@ class PointerMotionAbsoluteEvent(_PointerEvent):
 
 class PointerButtonEvent(_PointerEvent):
     """A pointer button event"""
+
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_button_event *", ptr)
 
@@ -130,6 +133,7 @@ class PointerButtonEvent(_PointerEvent):
 
 class PointerAxisEvent(_PointerEvent):
     """A pointer axis event"""
+
     def __init__(self, ptr) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_axis_event *", ptr)
 
