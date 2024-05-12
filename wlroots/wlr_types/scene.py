@@ -5,11 +5,15 @@ from __future__ import annotations
 import enum
 from typing import TYPE_CHECKING, Callable, TypeVar
 
+from pywayland.utils import wl_list_for_each
+
 from wlroots import Ptr, PtrHasData, ffi, lib
 from wlroots.util.region import PixmanRegion32
 from wlroots.wlr_types import OutputLayoutOutput, Surface
 
 if TYPE_CHECKING:
+    from typing import Iterator
+
     from wlroots.util.box import Box
     from wlroots.util.clock import Timespec
     from wlroots.wlr_types import Buffer, Output, OutputLayout
@@ -144,6 +148,16 @@ class SceneTree(PtrHasData):
     @classmethod
     def drag_icon_create(cls, parent: SceneTree, drag_icon: DragIcon) -> SceneTree:
         return SceneTree(lib.wlr_scene_drag_icon_create(parent._ptr, drag_icon._ptr))
+
+    @property
+    def children(self) -> Iterator[SceneNode]:
+        for ptr in wl_list_for_each(
+            "struct wlr_scene_node *",
+            self._ptr.children,
+            "link",
+            ffi=ffi,
+        ):
+            yield SceneNode(ptr)
 
 
 class SceneBuffer(Ptr):
