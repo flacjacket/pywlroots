@@ -117,8 +117,7 @@ class Seat(PtrHasData):
         _weakkeydict[keyboard_state_ptr] = self._ptr
         return SeatKeyboardState(keyboard_state_ptr)
 
-    @property
-    def keyboard(self) -> Keyboard | None:
+    def get_keyboard(self) -> Keyboard | None:
         """Get the active keyboard for the seat."""
         return instance_or_none(Keyboard, lib.wlr_seat_get_keyboard(self._ptr))
 
