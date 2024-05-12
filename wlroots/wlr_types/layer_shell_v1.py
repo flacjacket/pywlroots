@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
@@ -197,14 +197,16 @@ class LayerSurfaceV1(PtrHasData):
         return Surface(surface_ptr), sub_x_data[0], sub_y_data[0]
 
 
-LAYER_SHELL_VERSION = 4
+_MAX_LAYER_SHELL_VERSION: Final = 4
 
 
 class LayerShellV1(PtrHasData):
     def __init__(self, display: Display, version: int) -> None:
         """Create an wlr_xdg_output_manager_v1"""
-        if not 0 < version <= LAYER_SHELL_VERSION:
-            raise ValueError("Invalid layer shell version.")
+        if not 0 < version <= _MAX_LAYER_SHELL_VERSION:
+            raise ValueError(
+                f"Invalid layer shell version, should be a value between 1 (inclusive) and {_MAX_LAYER_SHELL_VERSION} (inclusive), got: {version}"
+            )
 
         self._ptr = lib.wlr_layer_shell_v1_create(display._ptr, version)
 

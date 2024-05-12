@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 from weakref import WeakKeyDictionary
 
 from pywayland.protocol.wayland import WlOutput
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from wlroots.renderer import Renderer
 
 
-COMPOSITOR_VERSION = 5
+_MAX_COMPOSITOR_VERSION: Final = 5
 
 
 class Compositor(Ptr):
@@ -35,9 +35,9 @@ class Compositor(Ptr):
         :param renderer:
             The wlroots renderer to attach the compositor to.
         """
-        if not version <= COMPOSITOR_VERSION:
+        if not 0 < version <= _MAX_COMPOSITOR_VERSION:
             raise ValueError(
-                f"Compositor version must be less than or equal to {COMPOSITOR_VERSION}"
+                f"Invalid compositor version, should be a value between 1 (inclusive) and {_MAX_COMPOSITOR_VERSION} (inclusive), got: {version}"
             )
         if renderer is None:
             self._ptr = lib.wlr_compositor_create(display._ptr, version, ffi.NULL)
