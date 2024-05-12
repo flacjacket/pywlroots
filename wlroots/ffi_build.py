@@ -1898,6 +1898,9 @@ void wlr_scene_output_layout_add_output(struct wlr_scene_output_layout *sol, str
 struct wlr_scene_tree *wlr_scene_subsurface_tree_create(
     struct wlr_scene_tree *parent, struct wlr_surface *surface);
 
+void wlr_scene_subsurface_tree_set_clip(struct wlr_scene_node *node,
+		struct wlr_box *clip);
+
 struct wlr_scene_tree *wlr_scene_xdg_surface_create(
     struct wlr_scene_tree *parent, struct wlr_xdg_surface *xdg_surface);
 

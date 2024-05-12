@@ -288,6 +288,17 @@ class SceneNode(PtrHasData):
             self._ptr, lib.buffer_iterator_callback, handle
         )
 
+    def subsurface_tree_set_clip(self, clip: Box | None):
+        """
+        Sets a cropping region for any subsurface trees that are children of this scene node.
+
+        A None value will disable clipping
+        """
+        clip_ptr = ffi.NULL
+        if clip is not None:
+            clip_ptr = clip._ptr
+        lib.wlr_scene_subsurface_tree_set_clip(self._ptr, clip_ptr)
+
 
 class SceneSurface(Ptr):
     def __init__(self, ptr) -> None:
