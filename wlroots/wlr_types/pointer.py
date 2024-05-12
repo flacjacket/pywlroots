@@ -33,10 +33,18 @@ class Pointer(PtrHasData):
 
     @staticmethod
     def from_input_device(input_device: InputDevice) -> Pointer:
+        """
+        Get `Pointer` from an InputDevice.
+
+        Asserts that the input device is a pointer.
+        """
         return Pointer(lib.wlr_pointer_from_input_device(input_device._ptr))
 
     @property
     def base(self) -> InputDevice:
+        """
+        Returns the InputDevice instance associated with this pointer instance.
+        """
         device_ptr = ffi.addressof(self._ptr.base)
         _weakkeydict[device_ptr] = self._ptr
         return InputDevice(device_ptr)
@@ -59,30 +67,42 @@ class _PointerEvent(Ptr):
 
 
 class PointerMotionEvent(_PointerEvent):
+    """A relative motion pointer event"""
     def __init__(self, ptr) -> None:
-        """A relative motion pointer event"""
         self._ptr = ffi.cast("struct wlr_pointer_motion_event *", ptr)
 
     @property
     def delta_x(self) -> float:
+        """
+        Relative x-coordinate compared to the previous position.
+        """
         return self._ptr.delta_x
 
     @property
     def delta_y(self) -> float:
+        """
+        Relative y-coordinate compared to the previous position.
+        """
         return self._ptr.delta_y
 
     @property
     def unaccel_delta_x(self) -> float:
+        """
+        Relative unaccelerated x-coordinate (raw device coordinate).
+        """
         return self._ptr.unaccel_dx
 
     @property
     def unaccel_delta_y(self) -> float:
+        """
+        Relative unaccelerated y-coordinate (raw device coordinate).
+        """
         return self._ptr.unaccel_dy
 
 
 class PointerMotionAbsoluteEvent(_PointerEvent):
+    """A absolute motion pointer event"""
     def __init__(self, ptr) -> None:
-        """A absolute motion pointer event"""
         self._ptr = ffi.cast("struct wlr_pointer_motion_absolute_event *", ptr)
 
     @property
@@ -95,8 +115,8 @@ class PointerMotionAbsoluteEvent(_PointerEvent):
 
 
 class PointerButtonEvent(_PointerEvent):
+    """A pointer button event"""
     def __init__(self, ptr) -> None:
-        """A pointer button event"""
         self._ptr = ffi.cast("struct wlr_pointer_button_event *", ptr)
 
     @property
@@ -109,8 +129,8 @@ class PointerButtonEvent(_PointerEvent):
 
 
 class PointerAxisEvent(_PointerEvent):
+    """A pointer axis event"""
     def __init__(self, ptr) -> None:
-        """A pointer axis event"""
         self._ptr = ffi.cast("struct wlr_pointer_axis_event *", ptr)
 
     @property
@@ -148,11 +168,19 @@ class PointerSwipeUpdateEvent(_PointerEvent):
         return self._ptr.fingers
 
     @property
-    def dx(self) -> float:
+    def delta_x(self) -> float:
+        """
+        Relative x-coordinate of the logical center of the gesture
+        compared to the previous event.
+        """
         return self._ptr.dx
 
     @property
-    def dy(self) -> float:
+    def delta_y(self) -> float:
+        """
+        Relative y-coordinate of the logical center of the gesture
+        compared to the previous event.
+        """
         return self._ptr.dy
 
 
@@ -163,6 +191,9 @@ class PointerSwipeEndEvent(_PointerEvent):
 
     @property
     def cancelled(self) -> bool:
+        """
+        Indicates if the gesture was cancelled.
+        """
         return self._ptr.cancelled
 
 
@@ -174,18 +205,6 @@ class PointerPinchBeginEvent(_PointerEvent):
     def fingers(self) -> int:
         return self._ptr.fingers
 
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
-
-    @property
-    def dx(self) -> float:
-        return self._ptr.dx
-
-    @property
-    def dy(self) -> float:
-        return self._ptr.dy
-
 
 class PointerPinchUpdateEvent(_PointerEvent):
     def __init__(self, ptr) -> None:
@@ -196,28 +215,34 @@ class PointerPinchUpdateEvent(_PointerEvent):
         return self._ptr.fingers
 
     @property
-    def dx(self) -> float:
+    def delta_x(self) -> float:
+        """
+        Relative x-coordinate of the logical center of the gesture
+        compared to the previous event.
+        """
         return self._ptr.dx
 
     @property
-    def dy(self) -> float:
+    def delta_y(self) -> float:
+        """
+        Relative y-coordinate of the logical center of the gesture
+        compared to the previous event.
+        """
         return self._ptr.dy
 
     @property
     def scale(self) -> float:
+        """
+        Absolute scale compared to the begin event
+        """
         return self._ptr.scale
 
     @property
     def rotation(self) -> float:
+        """
+        Relative angle in degrees clockwise compared to the previous event.
+        """
         return self._ptr.rotation
-
-    @property
-    def time_msec(self) -> int:
-        return self._ptr.time_msec
-
-    @property
-    def cancelled(self) -> bool:
-        return self._ptr.cancelled
 
 
 class PointerPinchEndEvent(_PointerEvent):
@@ -227,6 +252,9 @@ class PointerPinchEndEvent(_PointerEvent):
 
     @property
     def cancelled(self) -> bool:
+        """
+        Indicates if the gesture was cancelled.
+        """
         return self._ptr.cancelled
 
 
@@ -245,4 +273,7 @@ class PointerHoldEndEvent(_PointerEvent):
 
     @property
     def cancelled(self) -> bool:
+        """
+        Indicates if the gesture was cancelled.
+        """
         return self._ptr.cancelled
