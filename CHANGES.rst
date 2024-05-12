@@ -1,10 +1,10 @@
-0.16.9 -- 2024-mm-dd
+0.16.9 -- 2024-05-12
 --------------------
 * Fixed ``Seat.touch_point_clear_focus``: The method took too many arguments
   which were not aligned to the wlroots counterpart and lead to a runtime error.
-* This is probably the last 0.16 release unless there are important bugs to fix.
-  Since Linux distributions are phasing out support for wlroots 0.16, projects
-  should move to pywlroots 0.17 once this version is released
+* Fixed ``Renderer.autocreate`` return value check.  This also replaces some of
+  the exceptions from render_texture and render_texture_with_matrix with
+  boolean return values.
 
 
 0.16.8 -- 2024-05-04
