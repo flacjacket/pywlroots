@@ -26,10 +26,10 @@ class Renderer(Ptr):
     @staticmethod
     def autocreate(backend: Backend) -> Renderer:
         """Creates a suitable renderer for a backend."""
-        ret = lib.wlr_renderer_autocreate(backend._ptr)
-        if not ret:
+        renderer_ptr = lib.wlr_renderer_autocreate(backend._ptr)
+        if renderer_ptr == ffi.NULL:
             raise RuntimeError("Unable to create a renderer.")
-        return Renderer(ret)
+        return Renderer(renderer_ptr)
 
     def init_display(self, display: Display) -> None:
         """Creates necessary shm and invokes the initialization of the implementation
@@ -66,25 +66,19 @@ class Renderer(Ptr):
 
     def render_texture(
         self, texture: Texture, projection: Matrix, x: int, y: int, alpha: float
-    ) -> None:
+    ) -> bool:
         """Renders the requested texture"""
-        ret = lib.wlr_render_texture(
+        return lib.wlr_render_texture(
             self._ptr, texture._ptr, projection._ptr, x, y, alpha
         )
-        if not ret:
-            # TODO: get a better exception type
-            raise Exception("Bad render")
 
     def render_texture_with_matrix(
         self, texture: Texture, matrix: Matrix, alpha: float
-    ) -> None:
+    ) -> bool:
         """Renders the requested texture using the provided matrix"""
-        ret = lib.wlr_render_texture_with_matrix(
+        return lib.wlr_render_texture_with_matrix(
             self._ptr, texture._ptr, matrix._ptr, alpha
         )
-        if not ret:
-            # TODO: get a better exception type
-            raise Exception("Bad render")
 
     def render_rect(self, box: Box, color: ColorType, projection: Matrix) -> None:
         """Renders a solid rectangle in the specified color."""
