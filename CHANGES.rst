@@ -1,4 +1,4 @@
-0.17.0 -- 2024-mm-dd
+0.17.0 -- 2024-05-12
 ------
 * Support for wlroots 0.17.x
 * **Breaking change** Rename all declarations of XdgTopLevel.* to XdgToplevel.*
