@@ -1,7 +1,16 @@
-0.17.0
+0.17.0 -- 2024-mm-dd
 ------
 * Support for wlroots 0.17.x
-* rename all declarations of XdgTopLevel.* to XdgToplevel.*
+* **Breaking change** Rename all declarations of XdgTopLevel.* to XdgToplevel.*
+
+
+0.16.9 -- 2024-05-12
+--------------------
+* Fixed ``Seat.touch_point_clear_focus``: The method took too many arguments
+  which were not aligned to the wlroots counterpart and lead to a runtime error.
+* Fixed ``Renderer.autocreate`` return value check.  This also replaces some of
+  the exceptions from render_texture and render_texture_with_matrix with
+  boolean return values.
 
 
 0.16.8 -- 2024-05-04
