@@ -32,8 +32,12 @@ class Backend(Ptr):
             backends), $WAYLAND_DISPLAY (for Wayland backends), and
             $WLR_BACKENDS (to set the available backends).
         """
+        self.session: Session | None = None
+
         if backend_type == BackendType.AUTO:
-            ptr = lib.wlr_backend_autocreate(display._ptr)
+            session_ptr = ffi.new("struct wlr_session **")
+            ptr = lib.wlr_backend_autocreate(display._ptr, session_ptr)
+            self.session = Session(session_ptr[0])
         elif backend_type == BackendType.HEADLESS:
             ptr = lib.wlr_headless_backend_create(display._ptr)
         else:
@@ -92,7 +96,9 @@ class Backend(Ptr):
         self.destroy()
 
     def get_session(self) -> Session:
-        return Session(self)
+        if self.session is None:
+            raise ValueError("Backend does not have a session")
+        return self.session
 
     @property
     def is_headless(self) -> bool:
@@ -110,9 +116,9 @@ class Backend(Ptr):
 
 
 class Session:
-    def __init__(self, backend: Backend) -> None:
+    def __init__(self, ptr) -> None:
         """The running session"""
-        self._ptr = lib.wlr_backend_get_session(backend._ptr)
+        self._ptr = ptr
 
     def change_vt(self, vt: int) -> bool:
         return lib.wlr_session_change_vt(self._ptr, vt)

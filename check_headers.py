@@ -13,7 +13,6 @@ WAYLAND_PROCOTOLS = [
     "unstable/pointer-constraints/pointer-constraints-unstable-v1.xml",
 ]
 WLROOTS_PROTOCOLS = [
-    "protocol/idle.xml",
     "protocol/wlr-output-power-management-unstable-v1.xml",
     "protocol/wlr-layer-shell-unstable-v1.xml",
 ]

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 from weakref import WeakKeyDictionary
 
 from pywayland.protocol.wayland import WlOutput
@@ -19,16 +19,30 @@ if TYPE_CHECKING:
     from wlroots.renderer import Renderer
 
 
+_MAX_COMPOSITOR_VERSION: Final = 5
+
+
 class Compositor(Ptr):
-    def __init__(self, display: Display, renderer: Renderer) -> None:
+    def __init__(
+        self, display: Display, version: int, renderer: Renderer | None = None
+    ) -> None:
         """A compositor for clients to be able to allocate surfaces
 
         :param display:
             The Wayland server display to attach to the compositor.
+        :param version:
+            The version of the wlr_compositor interface to use.
         :param renderer:
             The wlroots renderer to attach the compositor to.
         """
-        self._ptr = lib.wlr_compositor_create(display._ptr, renderer._ptr)
+        if not 0 < version <= _MAX_COMPOSITOR_VERSION:
+            raise ValueError(
+                f"Invalid compositor version, should be a value between 1 (inclusive) and {_MAX_COMPOSITOR_VERSION} (inclusive), got: {version}"
+            )
+        if renderer is None:
+            self._ptr = lib.wlr_compositor_create(display._ptr, version, ffi.NULL)
+        else:
+            self._ptr = lib.wlr_compositor_create(display._ptr, version, renderer._ptr)
 
 
 class SubCompositor(Ptr):
@@ -45,41 +59,18 @@ class Surface(PtrHasData):
         """
         self._ptr = ptr
 
+        self.precommit_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.precommit),
+            data_wrapper=SurfaceState,
+        )
         self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
+        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
+        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
         self.new_subsurface_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_subsurface),
             data_wrapper=SubSurface,
         )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-
-    @property
-    def is_xdg_surface(self) -> bool:
-        """True if the current surface is an XDG surface"""
-        return lib.wlr_surface_is_xdg_surface(self._ptr)
-
-    @property
-    def is_layer_surface(self) -> bool:
-        """True if the current surface is a layer surface"""
-        return lib.wlr_surface_is_layer_surface(self._ptr)
-
-    @property
-    def is_xwayland_surface(self) -> bool:
-        """
-        True if the current surface is an XWayland surface.
-
-        Requires that pywlroots was built with XWayland support.
-        """
-        return lib.wlr_surface_is_xwayland_surface(self._ptr)
-
-    @property
-    def sx(self) -> int:
-        """Surface local buffer x position"""
-        return self._ptr.sx
-
-    @property
-    def sy(self) -> int:
-        """Surface local buffer y position"""
-        return self._ptr.sy
 
     @property
     def current(self) -> SurfaceState:
@@ -147,8 +138,6 @@ class SubSurface(PtrHasData):
         self._ptr = ffi.cast("struct wlr_subsurface *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
-        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
 
     @property
     def surface(self) -> Surface:

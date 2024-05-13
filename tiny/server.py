@@ -26,6 +26,8 @@ from wlroots.wlr_types import (
     Scene,
     SceneBuffer,
     SceneNodeType,
+    SceneOutput,
+    SceneOutputLayout,
     SceneSurface,
     SceneTree,
     Seat,
@@ -52,6 +54,7 @@ from .view import View
 if TYPE_CHECKING:
     from wlroots.wlr_types import InputDevice
     from wlroots.wlr_types.keyboard import KeyboardKeyEvent, KeyboardModifiers
+    from wlroots.wlr_types.output import OutputEventRequestState
 
 _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
@@ -81,6 +84,7 @@ class TinywlServer:
         cursor_manager: XCursorManager,
         seat: Seat,
         output_layout: OutputLayout,
+        scene_layout: SceneOutputLayout | None,
     ) -> None:
         # elements that we need to hold on to
         self._display = display
@@ -116,6 +120,7 @@ class TinywlServer:
         self.resize_edges: Edges = Edges.NONE
 
         self._output_layout = output_layout
+        self._scene_layout = scene_layout
         self.outputs: list[Output] = []
 
         xdg_shell.new_surface_event.add(Listener(self.server_new_xdg_surface))
@@ -214,7 +219,7 @@ class TinywlServer:
         logging.debug("Processing cursor motion: %s, %s", sx, sy)
 
         if view is None:
-            self._cursor_manager.set_cursor_image("left_ptr", self._cursor)
+            self._cursor.set_xcursor(self._cursor_manager, "default")
 
         if surface is None:
             # Clear pointer focus so future button events and such are not sent
@@ -229,7 +234,7 @@ class TinywlServer:
         self, modifiers: KeyboardModifiers, input_device: InputDevice
     ) -> None:
         keyboard = Keyboard.from_input_device(input_device)
-        self._seat.keyboard = keyboard
+        self._seat.set_keyboard(keyboard)
         self._seat.keyboard_notify_modifiers(modifiers)
 
     def send_key(self, key_event: KeyboardKeyEvent, input_device: InputDevice) -> None:
@@ -255,7 +260,7 @@ class TinywlServer:
 
         # Otherwise, we pass it along to the client
         if not handled:
-            self._seat.keyboard = keyboard
+            self._seat.set_keyboard(keyboard)
             self._seat.keyboard_notify_key(key_event)
 
     def handle_keybinding(self, keysym: int) -> bool:
@@ -290,8 +295,8 @@ class TinywlServer:
         if previous_surface is not None:
             # Deactivate the previously focused surface
             logging.info("Un-focusing previous")
-            previous_xdg_surface = XdgSurface.from_surface(previous_surface)
-            previous_xdg_surface.set_activated(False)
+            if previous_xdg_surface := XdgSurface.try_from_surface(previous_surface):
+                previous_xdg_surface.set_activated(False)
 
         view.scene_node.raise_to_top()
         # roll the given surface to the front of the list, copy and modify the
@@ -307,7 +312,7 @@ class TinywlServer:
         # Tell the seat to have the keyboard enter this surface. wlroots will
         # keep track of this and automatically send key events to the
         # appropriate clients without additional work on your part.
-        keyboard = self._seat.keyboard
+        keyboard = self._seat.get_keyboard()
         if keyboard:
             self._seat.keyboard_notify_enter(view.xdg_surface.surface, keyboard)
 
@@ -323,10 +328,12 @@ class TinywlServer:
             # we must provide the proper parent scene node of the xdg popup. To
             # enable this, we always set the user data field of xdg_surfaces to
             # the corresponding scene node.
-            parent_xdg_surface = XdgSurface.from_surface(xdg_surface.popup.parent)
-            parent_scene_tree = cast(SceneTree, parent_xdg_surface.data)
-            scene_tree = Scene.xdg_surface_create(parent_scene_tree, xdg_surface)
-            xdg_surface.data = scene_tree
+            if parent_xdg_surface := XdgSurface.try_from_surface(
+                xdg_surface.popup.parent
+            ):
+                parent_scene_tree = cast(SceneTree, parent_xdg_surface.data)
+                scene_tree = Scene.xdg_surface_create(parent_scene_tree, xdg_surface)
+                xdg_surface.data = scene_tree
             return
 
         assert xdg_surface.role == XdgSurfaceRole.TOPLEVEL
@@ -348,15 +355,25 @@ class TinywlServer:
         output.init_render(self._allocator, self._renderer)
 
         state = OutputState()
-        state.enabled = True
-        state.mode = output.preferred_mode()
+        state.set_enabled(True)
+        if mode := output.preferred_mode():
+            state.set_mode(mode)
 
         output.commit(state)
+        state.finish()
 
         self.outputs.append(output)
-        self._output_layout.add_auto(output)
+        l_output = self._output_layout.add_auto(output)
+        if not l_output:
+            logging.warning("Failed to add output to layout.")
+            return
 
         output.frame_event.add(Listener(self.output_frame))
+        output.request_state_event.add(Listener(self.output_request_state))
+
+        scene_output = SceneOutput.create(self._scene, output)
+        if self._scene_layout:
+            self._scene_layout.add_output(l_output, scene_output)
 
     def output_frame(self, listener, data) -> None:
         output = self.outputs[0]
@@ -365,6 +382,10 @@ class TinywlServer:
 
         now = Timespec.get_monotonic_time()
         scene_output.send_frame_done(now)
+
+    def output_request_state(self, listener, request: OutputEventRequestState) -> None:
+        output = self.outputs[0]
+        output.commit(request.state)
 
     # #############################################################
     # input handling callbacks
@@ -399,7 +420,7 @@ class TinywlServer:
         keyboard_handler = KeyboardHandler(keyboard, input_device, self)
         self.keyboards.append(keyboard_handler)
 
-        self._seat.keyboard = keyboard
+        self._seat.set_keyboard(keyboard)
 
     # #############################################################
     # cursor motion callbacks

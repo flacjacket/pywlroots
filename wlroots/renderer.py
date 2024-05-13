@@ -50,9 +50,9 @@ class Renderer(Ptr):
         finally:
             self.end()
 
-    def begin(self, width: int, height: int) -> None:
+    def begin(self, width: int, height: int) -> bool:
         """Begin rendering with the given height and width"""
-        lib.wlr_renderer_begin(self._ptr, width, height)
+        return lib.wlr_renderer_begin(self._ptr, width, height)
 
     def end(self):
         """Finish rendering"""

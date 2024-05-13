@@ -35,11 +35,11 @@ def main(argv) -> None:
         xdg_shell = XdgShell(display)
         with OutputLayout() as output_layout, Cursor(
             output_layout
-        ) as cursor, XCursorManager(24) as xcursor_manager, Seat(
+        ) as cursor, XCursorManager(None, 24) as xcursor_manager, Seat(
             display, "seat0"
         ) as seat:
             scene = Scene()
-            scene.attach_output_layout(output_layout)
+            scene_layout = scene.attach_output_layout(output_layout)
             tinywl_server = TinywlServer(  # noqa: F841
                 display=display,
                 backend=backend,
@@ -51,6 +51,7 @@ def main(argv) -> None:
                 cursor_manager=xcursor_manager,
                 seat=seat,
                 output_layout=output_layout,
+                scene_layout=scene_layout,
             )
 
             socket = display.add_socket()

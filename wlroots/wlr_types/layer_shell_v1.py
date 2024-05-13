@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
@@ -97,8 +97,6 @@ class LayerSurfaceV1(PtrHasData):
         self._ptr = ffi.cast("struct wlr_layer_surface_v1 *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
-        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
-        self.unmap_event = Signal(ptr=ffi.addressof(self._ptr.events.unmap))
         self.new_popup_event = Signal(ptr=ffi.addressof(self._ptr.events.new_popup))
 
     @property
@@ -163,10 +161,12 @@ class LayerSurfaceV1(PtrHasData):
         lib.wlr_layer_surface_v1_destroy(self._ptr)
 
     @staticmethod
-    def from_wlr_surface(surface: Surface):
-        surface_ptr = lib.wlr_layer_surface_v1_from_wlr_surface(surface._ptr)
-        _weakkeydict[surface_ptr] = surface._ptr
-        return LayerSurfaceV1(surface_ptr)
+    def try_from_wlr_surface(surface: Surface) -> LayerSurfaceV1 | None:
+        maybe_ptr = lib.wlr_layer_surface_v1_try_from_wlr_surface(surface._ptr)
+        if maybe_ptr == ffi.NULL:
+            return None
+        _weakkeydict[maybe_ptr] = maybe_ptr._ptr
+        return LayerSurfaceV1(maybe_ptr)
 
     def for_each_surface(
         self, iterator: SurfaceCallback[T], data: T | None = None
@@ -197,10 +197,18 @@ class LayerSurfaceV1(PtrHasData):
         return Surface(surface_ptr), sub_x_data[0], sub_y_data[0]
 
 
+_MAX_LAYER_SHELL_VERSION: Final = 4
+
+
 class LayerShellV1(PtrHasData):
-    def __init__(self, display: Display) -> None:
+    def __init__(self, display: Display, version: int) -> None:
         """Create an wlr_xdg_output_manager_v1"""
-        self._ptr = lib.wlr_layer_shell_v1_create(display._ptr)
+        if not 0 < version <= _MAX_LAYER_SHELL_VERSION:
+            raise ValueError(
+                f"Invalid layer shell version, should be a value between 1 (inclusive) and {_MAX_LAYER_SHELL_VERSION} (inclusive), got: {version}"
+            )
+
+        self._ptr = lib.wlr_layer_shell_v1_create(display._ptr, version)
 
         self.new_surface_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_surface), data_wrapper=LayerSurfaceV1

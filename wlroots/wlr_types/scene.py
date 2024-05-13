@@ -5,14 +5,19 @@ from __future__ import annotations
 import enum
 from typing import TYPE_CHECKING, Callable, TypeVar
 
+from pywayland.utils import wl_list_for_each
+
 from wlroots import Ptr, PtrHasData, ffi, lib
 from wlroots.util.region import PixmanRegion32
-from wlroots.wlr_types import Surface
+from wlroots.wlr_types import OutputLayoutOutput, Surface
 
 if TYPE_CHECKING:
+    from typing import Iterator
+
     from wlroots.util.box import Box
     from wlroots.util.clock import Timespec
     from wlroots.wlr_types import Buffer, Output, OutputLayout
+    from wlroots.wlr_types.data_device_manager import DragIcon
     from wlroots.wlr_types.layer_shell_v1 import LayerSurfaceV1
     from wlroots.wlr_types.presentation_time import Presentation
     from wlroots.wlr_types.xdg_shell import XdgSurface
@@ -35,9 +40,14 @@ class Scene(Ptr):
         ptr = ffi.addressof(self._ptr.tree)
         return SceneTree(ptr)
 
-    def attach_output_layout(self, output_layout: OutputLayout) -> bool:
-        """Get a scene-graph output from a wlr_output."""
-        return lib.wlr_scene_attach_output_layout(self._ptr, output_layout._ptr)
+    def attach_output_layout(
+        self, output_layout: OutputLayout
+    ) -> SceneOutputLayout | None:
+        """Attach an output layout to a scene."""
+        ptr = lib.wlr_scene_attach_output_layout(self._ptr, output_layout._ptr)
+        if ptr == ffi.NULL:
+            return None
+        return SceneOutputLayout(ptr)
 
     def set_presentation(self, presentation: Presentation) -> None:
         """
@@ -90,9 +100,11 @@ class SceneOutput(Ptr):
         """
         return cls(lib.wlr_scene_output_create(scene._ptr, output._ptr))
 
-    def commit(self) -> bool:
+    def commit(self, options: SceneOutputStateOptions | None = None) -> bool:
         """Render and commit an output."""
-        return lib.wlr_scene_output_commit(self._ptr)
+        options_ptr = options._ptr if options is not None else ffi.NULL
+
+        return lib.wlr_scene_output_commit(self._ptr, options_ptr)
 
     def destroy(self) -> None:
         """Destroy a scene-graph output."""
@@ -133,6 +145,20 @@ class SceneTree(PtrHasData):
             lib.wlr_scene_subsurface_tree_create(parent._ptr, surface._ptr)
         )
 
+    @classmethod
+    def drag_icon_create(cls, parent: SceneTree, drag_icon: DragIcon) -> SceneTree:
+        return SceneTree(lib.wlr_scene_drag_icon_create(parent._ptr, drag_icon._ptr))
+
+    @property
+    def children(self) -> Iterator[SceneNode]:
+        for ptr in wl_list_for_each(
+            "struct wlr_scene_node *",
+            self._ptr.children,
+            "link",
+            ffi=ffi,
+        ):
+            yield SceneNode(ptr)
+
 
 class SceneBuffer(Ptr):
     def __init__(self, ptr) -> None:
@@ -168,6 +194,10 @@ class SceneBuffer(Ptr):
         buffer_ptr = buffer._ptr if buffer else ffi.NULL
         region_ptr = region._ptr if region else ffi.NULL
         lib.wlr_scene_buffer_set_buffer_with_damage(self._ptr, buffer_ptr, region_ptr)
+
+    def set_opacity(self, opacity: float) -> None:
+        """Sets the opacity of this buffer"""
+        lib.wlr_scene_buffer_set_opacity(self._ptr, opacity)
 
 
 T = TypeVar("T")
@@ -272,6 +302,17 @@ class SceneNode(PtrHasData):
             self._ptr, lib.buffer_iterator_callback, handle
         )
 
+    def subsurface_tree_set_clip(self, clip: Box | None):
+        """
+        Sets a cropping region for any subsurface trees that are children of this scene node.
+
+        A None value will disable clipping
+        """
+        clip_ptr = ffi.NULL
+        if clip is not None:
+            clip_ptr = clip._ptr
+        lib.wlr_scene_subsurface_tree_set_clip(self._ptr, clip_ptr)
+
 
 class SceneSurface(Ptr):
     def __init__(self, ptr) -> None:
@@ -280,7 +321,7 @@ class SceneSurface(Ptr):
 
     @classmethod
     def from_buffer(cls, buffer: SceneBuffer) -> SceneSurface | None:
-        ptr = lib.wlr_scene_surface_from_buffer(buffer._ptr)
+        ptr = lib.wlr_scene_surface_try_from_buffer(buffer._ptr)
         if ptr == ffi.NULL:
             return None
         return cls(ptr)
@@ -335,3 +376,23 @@ class SceneLayerSurfaceV1(Ptr):
         lib.wlr_scene_layer_surface_v1_configure(
             self._ptr, full_area._ptr, usable_area._ptr
         )
+
+
+class SceneOutputLayout(Ptr):
+    def __init__(self, ptr) -> None:
+        """A `struct wlr_scene_output_layout_scene`"""
+        self._ptr = ptr
+
+    def add_output(
+        self, output_layout_output: OutputLayoutOutput, scene_output: SceneOutput
+    ) -> None:
+        """Add an output to the scene output layout."""
+        lib.wlr_scene_output_layout_add_output(
+            self._ptr, output_layout_output._ptr, scene_output._ptr
+        )
+
+
+class SceneOutputStateOptions(Ptr):
+    def __init__(self, ptr) -> None:
+        """A `struct wlr_scene_output_state_options`."""
+        self._ptr = ptr

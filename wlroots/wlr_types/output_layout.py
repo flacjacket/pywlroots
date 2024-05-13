@@ -31,19 +31,19 @@ class OutputLayout(Ptr):
             ffi.release(self._ptr)
             self._ptr = None
 
-    def add_auto(self, output: Output) -> None:
-        """Add an auto configured output to the layout
-
-        This will place the output in a sensible location in the layout. The
-        coordinates of the output in the layout may adjust dynamically when the
-        layout changes. If the output is already in the layout, it will become
-        auto configured. If the position of the output is set such as with
-        `wlr_output_layout_move()`, the output will become manually configured.
-
-        :param output:
-            The output to configure the layout against.
+    def add_auto(self, output: Output) -> OutputLayoutOutput | None:
         """
-        lib.wlr_output_layout_add_auto(self._ptr, output._ptr)
+        Add the output to the layout as automatically configured. This will place the
+        output in a sensible location in the layout. The coordinates of the output in
+        the layout will be adjusted dynamically when the layout changes. If the output
+        is already a part of the layout, it will become automatically configured.
+
+        Returns true on success, false on a memory allocation error.
+        """
+        ptr = lib.wlr_output_layout_add_auto(self._ptr, output._ptr)
+        if ptr == ffi.NULL:
+            return None
+        return OutputLayoutOutput(ptr)
 
     def output_coords(self, output: Output) -> tuple[float, float]:
         """Determine coordinates of the output in the layout
@@ -75,16 +75,16 @@ class OutputLayout(Ptr):
             return None
         return Output(output_ptr)
 
-    def add(self, output: Output, lx: int, ly: int) -> None:
+    def add(self, output: Output, lx: int, ly: int) -> OutputLayoutOutput | None:
         """
         Add the output to the layout at the specified coordinates. If the output is
-        already part of the output layout, this moves the output.
+        already a part of the output layout, it will become manually configured and will
+        be moved to the specified coordinates.
         """
-        lib.wlr_output_layout_add(self._ptr, output._ptr, lx, ly)
-
-    def move(self, output: Output, lx: int, ly: int) -> None:
-        """Move an output to specified coordinates."""
-        lib.wlr_output_layout_move(self._ptr, output._ptr, lx, ly)
+        ptr = lib.wlr_output_layout_add(self._ptr, output._ptr, lx, ly)
+        if ptr == ffi.NULL:
+            return None
+        return OutputLayoutOutput(ptr)
 
     def remove(self, output: Output) -> None:
         """Remove an output from the layout."""
@@ -127,3 +127,9 @@ class OutputLayout(Ptr):
             self._ptr, reference_ptr, lx, ly, dest_lx, dest_ly
         )
         return dest_lx[0], dest_ly[0]
+
+
+class OutputLayoutOutput(Ptr):
+    def __init__(self, ptr) -> None:
+        """A `struct wlr_output_layout_output`"""
+        self._ptr = ptr

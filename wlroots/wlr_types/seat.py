@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
 from typing import Iterator
 from weakref import WeakKeyDictionary
 
@@ -118,13 +117,11 @@ class Seat(PtrHasData):
         _weakkeydict[keyboard_state_ptr] = self._ptr
         return SeatKeyboardState(keyboard_state_ptr)
 
-    @property
-    def keyboard(self) -> Keyboard | None:
+    def get_keyboard(self) -> Keyboard | None:
         """Get the active keyboard for the seat."""
         return instance_or_none(Keyboard, lib.wlr_seat_get_keyboard(self._ptr))
 
-    @keyboard.setter
-    def keyboard(self, keyboard: Keyboard | None) -> None:
+    def set_keyboard(self, keyboard: Keyboard | None) -> None:
         """Set this keyboard as the active keyboard for the seat"""
         lib.wlr_seat_set_keyboard(self._ptr, ptr_or_null(keyboard))
 
@@ -232,21 +229,6 @@ class Seat(PtrHasData):
     def pointer_has_grab(self) -> bool:
         """Whether or not the pointer has a grab other than the default grab"""
         return lib.wlr_seat_pointer_has_grab(self._ptr)
-
-    def set_keyboard(self, keyboard: Keyboard | None) -> None:
-        """Set this keyboard as the active keyboard for the seat
-
-        Deprecated: Use the keyboard property.
-
-        :param keyboard:
-            The keyboard to set as active.
-        """
-        warnings.warn(
-            "Use the keyboard property of the seat, this method will be removed in the future.",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-        self.keyboard = keyboard
 
     def grab(self) -> KeyboardGrab:
         """Start a grab of the keyboard of this seat"""

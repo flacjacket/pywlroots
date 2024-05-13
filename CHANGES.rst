@@ -1,3 +1,9 @@
+0.17.0 -- 2024-mm-dd
+------
+* Support for wlroots 0.17.x
+* **Breaking change** Rename all declarations of XdgTopLevel.* to XdgToplevel.*
+
+
 0.16.9 -- 2024-05-12
 --------------------
 * Fixed ``Seat.touch_point_clear_focus``: The method took too many arguments

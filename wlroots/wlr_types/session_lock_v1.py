@@ -97,7 +97,7 @@ class SessionLockSurfaceV1(PtrHasData):
         return lib.wlr_session_lock_surface_v1_configure(self._ptr, width, height)
 
     @staticmethod
-    def from_surface(surface: Surface) -> SessionLockSurfaceV1 | None:
+    def try_from_surface(surface: Surface) -> SessionLockSurfaceV1 | None:
         """
         Get a SessionLockSurfaceV1 from a surface.
 
@@ -105,12 +105,5 @@ class SessionLockSurfaceV1(PtrHasData):
         May return None even if the surface has the session lock surface role if the
         corresponding session lock surface has been destroyed.
         """
-        surface_ptr = lib.wlr_session_lock_surface_v1_from_wlr_surface(surface._ptr)
+        surface_ptr = lib.wlr_session_lock_surface_v1_try_from_wlr_surface(surface._ptr)
         return SessionLockSurfaceV1(surface_ptr) if surface_ptr != ffi.NULL else None
-
-
-def surface_is_session_lock_surface_v1(surface: Surface) -> bool:
-    """
-    Returns true if the surface has the session lock surface role.
-    """
-    return lib.wlr_surface_is_session_lock_surface_v1(surface._ptr)

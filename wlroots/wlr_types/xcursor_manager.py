@@ -6,19 +6,20 @@ from typing import TYPE_CHECKING
 
 from wlroots import Ptr, ffi, lib
 
-from .cursor import Cursor
-
 if TYPE_CHECKING:
     from typing import Iterator
 
 
 class XCursorManager(Ptr):
-    def __init__(self, size, scale=1):
-        """Creates a new XCursor manager
+    def __init__(self, theme: str | None, size: int = 24, scale: float = 1.0):
+        """Creates a new XCursor manager using the theme and size
 
-        Create cursor with base size and scale.
+        and ensures an xcursor with scale is loaded
         """
-        ptr = lib.wlr_xcursor_manager_create(ffi.NULL, size)
+        theme_ptr = ffi.NULL
+        if theme is not None:
+            theme_ptr = theme.encode()
+        ptr = lib.wlr_xcursor_manager_create(theme_ptr, size)
         self._ptr = ffi.gc(ptr, lib.wlr_xcursor_manager_destroy)
 
         lib.wlr_xcursor_manager_load(self._ptr, scale)
@@ -28,17 +29,6 @@ class XCursorManager(Ptr):
         if self._ptr is not None:
             ffi.release(self._ptr)
             self._ptr = None
-
-    def set_cursor_image(self, name: str, cursor: Cursor):
-        """Set the cursor image
-
-        Set a Cursor image to the specified cursor name for all scale factors.
-        The wlroots cursor will take over from this point and ensure the
-        correct cursor is used on each output, assuming an output layout is
-        attached to it.
-        """
-        name_cdata = ffi.new("char []", name.encode())
-        lib.wlr_xcursor_manager_set_cursor_image(self._ptr, name_cdata, cursor._ptr)
 
     def get_xcursor(self, name: str, scale: float = 1) -> XCursor | None:
         """
