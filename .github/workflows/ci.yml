@@ -11,11 +11,6 @@ jobs:
     name: Build Wayland libraries
     runs-on: ubuntu-24.04
     env:
-      libdrm-version: "2.4.114"
-      seatd-version: "0.6.4"
-      pixman-version: "0.42.0"
-      xwayland-version: "22.1.9"
-      hwdata-version: "0.364"
       wayland-version: "1.22.0"
       wayland-protocols-version: "1.32"
     strategy:
@@ -27,12 +22,16 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
-            libepoxy-dev \
+            hwdata \
+            libdrm-dev \
             libegl1-mesa-dev \
+            libepoxy-dev \
             libgbm-dev \
             libgles2-mesa-dev \
             libinput-dev \
             libpciaccess-dev \
+            libpixman-1-dev \
+            libtirpc-dev \
             libxcb-composite0-dev \
             libxcb-dri3-dev \
             libxcb-ewmh-dev \
@@ -48,8 +47,10 @@ jobs:
             libxkbcommon-dev \
             libxshmfence-dev \
             meson \
+            seatd \
             xfonts-utils \
             xserver-xorg-dev \
+            xwayland \
             ninja-build
       - name: Set environment variables
         run: |
@@ -61,28 +62,13 @@ jobs:
         run: |
           wget $WAYLAND_URL
           wget $WAYLAND_PROTOCOLS_URL
-          wget $XWAYLAND_URL
-          wget $LIBDRM_URL
-          wget -O seatd.tar.gz $SEATD_URL
-          wget $PIXMAN_URL
-          wget -O hwdata.tar.gz $HWDATA_URL
           wget -O wlroots.tar.gz $WLROOTS_URL
           tar -xJf wayland-${{ env.wayland-version }}.tar.xz
           tar -xJf wayland-protocols-${{ env.wayland-protocols-version }}.tar.xz
-          tar -xzf xserver-xwayland-${{ env.xwayland-version }}.tar.gz
-          tar -xzf drm-libdrm-${{ env.libdrm-version }}.tar.gz
-          tar -xzf seatd.tar.gz
-          tar -xjf pixman-pixman-${{ env.pixman-version }}.tar.bz2
-          tar -xzf hwdata.tar.gz
           tar -xzf wlroots.tar.gz
         env:
           WAYLAND_URL: https://gitlab.freedesktop.org/wayland/wayland/-/releases/${{ env.wayland-version }}/downloads/wayland-${{ env.wayland-version }}.tar.xz
           WAYLAND_PROTOCOLS_URL: https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/${{ env.wayland-protocols-version }}/downloads/wayland-protocols-${{ env.wayland-protocols-version }}.tar.xz
-          XWAYLAND_URL: https://gitlab.freedesktop.org/xorg/xserver/-/archive/xwayland-${{ env.xwayland-version }}/xserver-xwayland-${{ env.xwayland-version }}.tar.gz
-          LIBDRM_URL: https://gitlab.freedesktop.org/mesa/drm/-/archive/libdrm-${{ env.libdrm-version }}/drm-libdrm-${{ env.libdrm-version }}.tar.gz
-          SEATD_URL: https://git.sr.ht/~kennylevinsen/seatd/archive/${{ env.seatd-version }}.tar.gz
-          PIXMAN_URL: https://gitlab.freedesktop.org/pixman/pixman/-/archive/pixman-${{ env.pixman-version }}/pixman-pixman-${{ env.pixman-version }}.tar.bz2
-          HWDATA_URL: https://github.com/vcrhonek/hwdata/archive/refs/tags/v${{ env.hwdata-version }}.tar.gz
           WLROOTS_URL: https://gitlab.freedesktop.org/wlroots/wlroots/-/archive/${{ matrix.wlroots-version }}/wlroots-${{ matrix.wlroots-version }}.tar.gz
       - name: Build wayland
         working-directory: wayland-${{ env.wayland-version }}
@@ -93,40 +79,6 @@ jobs:
           sudo ninja -C build install
       - name: Build wayland-protocols
         working-directory: wayland-protocols-${{ env.wayland-protocols-version }}
-        run: |
-          meson build --prefix=/usr
-          ninja -C build
-          DESTDIR=~/wayland ninja -C build install
-          sudo ninja -C build install
-      - name: Build libdrm
-        working-directory: drm-libdrm-${{ env.libdrm-version }}
-        run: |
-          meson build --prefix=/usr
-          ninja -C build
-          DESTDIR=~/wayland ninja -C build install
-          sudo ninja -C build install
-      - name: Build seatd
-        working-directory: seatd-${{ env.seatd-version }}
-        run: |
-          meson build --prefix=/usr
-          ninja -C build
-          DESTDIR=~/wayland ninja -C build install
-          sudo ninja -C build install
-      - name: Build pixman
-        working-directory: pixman-pixman-${{ env.pixman-version }}
-        run: |
-          meson build --prefix=/usr
-          ninja -C build
-          DESTDIR=~/wayland ninja -C build install
-          sudo ninja -C build install
-      - name: Build hwdata
-        working-directory: hwdata-${{ env.hwdata-version }}
-        run: |
-          ./configure --prefix=/usr --libdir=/lib --datadir=/usr/share
-          make
-          sudo make install
-      - name: Build xwayland
-        working-directory: xserver-xwayland-${{ env.xwayland-version }}
         run: |
           meson build --prefix=/usr
           ninja -C build
@@ -189,6 +141,7 @@ jobs:
             libgles2-mesa-dev \
             libinput-dev \
             libpciaccess-dev \
+            libpixman-1-dev \
             libxcb-composite0-dev \
             libxcb-ewmh-dev \
             libxcb-dri3-dev \
@@ -206,6 +159,7 @@ jobs:
       - name: Install Python dependencies
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: |
+          pip install "xkbcommon<1.5"
           pip install -e .[test]
       - name: Run unit tests
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
