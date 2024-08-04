@@ -7,7 +7,7 @@ on:
 jobs:
   build-wayland:
     name: Build Wayland libraries
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: quay.io/pypa/manylinux_2_28_x86_64
     env:
       libdrm-version: "2.4.114"
@@ -153,14 +153,14 @@ jobs:
       - name: Create artifact
         run: tar czf ~/wayland.tar.gz -C ${HOME}/wayland/ .
       - name: Upload built libraries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wayland
           path: ~/wayland.tar.gz
           if-no-files-found: error
   build-wheel-cpython:
     name: Build CPython wheels
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: quay.io/pypa/manylinux_2_28_x86_64
     needs: build-wayland
     strategy:
@@ -169,7 +169,7 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
       - name: Download wayland libraries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wayland
       - name: Unpack wayland artifact
@@ -204,31 +204,35 @@ jobs:
           ls dist/
           auditwheel show dist/pywlroots-*.whl
           auditwheel repair --plat manylinux_2_28_x86_64 -w output_wheels dist/pywlroots-*.whl
+        env:
+          PIP_CONSTRAINT: dist-build-constraints.txt
       - name: Upload wheel
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.python-version }}
           path: output_wheels/*.whl
   build-wheel-pypy:
     name: Build PyPy wheels
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: quay.io/pypa/manylinux_2_28_x86_64
     needs: build-wayland
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10"]
         pypy-version: ["7.3"]
     steps:
       - name: Download wayland libraries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wayland
       - name: Unpack wayland artifact
         run: tar xf wayland.tar.gz -C /
       - name: Set python version
         run: |
+          ls /opt/python/
           PYTHON_ROOT=$(find /opt/python -name pp${PYTHON_VERSION/./}-*_pp${PP_VERSION/./})
+          echo "${PYTHON_ROOT}"
           echo "${PYTHON_ROOT}/bin" >> $GITHUB_PATH
         shell: bash
         env:
@@ -257,14 +261,16 @@ jobs:
           ls dist/
           auditwheel show dist/pywlroots-*.whl
           auditwheel repair --plat manylinux_2_28_x86_64 -w output_wheels dist/pywlroots-*.whl
+        env:
+          PIP_CONSTRAINT: dist-build-constraints.txt
       - name: Upload wheel
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels-pypy-${{ matrix.python-version }}
           path: output_wheels/*.whl
   test-wheel:
     name: Test wheels
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-wheel-cpython, build-wheel-pypy]
     strategy:
       fail-fast: false
@@ -275,7 +281,6 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
-          - "pypy-3.8"
           - "pypy-3.9"
           - "pypy-3.10"
     steps:
@@ -285,11 +290,11 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             libxkbcommon-dev
       - name: Download wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wheels-${{ matrix.python-version }}
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install wheel
@@ -307,14 +312,14 @@ jobs:
           assert has_xwayland()
   build-source:
     name: Build source package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: quay.io/pypa/manylinux_2_28_x86_64
     needs: build-wayland
     env:
       python-version: "3.12"
     steps:
       - name: Download wayland libraries
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wayland
       - name: Unpack wayland artifact
@@ -346,58 +351,26 @@ jobs:
       - name: Build source
         run: |
           python -m build --sdist
+        env:
+          PIP_CONSTRAINT: dist-build-constraints.txt
       - name: Upload source
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: source
           path: dist/*.tar.gz
   upload-wheel:
     name: Upload wheels
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [test-wheel, build-source]
     steps:
-      - name: Download wheels CPython 3.8
-        uses: actions/download-artifact@v3
+      - name: Download wheels
+        uses: actions/download-artifact@v4
         with:
-          name: wheels-3.8
+          pattern: wheels-*
           path: dist/
-      - name: Download wheels CPython 3.9
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-3.9
-          path: dist/
-      - name: Download wheels CPython 3.10
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-3.10
-          path: dist/
-      - name: Download wheels CPython 3.11
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-3.11
-          path: dist/
-      - name: Download wheels CPython 3.12
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-3.12
-          path: dist/
-      - name: Download wheels PyPy 3.8
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-pypy-3.8
-          path: dist
-      - name: Download wheels PyPy 3.9
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-pypy-3.9
-          path: dist
-      - name: Download wheels PyPy 3.10
-        uses: actions/download-artifact@v3
-        with:
-          name: wheels-pypy-3.10
-          path: dist
+          merge-multiple: true
       - name: Download source
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: source
           path: dist/
