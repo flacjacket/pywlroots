@@ -23,6 +23,7 @@ jobs:
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
             hwdata \
+            libdisplay-info-dev \
             libdrm-dev \
             libegl1-mesa-dev \
             libepoxy-dev \
@@ -31,6 +32,7 @@ jobs:
             libinput-dev \
             libpciaccess-dev \
             libpixman-1-dev \
+            libseat-dev \
             libtirpc-dev \
             libxcb-composite0-dev \
             libxcb-dri3-dev \
@@ -39,6 +41,7 @@ jobs:
             libxcb-image0-dev \
             libxcb-present-dev \
             libxcb-render0-dev \
+            libxcb-render-util0-dev \
             libxcb-res0-dev \
             libxcb-xfixes0-dev \
             libxcb-xinput-dev \
@@ -136,30 +139,44 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
+            hwdata \
+            libdisplay-info-dev \
+            libdrm-dev \
             libegl1-mesa-dev \
+            libepoxy-dev \
             libgbm-dev \
             libgles2-mesa-dev \
             libinput-dev \
             libpciaccess-dev \
             libpixman-1-dev \
+            libseat-dev \
+            libtirpc-dev \
             libxcb-composite0-dev \
-            libxcb-ewmh-dev \
             libxcb-dri3-dev \
+            libxcb-ewmh-dev \
             libxcb-icccm4-dev \
             libxcb-image0-dev \
+            libxcb-present-dev \
             libxcb-render0-dev \
+            libxcb-render-util0-dev \
             libxcb-res0-dev \
             libxcb-xfixes0-dev \
             libxcb-xinput-dev \
             libxcb1-dev \
-            libxkbcommon-dev
+            libxfont-dev \
+            libxkbcommon-dev \
+            libxshmfence-dev \
+            meson \
+            seatd \
+            xfonts-utils \
+            xserver-xorg-dev \
+            xwayland
       - name: Set environment variables
         run: |
           echo "XDG_RUNTIME_DIR=/tmp" >> $GITHUB_ENV
       - name: Install Python dependencies
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: |
-          pip install "xkbcommon<1.5"
           pip install -e .[test]
       - name: Run unit tests
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
