@@ -16,8 +16,8 @@ jobs:
       xwayland-version: "22.1.9"
       xcvt-version: "0.1.2"
       inputproto-version: "2021.5"
-      wayland-protocols-version: "1.32"
-      wayland-version: "1.22.0"
+      wayland-protocols-version: "1.36"
+      wayland-version: "1.23.0"
       wlroots-version: "0.17.4"
     steps:
       - name: Install dependencies
