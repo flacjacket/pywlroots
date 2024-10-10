@@ -313,6 +313,13 @@ class Surface(PtrHasData):
         return ffi.unpack(self._ptr.protocols, self._ptr.protocols_len)
 
     @property
+    def hints(self) -> Hints | None:
+        ptr = self._ptr.hints
+        if ptr == ffi.NULL:
+            return None
+        return Hints(ptr)
+
+    @property
     def size_hints(self) -> SizeHints | None:
         ptr = self._ptr.size_hints
         if ptr == ffi.NULL:
@@ -421,6 +428,15 @@ class MinimizeEvent(Ptr):
     @property
     def minimize(self) -> bool:
         return self._ptr.minimize
+
+
+class Hints(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("xcb_icccm_wm_hints_t *", ptr)
+
+    @property
+    def flags(self) -> int:
+        return self._ptr.flags
 
 
 class SizeHints(Ptr):
