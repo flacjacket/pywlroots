@@ -738,21 +738,21 @@ void wlr_foreign_toplevel_handle_v1_set_parent(
 # types/wlr_fractional_scale_v1.h
 CDEF += """
 struct wlr_fractional_scale_manager_v1 {
-	struct wl_global *global;
+    struct wl_global *global;
 
-	struct {
-		struct wl_signal destroy;
-	} events;
+    struct {
+        struct wl_signal destroy;
+    } events;
 
-        ...;
+    ...;
 };
 
 
 void wlr_fractional_scale_v1_notify_scale(
-		struct wlr_surface *surface, double scale);
+    struct wlr_surface *surface, double scale);
 
 struct wlr_fractional_scale_manager_v1 *wlr_fractional_scale_manager_v1_create(
-		struct wl_display *display, uint32_t version);
+    struct wl_display *display, uint32_t version);
 """
 
 # types/wlr_gamma_control_v1.h
@@ -1116,6 +1116,58 @@ struct wlr_output {
     ...;
 };
 
+struct wlr_output_event_damage {
+    struct wlr_output *output;
+    const pixman_region32_t *damage; // output-buffer-local coordinates
+    ...;
+};
+
+struct wlr_output_event_precommit {
+    struct wlr_output *output;
+    struct timespec *when;
+    const struct wlr_output_state *state;
+    ...;
+};
+
+struct wlr_output_event_commit {
+    struct wlr_output *output;
+    struct timespec *when;
+    const struct wlr_output_state *state;
+    ...;
+};
+
+enum wlr_output_present_flag {
+    WLR_OUTPUT_PRESENT_VSYNC = ...,
+    WLR_OUTPUT_PRESENT_HW_CLOCK = ...,
+    WLR_OUTPUT_PRESENT_HW_COMPLETION = ...,
+    WLR_OUTPUT_PRESENT_ZERO_COPY = ...,
+    ...
+};
+
+struct wlr_output_event_present {
+    struct wlr_output *output;
+    // Frame submission for which this presentation event is for (see
+    // wlr_output.commit_seq).
+    uint32_t commit_seq;
+    // Whether the frame was presented at all.
+    bool presented;
+    // Time when the content update turned into light the first time.
+    struct timespec *when;
+    // Vertical retrace counter. Zero if unavailable.
+    unsigned seq;
+    // Prediction of how many nanoseconds after `when` the very next output
+    // refresh may occur. Zero if unknown.
+    int refresh; // nsec
+    uint32_t flags; // enum wlr_output_present_flag
+    ...;
+};
+
+struct wlr_output_event_bind {
+    struct wlr_output *output;
+    struct wl_resource *resource;
+    ...;
+};
+
 struct wlr_output_event_request_state {
     struct wlr_output *output;
     const struct wlr_output_state *state;
@@ -1172,6 +1224,16 @@ void wlr_output_state_set_render_format(struct wlr_output_state *state,
     uint32_t format);
 void wlr_output_state_set_subpixel(struct wlr_output_state *state,
     enum wl_output_subpixel subpixel);
+void wlr_output_state_set_buffer(struct wlr_output_state *state,
+    struct wlr_buffer *buffer);
+bool wlr_output_state_set_gamma_lut(struct wlr_output_state *state,
+    size_t ramp_size, const uint16_t *r, const uint16_t *g, const uint16_t *b);
+void wlr_output_state_set_damage(struct wlr_output_state *state,
+    const pixman_region32_t *damage);
+void wlr_output_state_set_layers(struct wlr_output_state *state,
+    struct wlr_output_layer_state *layers, size_t layers_len);
+bool wlr_output_state_copy(struct wlr_output_state *dst,
+    const struct wlr_output_state *src);
 
 void wlr_output_render_software_cursors(struct wlr_output *output,
     struct pixman_region32 *damage);
@@ -1837,7 +1899,7 @@ struct wlr_scene_surface *wlr_scene_surface_try_from_buffer(
     struct wlr_scene_buffer *scene_buffer);
 
 struct wlr_scene_rect *wlr_scene_rect_create(struct wlr_scene_tree *parent,
-        int width, int height, const float color[static 4]);
+    int width, int height, const float color[static 4]);
 
 void wlr_scene_rect_set_size(struct wlr_scene_rect *rect, int width, int height);
 
@@ -1899,7 +1961,7 @@ struct wlr_scene_tree *wlr_scene_subsurface_tree_create(
     struct wlr_scene_tree *parent, struct wlr_surface *surface);
 
 void wlr_scene_subsurface_tree_set_clip(struct wlr_scene_node *node,
-		struct wlr_box *clip);
+    struct wlr_box *clip);
 
 struct wlr_scene_tree *wlr_scene_xdg_surface_create(
     struct wlr_scene_tree *parent, struct wlr_xdg_surface *xdg_surface);
@@ -2266,15 +2328,15 @@ struct wlr_session_lock_v1 {
 };
 
 struct wlr_session_lock_surface_v1_state {
-	uint32_t width, height;
-	uint32_t configure_serial;
+    uint32_t width, height;
+    uint32_t configure_serial;
 };
 
 struct wlr_session_lock_surface_v1_configure {
-	struct wl_list link; // wlr_session_lock_surface_v1.configure_list
-	uint32_t serial;
+    struct wl_list link; // wlr_session_lock_surface_v1.configure_list
+    uint32_t serial;
 
-	uint32_t width, height;
+    uint32_t width, height;
 };
 
 struct wlr_session_lock_surface_v1 {
