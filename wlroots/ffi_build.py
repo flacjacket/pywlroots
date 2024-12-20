@@ -1118,7 +1118,7 @@ struct wlr_output {
 
 struct wlr_output_event_damage {
     struct wlr_output *output;
-    const pixman_region32_t *damage; // output-buffer-local coordinates
+    const pixman_region32 *damage; // output-buffer-local coordinates
     ...;
 };
 
@@ -1229,7 +1229,7 @@ void wlr_output_state_set_buffer(struct wlr_output_state *state,
 bool wlr_output_state_set_gamma_lut(struct wlr_output_state *state,
     size_t ramp_size, const uint16_t *r, const uint16_t *g, const uint16_t *b);
 void wlr_output_state_set_damage(struct wlr_output_state *state,
-    const pixman_region32_t *damage);
+    const pixman_region32 *damage);
 void wlr_output_state_set_layers(struct wlr_output_state *state,
     struct wlr_output_layer_state *layers, size_t layers_len);
 bool wlr_output_state_copy(struct wlr_output_state *dst,
