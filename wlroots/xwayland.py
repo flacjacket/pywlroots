@@ -313,6 +313,13 @@ class Surface(PtrHasData):
         return ffi.unpack(self._ptr.protocols, self._ptr.protocols_len)
 
     @property
+    def hints(self) -> Hints | None:
+        ptr = self._ptr.hints
+        if ptr == ffi.NULL:
+            return None
+        return Hints(ptr)
+
+    @property
     def size_hints(self) -> SizeHints | None:
         ptr = self._ptr.size_hints
         if ptr == ffi.NULL:
@@ -421,6 +428,47 @@ class MinimizeEvent(Ptr):
     @property
     def minimize(self) -> bool:
         return self._ptr.minimize
+
+
+class Hints(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("xcb_icccm_wm_hints_t *", ptr)
+
+    @property
+    def flags(self) -> int:
+        return self._ptr.flags
+
+    @property
+    def input(self) -> int:
+        return self._ptr.input
+
+    @property
+    def initial_state(self) -> int:
+        return self._ptr.initial_state
+
+    @property
+    def icon_pixmap(self) -> int:
+        return self._ptr.icon_pixmap
+
+    @property
+    def icon_window(self) -> int:
+        return self._ptr.icon_window
+
+    @property
+    def icon_x(self) -> int:
+        return self._ptr.icon_x
+
+    @property
+    def icon_y(self) -> int:
+        return self._ptr.icon_y
+
+    @property
+    def icon_mask(self) -> int:
+        return self._ptr.icon_mask
+
+    @property
+    def window_group(self) -> int:
+        return self._ptr.window_group
 
 
 class SizeHints(Ptr):

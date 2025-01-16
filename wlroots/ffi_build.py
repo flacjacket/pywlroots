@@ -3151,7 +3151,14 @@ if has_xwayland():
     typedef uint32_t xcb_window_t;
     typedef uint32_t xcb_atom_t;
     typedef struct {
-        ...;
+    int32_t flags;
+    uint32_t input;
+    int32_t initial_state;
+    xcb_pixmap_t icon_pixmap;
+    xcb_window_t icon_window;
+    int32_t icon_x, icon_y;
+    xcb_pixmap_t icon_mask;
+    xcb_window_t window_group;
     } xcb_icccm_wm_hints_t;
     typedef struct {
     uint32_t flags;
