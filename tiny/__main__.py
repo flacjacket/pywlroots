@@ -33,11 +33,12 @@ def main(argv) -> None:
         )
         device_manager = DataDeviceManager(display)  # noqa: F841
         xdg_shell = XdgShell(display)
-        with OutputLayout() as output_layout, Cursor(
-            output_layout
-        ) as cursor, XCursorManager(None, 24) as xcursor_manager, Seat(
-            display, "seat0"
-        ) as seat:
+        with (
+            OutputLayout() as output_layout,
+            Cursor(output_layout) as cursor,
+            XCursorManager(None, 24) as xcursor_manager,
+            Seat(display, "seat0") as seat,
+        ):
             scene = Scene()
             scene_layout = scene.attach_output_layout(output_layout)
             tinywl_server = TinywlServer(  # noqa: F841
