@@ -1,7 +1,7 @@
 # Copyright (c) Matt Colligan 2021
 from __future__ import annotations
 
-from typing import Iterator
+from collections.abc import Iterator
 
 from pywayland.protocol.wayland import WlOutput
 from pywayland.server import Display, Signal

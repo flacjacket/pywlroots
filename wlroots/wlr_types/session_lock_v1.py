@@ -31,7 +31,6 @@ _weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
 class SessionLockManagerV1(PtrHasData):
-
     def __init__(self, display: Display) -> None:
         self._ptr = lib.wlr_session_lock_manager_v1_create(display._ptr)
         self.new_lock_event = Signal(
@@ -41,7 +40,6 @@ class SessionLockManagerV1(PtrHasData):
 
 
 class SessionLockV1(PtrHasData):
-
     def __init__(self, ptr):
         self._ptr = ffi.cast("struct wlr_session_lock_v1 *", ptr)
         self.new_surface_event = Signal(

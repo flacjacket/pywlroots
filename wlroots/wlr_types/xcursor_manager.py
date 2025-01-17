@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from wlroots import Ptr, ffi, lib
 
 if TYPE_CHECKING:
-    from typing import Iterator
+    from collections.abc import Iterator
 
 
 class XCursorManager(Ptr):
