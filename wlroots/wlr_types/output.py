@@ -15,7 +15,7 @@ from wlroots.util.region import PixmanRegion32
 from .matrix import Matrix
 
 if TYPE_CHECKING:
-    from typing import Iterator
+    from collections.abc import Iterator
 
     from wlroots.allocator import Allocator
     from wlroots.renderer import Renderer

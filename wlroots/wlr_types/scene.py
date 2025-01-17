@@ -12,7 +12,7 @@ from wlroots.util.region import PixmanRegion32
 from wlroots.wlr_types import OutputLayoutOutput, Surface
 
 if TYPE_CHECKING:
-    from typing import Iterator
+    from collections.abc import Iterator
 
     from wlroots.util.box import Box
     from wlroots.util.clock import Timespec

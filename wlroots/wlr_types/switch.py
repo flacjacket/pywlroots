@@ -57,7 +57,6 @@ class Switch(PtrHasData):
 
 
 class SwitchToggleEvent(Ptr):
-
     def __init__(self, ptr):
         self._ptr = ptr
 
