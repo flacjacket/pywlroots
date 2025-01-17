@@ -8,9 +8,9 @@ jobs:
   build-wayland:
     name: Build Wayland libraries
     runs-on: ubuntu-24.04
-    container: quay.io/pypa/manylinux_2_28_x86_64
+    container: quay.io/pypa/manylinux_2_34_x86_64
     env:
-      libdrm-version: "2.4.114"
+      libdrm-version: "2.4.119"
       seatd-version: "0.6.3"
       pixman-version: "0.42.0"
       xwayland-version: "22.1.9"
@@ -22,6 +22,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
+          dnf -y install almalinux-release-devel
           yum -y install \
             hwdata \
             python3-pip \
@@ -161,7 +162,7 @@ jobs:
   build-wheel-cpython:
     name: Build CPython wheels
     runs-on: ubuntu-24.04
-    container: quay.io/pypa/manylinux_2_28_x86_64
+    container: quay.io/pypa/manylinux_2_34_x86_64
     needs: build-wayland
     strategy:
       fail-fast: false
@@ -203,7 +204,7 @@ jobs:
           python -m build --wheel
           ls dist/
           auditwheel show dist/pywlroots-*.whl
-          auditwheel repair --plat manylinux_2_28_x86_64 -w output_wheels dist/pywlroots-*.whl
+          auditwheel repair --plat manylinux_2_34_x86_64 -w output_wheels dist/pywlroots-*.whl
         env:
           PIP_CONSTRAINT: dist-build-constraints.txt
       - name: Upload wheel
@@ -214,7 +215,7 @@ jobs:
   build-wheel-pypy:
     name: Build PyPy wheels
     runs-on: ubuntu-24.04
-    container: quay.io/pypa/manylinux_2_28_x86_64
+    container: quay.io/pypa/manylinux_2_34_x86_64
     needs: build-wayland
     strategy:
       fail-fast: false
@@ -260,7 +261,7 @@ jobs:
           python -m build --wheel
           ls dist/
           auditwheel show dist/pywlroots-*.whl
-          auditwheel repair --plat manylinux_2_28_x86_64 -w output_wheels dist/pywlroots-*.whl
+          auditwheel repair --plat manylinux_2_34_x86_64 -w output_wheels dist/pywlroots-*.whl
         env:
           PIP_CONSTRAINT: dist-build-constraints.txt
       - name: Upload wheel
@@ -312,7 +313,7 @@ jobs:
   build-source:
     name: Build source package
     runs-on: ubuntu-24.04
-    container: quay.io/pypa/manylinux_2_28_x86_64
+    container: quay.io/pypa/manylinux_2_34_x86_64
     needs: build-wayland
     env:
       python-version: "3.12"

@@ -1,1 +1,1 @@
-xkbcommon<1.0
+xkbcommon<1.5
