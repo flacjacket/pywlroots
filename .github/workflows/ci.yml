@@ -110,13 +110,10 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
-          - "pypy-3.8"
-          - "pypy-3.9"
           - "pypy-3.10"
         wlroots-version: ["0.17.4"]
         include:
@@ -187,7 +184,7 @@ jobs:
           WLR_RENDERER: pixman
           WLR_RENDERER_ALLOW_SOFTWARE: '1'
   ruff-test:
-    name: Ruff tests
+    name: ruff tests
     runs-on: ubuntu-24.04
     env:
       python-version: "3.12"
