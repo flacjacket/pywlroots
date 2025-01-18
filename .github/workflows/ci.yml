@@ -2,6 +2,7 @@ name: CI
 on:
   pull_request:
   push:
+  workflow_dispatch:
   schedule:
     # Run at 17:29 every Saturday
     - cron: '29 17 * * 6'
@@ -114,10 +115,11 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
           - "pypy-3.10"
         wlroots-version: ["0.17.4"]
         include:
-          - python-version: "3.12"
+          - python-version: "3.13"
             wlroots-version: master
     steps:
       - name: Download wayland libraries
@@ -187,7 +189,7 @@ jobs:
     name: ruff tests
     runs-on: ubuntu-24.04
     env:
-      python-version: "3.12"
+      python-version: "3.13"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -201,7 +203,7 @@ jobs:
     name: mypy tests
     runs-on: ubuntu-24.04
     env:
-      python-version: "3.12"
+      python-version: "3.13"
     steps:
       - name: Install dependencies
         run: |
@@ -228,7 +230,7 @@ jobs:
     name: black tests
     runs-on: ubuntu-24.04
     env:
-      python-version: "3.12"
+      python-version: "3.13"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -246,7 +248,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build-wayland
     env:
-      python-version: "3.12"
+      python-version: "3.13"
       wlroots-version: "0.17.4"
     steps:
       - name: Download wayland libraries
@@ -282,7 +284,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build-wayland
     env:
-      python-version: "3.12"
+      python-version: "3.13"
       wlroots-version: "0.17.4"
     steps:
       - name: Download wayland libraries
