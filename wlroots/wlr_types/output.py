@@ -3,13 +3,24 @@
 
 from __future__ import annotations
 
+import enum
 from typing import TYPE_CHECKING, NamedTuple
 
 from pywayland.protocol.wayland import WlOutput
 from pywayland.server import Signal
 from pywayland.utils import wl_list_for_each
 
-from wlroots import Ptr, PtrHasData, ffi, lib, ptr_or_null, str_or_none
+from wlroots import (
+    Ptr,
+    PtrHasData,
+    ffi,
+    instance_or_none,
+    lib,
+    ptr_or_null,
+    str_or_none,
+)
+from wlroots.wlr_types.buffer import Buffer
+from wlroots.util.clock import Timespec
 from wlroots.util.region import PixmanRegion32
 
 from .matrix import Matrix
@@ -44,14 +55,21 @@ class Output(PtrHasData):
         self.frame_event = Signal(ptr=ffi.addressof(self._ptr.events.frame))
         self.damage_event = Signal(ptr=ffi.addressof(self._ptr.events.damage))
         self.needs_frame_event = Signal(ptr=ffi.addressof(self._ptr.events.needs_frame))
-        self.precommit_event = Signal(ptr=ffi.addressof(self._ptr.events.precommit))
-        self.commit_event = Signal(ptr=ffi.addressof(self._ptr.events.commit))
+        self.precommit_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.precommit),
+            data_wrapper=OutputPrecommitEvent,
+        )
+        self.commit_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.commit), data_wrapper=OutputCommitEvent
+        )
         self.present_event = Signal(ptr=ffi.addressof(self._ptr.events.present))
-        self.bind_event = Signal(ptr=ffi.addressof(self._ptr.events.bind))
+        self.bind_event = Signal(
+            ptr=ffi.addressof(self._ptr.events.bind), data_wrapper=OutputBindEvent
+        )
         self.description_event = Signal(ptr=ffi.addressof(self._ptr.events.description))
         self.request_state_event = Signal(
             ptr=ffi.addressof(self._ptr.events.request_state),
-            data_wrapper=OutputEventRequestState,
+            data_wrapper=OutputRequestStateEvent,
         )
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
@@ -114,6 +132,13 @@ class Output(PtrHasData):
     def transform_matrix(self) -> Matrix:
         """The transform matrix giving the projection of the output"""
         return Matrix(self._ptr.transform_matrix)
+
+    @property
+    def commit_seq(self) -> int:
+        """
+        Commit sequence number. Incremented on each commit, may overflow.
+        """
+        return self._ptr.commit_seq
 
     def enable(self, *, enable: bool = True) -> None:
         """Enables or disables the output
@@ -342,6 +367,10 @@ class CustomMode(NamedTuple):
 
 
 class OutputState(Ptr):
+    """
+    Holds the double-buffered output state.
+    """
+
     def __init__(self, ptr: ffi.CData | None = None) -> None:
         if ptr is None:
             ptr = ffi.new("struct wlr_output_state *")
@@ -354,6 +383,36 @@ class OutputState(Ptr):
 
     def set_enabled(self, enabled: bool) -> None:
         lib.wlr_output_state_set_enabled(self._ptr, enabled)
+
+    @property
+    def damage(self) -> PixmanRegion32 | None:
+        return instance_or_none(PixmanRegion32, self._ptr.damage)
+
+    def set_damage(self, damage: PixmanRegion32) -> None:
+        """
+        Sets the damage region for an output.
+
+        This is used as a hint to the backend and can be used to reduce power consumption or increase performance on some devices.
+
+        This should be called in along with ``OutputState.set_buffer()``.
+        This state will be applied once ``Output.commit(output_state)`` is called.
+        """
+        lib.wlr_output_state_set_damage(self._ptr, damage._ptr)
+
+    @property
+    def buffer(self) -> Buffer | None:
+        return instance_or_none(Buffer, self._ptr.buffer)
+
+    def set_buffer(self, buffer: Buffer) -> None:
+        """
+        Sets the buffer for an output.
+
+        The buffer contains the contents of the screen.
+
+        If the compositor wishes to present a new frame, they must commit with a buffer.
+        This state will be applied once ``Output.commit(output_state)`` is called.
+        """
+        lib.wlr_output_state_set_buffer(self._ptr, buffer._ptr)
 
     @property
     def scale(self) -> float:
@@ -412,9 +471,35 @@ class OutputState(Ptr):
         lib.wlr_output_state_finish(self._ptr)
 
 
-class OutputEventRequestState(Ptr):
-    def __init__(self, ptr) -> None:
-        self._ptr = ffi.cast("struct wlr_output_event_request_state *", ptr)
+class OutputPresentFlag(enum.IntFlag):
+    WLR_OUTPUT_PRESENT_VSYNC = lib.WLR_OUTPUT_PRESENT_VSYNC
+    """
+    The presentation was synchronized to the "vertical retrace" by the
+    display hardware such that tearing does not happen.
+    """
+
+    WLR_OUTPUT_PRESENT_HW_CLOCK = lib.WLR_OUTPUT_PRESENT_HW_CLOCK
+    """
+    The display hardware provided measurements that the hardware driver
+    converted into a presentation timestamp.
+    """
+
+    WLR_OUTPUT_PRESENT_HW_COMPLETION = lib.WLR_OUTPUT_PRESENT_HW_COMPLETION
+    """
+    The display hardware signalled that it started using the new image
+    content.
+    """
+
+    WLR_OUTPUT_PRESENT_ZERO_COPY = lib.WLR_OUTPUT_PRESENT_ZERO_COPY
+    """
+    The presentation of this update was done zero-copy.
+    """
+
+
+class _OutputStateAwareEvent(Ptr):
+    """\
+    Common event superclass which provides access to the output and output state.
+    """
 
     @property
     def output(self) -> Output:
@@ -423,3 +508,104 @@ class OutputEventRequestState(Ptr):
     @property
     def state(self) -> OutputState:
         return OutputState(self._ptr.state)
+
+
+class OutputRequestStateEvent(_OutputStateAwareEvent):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_output_event_request_state *", ptr)
+
+
+OutputEventRequestState = OutputRequestStateEvent
+
+
+class OutputPrecommitEvent(_OutputStateAwareEvent):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_output_event_precommit *", ptr)
+
+
+class OutputCommitEvent(_OutputStateAwareEvent):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_output_event_commit *", ptr)
+
+    @property
+    def when(self) -> Timespec:
+        return Timespec(self._ptr.when)
+
+
+class OutputDamageEvent(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_output_event_damage *", ptr)
+
+    @property
+    def output(self) -> Output:
+        return Output(self._ptr.output)
+
+    @property
+    def damage(self) -> PixmanRegion32:
+        """
+        Output-buffer-local coordinates.
+        """
+        return PixmanRegion32(self._ptr.damage)
+
+
+class OutputBindEvent(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_output_event_bind *", ptr)
+
+    @property
+    def output(self) -> Output:
+        return Output(self._ptr.output)
+
+    @property
+    def resource(self) -> ffi.CData:  # This should be WlResource
+        return self._ptr.resource
+
+
+class OutputPresentEvent(Ptr):
+    def __init__(self, ptr) -> None:
+        self._ptr = ffi.cast("struct wlr_output_event_present *", ptr)
+
+    @property
+    def output(self) -> Output:
+        return Output(self._ptr.output)
+
+    @property
+    def commit_seq(self) -> int:
+        """
+        Frame submission for which this presentation event is for
+        (see Output.commit_seq).
+        """
+        return self._ptr.commit_seq
+
+    @property
+    def presented(self) -> bool:
+        """
+        Whether the frame was presented at all.
+        """
+        return self._ptr.presented
+
+    @property
+    def when(self) -> Timespec:
+        """
+        Time when the content update turned into light the first time.
+        """
+        return Timespec(self._ptr.when)
+
+    @property
+    def seq(self) -> int:
+        """
+        Vertical retrace counter. Zero if unavailable.
+        """
+        return self._ptr.seq
+
+    @property
+    def refresh_nsec(self) -> int:
+        """
+        Prediction of how many nanoseconds after `when` the very next output
+        refresh may occur. Zero if unknown.
+        """
+        return self._ptr.refresh
+
+    @property
+    def flags(self) -> OutputPresentFlag:
+        return OutputPresentFlag(self._ptr.flags)

@@ -10,8 +10,8 @@ class Timespec(Ptr):
         """A wrapper aronud a timespec struct"""
         self._ptr = ptr
 
-    @classmethod
-    def get_monotonic_time(cls) -> Timespec:
+    @staticmethod
+    def get_monotonic_time() -> Timespec:
         """Get the current monotonic time"""
         timespec = ffi.new("struct timespec *")
         ret = lib.clock_gettime(lib.CLOCK_MONOTONIC, timespec)
