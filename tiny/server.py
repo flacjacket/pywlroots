@@ -339,6 +339,7 @@ class TinywlServer:
         assert xdg_surface.role == XdgSurfaceRole.TOPLEVEL
 
         scene_tree = Scene.xdg_surface_create(self._scene.tree, xdg_surface)
+        xdg_surface.data = scene_tree
         view = View(xdg_surface, self, scene_tree.node)
         self.views.append(view)
 
