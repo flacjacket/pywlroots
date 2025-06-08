@@ -2,6 +2,7 @@ name: Publish to PyPI
 on:
   pull_request:
   push:
+  workflow_dispatch:
   release:
     types: [published]
 jobs:
@@ -167,7 +168,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - name: Download wayland libraries
         uses: actions/download-artifact@v4
@@ -177,7 +178,7 @@ jobs:
         run: tar xf wayland.tar.gz -C /
       - name: Set python version
         run: |
-          PYTHON_ROOT=$(find /opt/python -name cp${PYTHON_VERSION/./}-*)
+          PYTHON_ROOT=$(find /opt/python -name "cp${PYTHON_VERSION/./}-*" -not -name "*t")
           echo "${PYTHON_ROOT}/bin" >> $GITHUB_PATH
         shell: bash
         env:
@@ -232,7 +233,7 @@ jobs:
       - name: Set python version
         run: |
           ls /opt/python/
-          PYTHON_ROOT=$(find /opt/python -name pp${PYTHON_VERSION/./}-*_pp${PP_VERSION/./})
+          PYTHON_ROOT=$(find /opt/python -name "pp${PYTHON_VERSION/./}-*_pp${PP_VERSION/./}" -not -name "*t")
           echo "${PYTHON_ROOT}"
           echo "${PYTHON_ROOT}/bin" >> $GITHUB_PATH
         shell: bash
@@ -281,6 +282,7 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
           - "pypy-3.11"
     steps:
       - name: Install dependencies
@@ -288,6 +290,12 @@ jobs:
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
             libxkbcommon-dev
+      - name: Download wayland libraries
+        uses: actions/download-artifact@v4
+        with:
+          name: wayland
+      - name: Unpack wayland artifact
+        run: sudo tar xf wayland.tar.gz -C /
       - name: Download wheels
         uses: actions/download-artifact@v4
         with:
@@ -315,7 +323,7 @@ jobs:
     container: quay.io/pypa/manylinux_2_34_x86_64
     needs: build-wayland
     env:
-      python-version: "3.12"
+      python-version: "3.13"
     steps:
       - name: Download wayland libraries
         uses: actions/download-artifact@v4
@@ -325,7 +333,7 @@ jobs:
         run: tar xf wayland.tar.gz -C /
       - name: Set python version
         run: |
-          PYTHON_ROOT=$(find /opt/python -name cp${PYTHON_VERSION/./}-*)
+          PYTHON_ROOT=$(find /opt/python -name "cp${PYTHON_VERSION/./}-*" -not -name "*t")
           echo "${PYTHON_ROOT}/bin" >> $GITHUB_PATH
         shell: bash
         env:
