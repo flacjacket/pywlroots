@@ -5,3 +5,4 @@ include *.rst
 include tiny/*.py
 recursive-include tests *.py
 recursive-include wlroots *.rst
+recursive-include wlroots *.xml
