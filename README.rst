@@ -24,6 +24,12 @@ To build pywlroots from source, the Python requirements will need to be
 installed manually.  These are available in ``requirements.txt``.  The cffi
 bindings are built by running ``python wlroots/ffi_build.py``.
 
+Included Protocols
+------------------
+
+XML files containing the protocol specification that are needed for the
+pywlroots ffi build. Read more `here <wlroots/include/README.rst>`_.
+
 Versioning and Releases
 -----------------------
 
