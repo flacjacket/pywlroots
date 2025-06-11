@@ -1,27 +1,19 @@
-Included Headers
+Protocol Headers
 ----------------
 
-Generated Wayland protocol headers that are included with the pywlroots ffi
-build, and are shipped with the library for downstream libraries to be able to
-include these headers.
+Dynamically generated Wayland and wlroots protocol headers that are included
+with the pywlroots ffi build, and are automatically generated when running
+``python wlroots/ffi_build.py``. You can generate them manually by running:
 
-Updating Headers
-----------------
+.. code-block::
 
-When protocol versions are updated or the wayland scanner generation changes,
-the included headers should be updated as well.  The match between the latest
-protocol and the included files is run in the CI.  When that starts to fail,
-run:
-```
-wayland-scanner server-header /usr/share/wayland-protocols/path/to/file.xml wlroots/include/file.h
-```
-This can also be used to add new headers to pywlroots.
+    python check_headers.py --generate
 
-Alternatively, if you download a copy of the upstream wlroots source code, you
-can run:
-```
-python check_headers.py --wlroots-dir /path/to/wlroots/source --generate
-```
-Which will regenerate all of theh current set of protocol headers.  Leaving off
-the `--generate` option will instread run a check on the currently generated
-protocols.
+Updating Protocols
+------------------
+
+When protocol versions are updated, the included protocols XML files should
+be updated as well. The match between the latest protocol and the generated
+headers is run in the CI.  When that starts to fail, update the corresponding
+XML file in ``wlroots/protocol`` with the one in the `wlroots repository
+<https://gitlab.freedesktop.org/wlroots/wlroots>`_.
