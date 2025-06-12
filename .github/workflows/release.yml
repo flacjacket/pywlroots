@@ -206,8 +206,6 @@ jobs:
           ls dist/
           auditwheel show dist/pywlroots-*.whl
           auditwheel repair --plat manylinux_2_34_x86_64 -w output_wheels dist/pywlroots-*.whl
-        env:
-          PIP_CONSTRAINT: dist-build-constraints.txt
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
@@ -263,8 +261,6 @@ jobs:
           ls dist/
           auditwheel show dist/pywlroots-*.whl
           auditwheel repair --plat manylinux_2_34_x86_64 -w output_wheels dist/pywlroots-*.whl
-        env:
-          PIP_CONSTRAINT: dist-build-constraints.txt
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
@@ -358,8 +354,6 @@ jobs:
       - name: Build source
         run: |
           python -m build --sdist
-        env:
-          PIP_CONSTRAINT: dist-build-constraints.txt
       - name: Upload source
         uses: actions/upload-artifact@v4
         with:
