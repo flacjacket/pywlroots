@@ -77,14 +77,14 @@ jobs:
       - name: Build wayland
         working-directory: wayland-${{ env.wayland-version }}
         run: |
-          meson build --prefix=/usr -Ddocumentation=false
+          meson setup build --prefix=/usr -Ddocumentation=false
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           sudo ninja -C build install
       - name: Build wayland-protocols
         working-directory: wayland-protocols-${{ env.wayland-protocols-version }}
         run: |
-          meson build --prefix=/usr
+          meson setup build --prefix=/usr
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           sudo ninja -C build install
@@ -92,7 +92,7 @@ jobs:
         working-directory: wlroots-${{ matrix.wlroots-version }}
         continue-on-error: ${{ matrix.wlroots-version == 'master' }}
         run: |
-          meson build --prefix=/usr -Dxwayland=enabled
+          meson setup build --prefix=/usr -Dxwayland=enabled
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
       - name: Create artifact
