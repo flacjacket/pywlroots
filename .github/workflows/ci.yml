@@ -233,7 +233,6 @@ jobs:
         run: |
           mypy -p wlroots
           mypy -p tiny
-          mypy check_headers.py
   black-test:
     name: black tests
     runs-on: ubuntu-24.04
@@ -250,7 +249,7 @@ jobs:
         run: |
           pip install black
       - name: Run black test
-        run: black --check wlroots tiny check_headers.py
+        run: black --check wlroots tiny
   packaging-test:
     name: packaging tests
     runs-on: ubuntu-24.04
@@ -285,7 +284,7 @@ jobs:
         run: |
           check-manifest
           python setup.py check -m -s
-          python setup.py sdist
+          python -m build --sdist
           twine check dist/*
   protocol-headers-test:
     name: protocol headers test
@@ -318,4 +317,6 @@ jobs:
           sudo apt update
           sudo apt-get install -y --no-install-recommends pkgconf
       - name: Run protocol test
-        run: python check_headers.py --wlroots-dir wlroots-${{ env.wlroots-version }}
+        run: |
+          python wlroots/include/check_headers.py --generate
+          python wlroots/include/check_headers.py --wlroots-dir wlroots-${{ env.wlroots-version }}
