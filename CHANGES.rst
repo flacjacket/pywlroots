@@ -1,5 +1,15 @@
+0.17.1 -- unreleased 
+--------------------
+* Added more properties to ``OutputState``
+* Added support for various ``Output`` events 
+  (`#209 <https://github.com/flacjacket/pywlroots/issue/209>`_):
+* Renamed ``OutputEventRequestState`` to ``OutputRequestStateEvent``
+  (the previous name is still available as an alias  
+   `#210 <https://github.com/flacjacket/pywlroots/issue/210>`_)
+
+
 0.17.0 -- 2024-05-12
-------
+--------------------
 * Support for wlroots 0.17.x
 * **Breaking change** Rename all declarations of XdgTopLevel.* to XdgToplevel.*
 
