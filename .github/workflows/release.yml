@@ -93,63 +93,63 @@ jobs:
       - name: Build wayland
         working-directory: wayland-${{ env.wayland-version }}
         run: |
-          meson build --prefix=/usr -Ddocumentation=false
+          meson setup build --prefix=/usr -Ddocumentation=false
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           ninja -C build install
       - name: Build wayland-protocols
         working-directory: wayland-protocols-${{ env.wayland-protocols-version }}
         run: |
-          meson build --prefix=/usr
+          meson setup build --prefix=/usr
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           ninja -C build install
       - name: Build libdrm
         working-directory: libdrm-libdrm-${{ env.libdrm-version }}
         run: |
-          meson build --prefix=/usr
+          meson setup build --prefix=/usr
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           ninja -C build install
       - name: Build seatd
         working-directory: seatd-${{ env.seatd-version }}
         run: |
-          meson build --prefix=/usr
+          meson setup build --prefix=/usr
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           ninja -C build install
       - name: Build pixman
         working-directory: pixman-pixman-${{ env.pixman-version }}
         run: |
-          meson build --prefix=/usr
+          meson setup build --prefix=/usr
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           ninja -C build install
       - name: Build inputproto
         working-directory: xorgproto-xorgproto-${{ env.inputproto-version }}
         run: |
-          meson build --prefix=/usr
+          meson setup build --prefix=/usr
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           ninja -C build install
       - name: Build libxcvt
         working-directory: libxcvt-libxcvt-${{ env.xcvt-version }}
         run: |
-          meson build --prefix=/usr
+          meson setup build --prefix=/usr
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           ninja -C build install
       - name: Build xwayland
         working-directory: xserver-xwayland-${{ env.xwayland-version }}
         run: |
-          meson build --prefix=/usr
+          meson setup build --prefix=/usr
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
           ninja -C build install
       - name: Build wlroots
         working-directory: wlroots-${{ env.wlroots-version }}
         run: |
-          meson build --prefix=/usr -Dxwayland=enabled
+          meson setup build --prefix=/usr -Dxwayland=enabled
           ninja -C build
           DESTDIR=~/wayland ninja -C build install
       - name: Create artifact
