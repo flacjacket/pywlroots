@@ -2,9 +2,9 @@
 # Copyright (c) 2022 Aakash Sen Sharma
 
 import importlib.util
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
 
 from cffi import FFI, VerificationError
@@ -41,7 +41,7 @@ def load_wlroots_version():
             lib = importlib.import_module("wlroots").lib
         return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"  # type: ignore[attr-defined]
     else:
-        return os.getenv("PYTHON_CROSSENV_WLROOTS_VERSION")  # type: ignore[attr-defined]
+        return os.getenv("PYTHON_CROSSENV_WLROOTS_VERSION")
 
 
 def check_version():
