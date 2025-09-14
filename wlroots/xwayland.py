@@ -75,6 +75,10 @@ class Server(PtrHasData):
     def ready(self) -> bool:
         return self._ptr.ready
 
+    @property
+    def pid(self) -> int:
+        return self._ptr.pid
+
 
 class XWayland(PtrHasData):
     def __init__(self, display: Display, compositor: Compositor, lazy: bool) -> None:
