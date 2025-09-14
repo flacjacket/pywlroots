@@ -278,7 +278,7 @@ jobs:
         run: |
           check-manifest
           python setup.py check -m -s
-          python setup.py sdist
+          python -m build --sdist
           twine check dist/*
   protocol-headers-test:
     name: protocol headers test

@@ -3,6 +3,8 @@ requires = [
     "setuptools>=77.0.0",
     "wheel",
     "cffi>=1.12.0; platform_python_implementation != 'PyPy'",
+    "pywayland>=0.4.14",
+    "xkbcommon",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -31,7 +33,7 @@ classifiers = [
 dependencies = [
     "cffi >= 1.12.0; platform_python_implementation != 'PyPy'",
     "pywayland >= 0.4.14",
-    "xkbcommon >= 0.2",
+    "xkbcommon",
 ]
 dynamic = ["version"]
 
