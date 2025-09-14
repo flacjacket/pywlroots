@@ -3,6 +3,7 @@
 
 import importlib.util
 import sys
+import os
 from pathlib import Path
 
 from cffi import FFI, VerificationError
@@ -32,12 +33,14 @@ def load_wlroots_version():
     ffi = FFI()
     ffi.cdef(CDEF_VERSION)
 
-    try:
-        lib = ffi.verify("#include <wlr/version.h>")
-    except (PermissionError, OSError, VerificationError):
-        lib = importlib.import_module("wlroots").lib
-
-    return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"  # type: ignore[attr-defined]
+    if not os.getenv("PYTHON_CROSSENV"):
+        try:
+            lib = ffi.verify("#include <wlr/version.h>")
+        except (PermissionError, OSError, VerificationError):
+            lib = importlib.import_module("wlroots").lib
+        return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"  # type: ignore[attr-defined]
+    else:
+        return os.getenv("PYTHON_CROSSENV_WLROOTS_VERSION")  # type: ignore[attr-defined]
 
 
 def check_version():
