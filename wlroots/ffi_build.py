@@ -2,16 +2,17 @@
 # Copyright (c) 2022 Aakash Sen Sharma
 
 import importlib.util
-import sys
 import os
+import subprocess
+import sys
 from pathlib import Path
 
 from cffi import FFI, VerificationError
 from pywayland.ffi_build import ffi_builder as pywayland_ffi
 from xkbcommon.ffi_build import ffibuilder as xkb_ffi
 
-include_dir = (Path(__file__).parent / "include").resolve()
-assert include_dir.is_dir(), f"missing {include_dir}"
+INCLUDE_PATH = (Path(__file__).parent / "include").resolve()
+assert INCLUDE_PATH.is_dir(), f"missing {INCLUDE_PATH}"
 
 
 def load_version():
@@ -40,7 +41,7 @@ def load_wlroots_version():
             lib = importlib.import_module("wlroots").lib
         return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"  # type: ignore[attr-defined]
     else:
-        return os.getenv("PYTHON_CROSSENV_WLROOTS_VERSION")  # type: ignore[attr-defined]
+        return os.getenv("PYTHON_CROSSENV_WLROOTS_VERSION")
 
 
 def check_version():
@@ -80,7 +81,7 @@ def has_xwayland() -> bool:
         FFI().verify(
             "#include <wlr/xwayland.h>",
             define_macros=[("WLR_USE_UNSTABLE", 1)],
-            include_dirs=["/usr/include/pixman-1", include_dir.as_posix()],
+            include_dirs=["/usr/include/pixman-1", INCLUDE_PATH.as_posix()],
         )
         has_xwayland = True
     except VerificationError:
@@ -3390,11 +3391,12 @@ ffi_builder.set_source(
     SOURCE,
     libraries=["wlroots"],
     define_macros=[("WLR_USE_UNSTABLE", None)],
-    include_dirs=["/usr/include/pixman-1", include_dir],
+    include_dirs=["/usr/include/pixman-1", INCLUDE_PATH],
 )
 ffi_builder.include(pywayland_ffi)
 ffi_builder.include(xkb_ffi)
 ffi_builder.cdef(CDEF)
 
 if __name__ == "__main__":
+    subprocess.run(["python", f"{INCLUDE_PATH}/check_headers.py", "--generate"])
     ffi_builder.compile()

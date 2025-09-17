@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tempfile
 
-INCLUDE_PATH = pathlib.Path(__file__).parent / "wlroots" / "include"
+INCLUDE_PATH = pathlib.Path(__file__).parent
 WAYLAND_PROCOTOLS = [
     "stable/xdg-shell/xdg-shell.xml",
     "unstable/idle-inhibit/idle-inhibit-unstable-v1.xml",
@@ -16,6 +16,10 @@ WLROOTS_PROTOCOLS = [
     "protocol/wlr-output-power-management-unstable-v1.xml",
     "protocol/wlr-layer-shell-unstable-v1.xml",
 ]
+
+
+def get_wlroots_protocols_dir() -> pathlib.Path:
+    return pathlib.Path(__file__).parent.parent
 
 
 def get_wayland_protocols_dir() -> pathlib.Path | None:
@@ -49,7 +53,7 @@ def check(protocols: list[pathlib.Path]) -> None:
         header_filename(protocol_xml) for protocol_xml in protocols
     }
     protocol_files = {
-        path.name for path in INCLUDE_PATH.iterdir() if path.name != "README.rst"
+        path.name for path in INCLUDE_PATH.iterdir() if path.suffix == ".h"
     }
 
     if expected_protocol_files != protocol_files:
@@ -95,12 +99,14 @@ def generate(protocols: list[pathlib.Path]) -> None:
         generate_protocol_header(protocol_xml, INCLUDE_PATH)
 
 
-def parse_args(argv):
+def parse_args(argv) -> tuple[list[pathlib.Path], bool]:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--wayland-dir", default=get_wayland_protocols_dir(), type=pathlib.Path
     )
-    parser.add_argument("--wlroots-dir", required=True, type=pathlib.Path)
+    parser.add_argument(
+        "--wlroots-dir", default=get_wlroots_protocols_dir(), type=pathlib.Path
+    )
     parser.add_argument("--generate", action="store_true")
     args = parser.parse_args(argv)
 

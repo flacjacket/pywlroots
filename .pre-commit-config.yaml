@@ -1,11 +1,11 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 24.1.0
+    rev: 25.1.0
     hooks:
       - id: black
         # Use the latest supported version here
         language_version: python3.13
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.14
+    rev: v0.13.0
     hooks:
       - id: ruff

@@ -21,3 +21,6 @@ pywlroots.egg-info/
 .eggs
 
 *.swp
+
+# Protocol headers
+wlroots/include/*.h
