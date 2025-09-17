@@ -74,6 +74,12 @@ line-length = 88
 [tool.black]
 line-length = 88
 
+[tool.check-manifest]
+ignore = [
+    "wlroots/_build.py",
+    "wlroots/include/*.h",
+]
+
 [tool.mypy]
 check_untyped_defs = true
 # disallow_any_decorated = true
