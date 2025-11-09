@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import contextlib
 from collections.abc import Iterator
-from typing import Union
 
 from pywayland.server import Display
 
@@ -13,7 +12,7 @@ from wlroots.backend import Backend
 from wlroots.util.box import Box
 from wlroots.wlr_types import Matrix, Texture
 
-ColorType = Union[list, tuple, ffi.CData]
+ColorType = type[list[float] | tuple[float] | ffi.CData]
 
 
 class Renderer(Ptr):

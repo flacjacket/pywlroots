@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import enum
-import weakref
+from weakref import WeakKeyDictionary
 
 from pywayland.server import Signal
 
 from wlroots import PtrHasData, ffi, lib
 
-_weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 
 @enum.unique

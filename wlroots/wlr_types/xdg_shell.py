@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import enum
-import weakref
-from typing import Callable, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
+from weakref import WeakKeyDictionary
 
 from pywayland.server import Display, Signal
 
@@ -15,7 +16,7 @@ from wlroots.util.edges import Edges
 from .compositor import Surface
 from .output import Output
 
-_weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 T = TypeVar("T")
 SurfaceCallback = Callable[[Surface, int, int, T], None]

@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import enum
-from typing import TYPE_CHECKING, Callable, TypeVar
+from collections.abc import Callable
+from typing import TYPE_CHECKING, TypeVar
 
 from pywayland.utils import wl_list_for_each
 

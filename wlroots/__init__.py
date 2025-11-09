@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import weakref
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
+from weakref import WeakKeyDictionary
 
 from ._ffi import ffi, lib
 from .version import version as _version
@@ -14,7 +15,7 @@ __wlroots_version__ = (
 
 __version__ = _version
 
-_weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
 
 T = TypeVar("T")
 
