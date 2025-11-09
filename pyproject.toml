@@ -71,9 +71,6 @@ lint.select = ['E', 'F', 'I', 'N', 'W', 'UP', 'RUF']
 lint.ignore = ["E501"]
 line-length = 88
 
-[tool.black]
-line-length = 88
-
 [tool.check-manifest]
 ignore = [
     "wlroots/_build.py",

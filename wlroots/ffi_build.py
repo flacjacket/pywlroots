@@ -39,7 +39,9 @@ def load_wlroots_version():
             lib = ffi.verify("#include <wlr/version.h>")
         except (PermissionError, OSError, VerificationError):
             lib = importlib.import_module("wlroots").lib
-        return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"  # type: ignore[attr-defined]
+        return (
+            f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"  # type: ignore[attr-defined]
+        )
     else:
         return os.getenv("PYTHON_CROSSENV_WLROOTS_VERSION")
 

@@ -227,23 +227,6 @@ jobs:
         run: |
           mypy -p wlroots
           mypy -p tiny
-  black-test:
-    name: black tests
-    runs-on: ubuntu-24.04
-    env:
-      python-version: "3.13"
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.python-version }}
-      - name: Install Python dependencies
-        run: |
-          pip install black
-      - name: Run black test
-        run: black --check wlroots tiny
   packaging-test:
     name: packaging tests
     runs-on: ubuntu-24.04
