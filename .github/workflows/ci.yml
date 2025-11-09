@@ -204,6 +204,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
+            libinput-dev \
+            libpixman-1-dev \
             libxkbcommon-dev \
       - name: Download wayland libraries
         uses: actions/download-artifact@v4
@@ -219,9 +221,7 @@ jobs:
           python-version: ${{ env.python-version }}
       - name: Install Python dependencies
         run: |
-          pip install wheel
-          pip install -r requirements.txt
-          pip install mypy types-cffi types-dataclasses
+          pip install .[typecheck]
       - name: Run mypy test
         run: |
           mypy -p wlroots
@@ -244,6 +244,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
+            libinput-dev \
+            libpixman-1-dev \
             libxkbcommon-dev \
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -253,9 +255,7 @@ jobs:
           python-version: ${{ env.python-version }}
       - name: Install Python dependencies
         run: |
-          pip install wheel
-          pip install -r requirements.txt
-          pip install check-manifest twine
+          pip install .[packaging]
       - name: Run packaging test
         run: |
           check-manifest

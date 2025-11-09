@@ -43,6 +43,11 @@ typecheck = [
     "types-cffi",
     "types-dataclasses",
 ]
+packaging = [
+    "build",
+    "check-manifest",
+    "twine",
+]
 
 [project.urls]
 homepage = "https://github.com/flacjacket/pywlroots"
