@@ -178,22 +178,8 @@ jobs:
           WLR_LIBINPUT_NO_DEVICES: '1'
           WLR_RENDERER: pixman
           WLR_RENDERER_ALLOW_SOFTWARE: '1'
-  ruff-test:
-    name: ruff tests
-    runs-on: ubuntu-24.04
-    env:
-      python-version: "3.13"
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.python-version }}
-      - name: Run ruff check
-        uses: astral-sh/ruff-action@v3
-  mypy-test:
-    name: mypy tests
+  pre-commit-test:
+    name: pre-commit tests
     runs-on: ubuntu-24.04
     needs: build-wayland
     env:
@@ -221,11 +207,9 @@ jobs:
           python-version: ${{ env.python-version }}
       - name: Install Python dependencies
         run: |
-          pip install .[typecheck]
-      - name: Run mypy test
-        run: |
-          mypy -p wlroots
-          mypy -p tiny
+          pip install .
+      - name: Run pre-commit test
+        uses: pre-commit/action@v3.0.1
   packaging-test:
     name: packaging tests
     runs-on: ubuntu-24.04

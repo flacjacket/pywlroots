@@ -38,11 +38,6 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = ["pytest"]
-typecheck = [
-    "mypy",
-    "types-cffi",
-    "types-dataclasses",
-]
 packaging = [
     "build",
     "check-manifest",
