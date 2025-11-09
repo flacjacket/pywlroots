@@ -13,5 +13,5 @@ class FractionalScaleManagerV1(PtrHasData):
         self._ptr = lib.wlr_fractional_scale_manager_v1_create(display._ptr, version)
 
 
-def notify_scale(surface: Surface, scale: float):
+def notify_scale(surface: Surface, scale: float) -> None:
     lib.wlr_fractional_scale_v1_notify_scale(surface._ptr, scale)

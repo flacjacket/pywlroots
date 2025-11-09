@@ -14,11 +14,11 @@ from .compositor import Surface
 if TYPE_CHECKING:
     from pywayland.server import Display
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class XdgActivationV1(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """An XDG activation manager: struct wlr_xdg_activation_v1."""
         self._ptr = ffi.cast("struct wlr_xdg_activation_v1 *", ptr)
 
@@ -36,7 +36,7 @@ class XdgActivationV1(Ptr):
 
 
 class XdgActivationV1RequestActivateEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """struct wlr_xdg_activation_v1_request_activate_event"""
         self._ptr = ffi.cast(
             "struct wlr_xdg_activation_v1_request_activate_event *", ptr

@@ -11,8 +11,10 @@ from wlroots.util.edges import Edges
 from .cursor_mode import CursorMode
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from wlroots.wlr_types import SceneNode, Surface
-    from wlroots.wlr_types.xdg_shell import XdgSurface
+    from wlroots.wlr_types.xdg_shell import XdgSurface, XdgToplevelResizeEvent
 
     from .server import TinywlServer
 
@@ -39,20 +41,20 @@ class View:
         toplevel.request_move_event.add(Listener(self.xdg_toplevel_request_move))
         toplevel.request_resize_event.add(Listener(self.xdg_toplevel_request_resize))
 
-    def xdg_toplevel_map(self, listener, data) -> None:
+    def xdg_toplevel_map(self, listener: Listener, data: Any) -> None:
         logging.info("mapped new view")
         self.mapped = True
         self.tinywl_server.focus_view(self)
 
-    def xdg_toplevel_unmap(self, listener, data) -> None:
+    def xdg_toplevel_unmap(self, listener: Listener, data: Any) -> None:
         logging.info("unmapped view")
         self.mapped = False
 
-    def xdg_toplevel_destroy(self, listener, data) -> None:
+    def xdg_toplevel_destroy(self, listener: Listener, data: Any) -> None:
         logging.info("destroyed view")
         self.tinywl_server.views.remove(self)
 
-    def xdg_toplevel_request_move(self, listener, data) -> None:
+    def xdg_toplevel_request_move(self, listener: Listener, data: Any) -> None:
         # This event is raised when a client would like to begin an interactive
         # move, typically because the user clicked on their client-side
         # decorations. Note that a more sophisticated compositor should check
@@ -62,7 +64,9 @@ class View:
         logging.info("request move start")
         self._begin_interactive(CursorMode.MOVE, Edges.NONE)
 
-    def xdg_toplevel_request_resize(self, listener, event) -> None:
+    def xdg_toplevel_request_resize(
+        self, listener: Listener, event: XdgToplevelResizeEvent
+    ) -> None:
         # This event is raised when a client would like to begin an interactive
         # resize, typically because the user clicked on their client-side
         # decorations. Note that a more sophisticated compositor should check

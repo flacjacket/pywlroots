@@ -15,7 +15,7 @@ from .xdg_shell import XdgToplevel
 if TYPE_CHECKING:
     from pywayland.server import Display
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class XdgToplevelDecorationV1Mode(enum.IntEnum):
@@ -25,7 +25,7 @@ class XdgToplevelDecorationV1Mode(enum.IntEnum):
 
 
 class XdgDecorationManagerV1(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """An XDG decoration manager: wlr_xdg_decoration_manager_v1."""
         self._ptr = ffi.cast("struct wlr_xdg_decoration_manager_v1 *", ptr)
 
@@ -36,14 +36,14 @@ class XdgDecorationManagerV1(PtrHasData):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @classmethod
-    def create(cls, display: Display):
+    def create(cls, display: Display) -> XdgDecorationManagerV1:
         """Create a wlr_xdg_decoration_manager_v1 for the given display."""
         ptr = lib.wlr_xdg_decoration_manager_v1_create(display._ptr)
         return cls(ptr)
 
 
 class XdgToplevelDecorationV1(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """struct wlr_xdg_toplevel_decoration_v1"""
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_decoration_v1 *", ptr)
 

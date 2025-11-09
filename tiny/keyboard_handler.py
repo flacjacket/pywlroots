@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 from pywayland.server import Listener
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from wlroots.wlr_types import InputDevice, Keyboard
     from wlroots.wlr_types.keyboard import KeyboardKeyEvent
 
@@ -25,7 +27,7 @@ class KeyboardHandler:
         keyboard.modifiers_event.add(Listener(self.keyboard_handle_modifiers))
         keyboard.key_event.add(Listener(self.keyboard_handle_key))
 
-    def keyboard_handle_modifiers(self, listener: Listener, data) -> None:
+    def keyboard_handle_modifiers(self, listener: Listener, data: Any) -> None:
         """Activates the keyboard and sends the modifiers event to the active surface"""
         self.tinywl_server.send_modifiers(self.keyboard.modifiers, self.input_device)
 

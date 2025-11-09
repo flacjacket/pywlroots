@@ -1,4 +1,5 @@
 # Copyright (c) Sean Vig 2019
+
 from __future__ import annotations
 
 import enum
@@ -8,7 +9,7 @@ from pywayland.server import Signal
 
 from wlroots import PtrHasData, ffi, lib
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 @enum.unique
@@ -28,7 +29,7 @@ class InputDeviceType(enum.IntEnum):
 
 
 class InputDevice(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Create the input device from the given cdata
 
         :param ptr:

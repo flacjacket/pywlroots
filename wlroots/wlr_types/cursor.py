@@ -1,7 +1,9 @@
 # Copyright (c) Sean Vig 2019
+
 from __future__ import annotations
 
 import enum
+from types import TracebackType
 from typing import TYPE_CHECKING
 
 from pywayland.server import Signal
@@ -273,7 +275,12 @@ class Cursor(PtrHasData):
         """Context manager to clean up the cursor"""
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         """Clean up the cursor when exiting the context"""
         self.destroy()
 

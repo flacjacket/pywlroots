@@ -13,7 +13,7 @@ class BufferDataPtrAccessFlag(enum.IntFlag):
 
 
 class Buffer(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     def drop(self) -> None:

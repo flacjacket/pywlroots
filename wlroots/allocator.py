@@ -9,7 +9,7 @@ from wlroots.wlr_types.buffer import Buffer
 
 
 class Allocator(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Create an allocator.
 
         The allocator is the bridge between the renderer and the backend. It

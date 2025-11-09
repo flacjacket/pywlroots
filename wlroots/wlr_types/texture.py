@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
 
 
 class Texture(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @staticmethod

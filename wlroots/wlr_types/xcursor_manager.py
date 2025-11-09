@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import TracebackType
 from typing import TYPE_CHECKING
 
 from wlroots import Ptr, ffi, lib
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class XCursorManager(Ptr):
-    def __init__(self, theme: str | None, size: int = 24, scale: float = 1.0):
+    def __init__(self, theme: str | None, size: int = 24, scale: float = 1.0) -> None:
         """Creates a new XCursor manager using the theme and size
 
         and ensures an xcursor with scale is loaded
@@ -24,7 +25,7 @@ class XCursorManager(Ptr):
 
         lib.wlr_xcursor_manager_load(self._ptr, scale)
 
-    def destroy(self):
+    def destroy(self) -> None:
         """Destroy the x cursor manager"""
         if self._ptr is not None:
             ffi.release(self._ptr)
@@ -41,11 +42,16 @@ class XCursorManager(Ptr):
             return None
         return XCursor(ptr)
 
-    def __enter__(self):
+    def __enter__(self) -> XCursorManager:
         """Setup X cursor manager in a context manager"""
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         """Clean-up the X cursor manager on contex manager exit"""
         self.destroy()
 
@@ -59,7 +65,7 @@ class XCursorManager(Ptr):
 class XCursor(Ptr):
     """struct wlr_xcursor"""
 
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @property
@@ -71,5 +77,5 @@ class XCursor(Ptr):
 class XCursorImage(Ptr):
     """struct wlr_xcursor_image"""
 
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr

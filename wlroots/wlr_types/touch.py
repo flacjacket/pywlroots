@@ -1,4 +1,5 @@
 # Copyright (c) Matt Colligan 2021
+
 from __future__ import annotations
 
 from weakref import WeakKeyDictionary
@@ -7,11 +8,11 @@ from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 
 from .input_device import InputDevice
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class Touch(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @staticmethod
@@ -54,7 +55,7 @@ class _TouchEvent(Ptr):
 
 
 class TouchDownEvent(_TouchEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_touch_down_event *", ptr)
 
     @property
@@ -67,12 +68,12 @@ class TouchDownEvent(_TouchEvent):
 
 
 class TouchUpEvent(_TouchEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_touch_up_event *", ptr)
 
 
 class TouchMotionEvent(_TouchEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_touch_motion_event *", ptr)
 
     @property
@@ -85,5 +86,5 @@ class TouchMotionEvent(_TouchEvent):
 
 
 class TouchCancelEvent(_TouchEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_touch_cancel_event *", ptr)

@@ -1,4 +1,5 @@
 # Copyright (c) 2021 Matt Colligan
+
 from __future__ import annotations
 
 import enum
@@ -17,7 +18,7 @@ from .xdg_shell import SurfaceCallback, T
 if TYPE_CHECKING:
     from pywayland.server import Display
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class LayerSurfaceV1KeyboardInteractivity(enum.IntEnum):
@@ -51,7 +52,7 @@ class Margin:
 
 
 class LayerSurfaceV1State(Ptr):
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @property
@@ -93,7 +94,7 @@ class LayerSurfaceV1State(Ptr):
 
 
 class LayerSurfaceV1(PtrHasData):
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_layer_surface_v1 *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
@@ -114,7 +115,7 @@ class LayerSurfaceV1(PtrHasData):
         return Output(output_ptr)
 
     @output.setter
-    def output(self, output: Output):
+    def output(self, output: Output) -> None:
         self._ptr.output = output._ptr
 
     @property

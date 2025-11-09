@@ -88,7 +88,7 @@ class Scene(Ptr):
 
 
 class SceneOutput(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A viewport for an output in the scene-graph"""
         self._ptr = ptr
 
@@ -126,7 +126,7 @@ class SceneOutput(Ptr):
 
 
 class SceneTree(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """struct wlr_scene_tree"""
         self._ptr = ptr
 
@@ -162,7 +162,7 @@ class SceneTree(PtrHasData):
 
 
 class SceneBuffer(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """struct wlr_scene_buffer"""
         self._ptr = ptr
 
@@ -205,8 +205,10 @@ T = TypeVar("T")
 BufferCallback = Callable[[SceneBuffer, int, int, T], None]
 
 
-@ffi.def_extern()
-def buffer_iterator_callback(buffer_ptr, sx, sy, data_ptr):
+@ffi.def_extern()  # type: ignore[misc]
+def buffer_iterator_callback(
+    buffer_ptr: ffi.CData, sx: int, sy: int, data_ptr: ffi.CData
+) -> None:
     """Callback used to invoke the for_each_buffer method"""
     func, py_data = ffi.from_handle(data_ptr)
     buffer = SceneBuffer(buffer_ptr)
@@ -214,7 +216,7 @@ def buffer_iterator_callback(buffer_ptr, sx, sy, data_ptr):
 
 
 class SceneNode(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A node is an object in the scene."""
         self._ptr = ptr
 
@@ -303,7 +305,7 @@ class SceneNode(PtrHasData):
             self._ptr, lib.buffer_iterator_callback, handle
         )
 
-    def subsurface_tree_set_clip(self, clip: Box | None):
+    def subsurface_tree_set_clip(self, clip: Box | None) -> None:
         """
         Sets a cropping region for any subsurface trees that are children of this scene node.
 
@@ -316,7 +318,7 @@ class SceneNode(PtrHasData):
 
 
 class SceneSurface(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """struct wlr_scene_surface"""
         self._ptr = ptr
 
@@ -355,7 +357,7 @@ class SceneRect(Ptr):
 
 
 class SceneLayerSurfaceV1(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @property
@@ -380,7 +382,7 @@ class SceneLayerSurfaceV1(Ptr):
 
 
 class SceneOutputLayout(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A `struct wlr_scene_output_layout_scene`"""
         self._ptr = ptr
 
@@ -394,6 +396,6 @@ class SceneOutputLayout(Ptr):
 
 
 class SceneOutputStateOptions(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A `struct wlr_scene_output_state_options`."""
         self._ptr = ptr

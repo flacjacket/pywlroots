@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from collections.abc import Sequence
 
 from pywayland.server import Display
 
@@ -26,7 +27,7 @@ from wlroots.wlr_types import (
 from .server import TinywlServer
 
 
-def main(argv) -> None:
+def main(argv: Sequence[str] | None) -> None:
     with Display() as display:
         _, allocator, renderer, backend, _ = build_compositor(display)
         device_manager = DataDeviceManager(display)  # noqa: F841

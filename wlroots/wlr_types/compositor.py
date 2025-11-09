@@ -13,7 +13,7 @@ from wlroots.util.clock import Timespec
 
 from .texture import Texture
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 if TYPE_CHECKING:
     from wlroots.renderer import Renderer
@@ -51,7 +51,7 @@ class SubCompositor(Ptr):
 
 
 class Surface(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Create a wlroots Surface
 
         :param ptr:
@@ -86,7 +86,7 @@ class Surface(PtrHasData):
         _weakkeydict[previous_ptr] = self._ptr
         return SurfaceState(previous_ptr)
 
-    def get_texture(self):
+    def get_texture(self) -> Texture | None:
         """Get the texture of the buffer currently attached to this surface
 
         Returns None if no buffer is currently attached or if something went
@@ -104,7 +104,7 @@ class Surface(PtrHasData):
 
 
 class SurfaceState(Ptr):
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         """The state of a given surface
 
         :param ptr:
@@ -129,7 +129,7 @@ class SurfaceState(Ptr):
 
 
 class SubSurface(PtrHasData):
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         """A wlroots subsurface
 
         :param ptr:

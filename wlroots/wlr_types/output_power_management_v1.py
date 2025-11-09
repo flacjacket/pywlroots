@@ -17,7 +17,7 @@ class OutputPowerManagementV1Mode(enum.IntEnum):
 
 
 class OutputPowerV1(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_output_power_v1 *", ptr)
 
     @property
@@ -42,7 +42,7 @@ class OutputPowerManagerV1(Ptr):
 
 
 class OutputPowerV1SetModeEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_output_power_v1_set_mode_event *", ptr)
 
     @property

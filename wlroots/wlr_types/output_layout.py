@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from types import TracebackType
+
 from pywayland.server import Signal
 
 from wlroots import Ptr, ffi, lib
@@ -61,7 +63,12 @@ class OutputLayout(Ptr):
         """Use the output layout in a context manager"""
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         """Clean up the output layout when exiting the context"""
         self.destroy()
 
@@ -130,6 +137,6 @@ class OutputLayout(Ptr):
 
 
 class OutputLayoutOutput(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A `struct wlr_output_layout_output`"""
         self._ptr = ptr

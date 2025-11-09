@@ -77,27 +77,23 @@ ignore = [
 ]
 
 [tool.mypy]
-check_untyped_defs = true
-# disallow_any_decorated = true
-# disallow_any_explicit = true
-# disallow_any_expr = true
-# disallow_any_generics = true
-# disallow_any_unimported = true
-# disallow_incomplete_defs = true
+packages = ["wlroots", "tiny"]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_equality = true
 disallow_subclassing_any = true
-# disallow_untyped_calls = true
-# disallow_untyped_decorators = true
-# disallow_untyped_defs = true
+disallow_untyped_decorators = true
+disallow_any_generics = true
+disallow_untyped_calls = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+# warn_return_any = true
 no_implicit_optional = true
 show_error_codes = true
-strict_equality = true
 warn_incomplete_stub = true
 warn_no_return = true
-warn_redundant_casts = true
-# warn_return_any = true
 warn_unreachable = true
-warn_unused_configs = true
-warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
 module = [

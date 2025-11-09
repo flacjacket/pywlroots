@@ -47,7 +47,7 @@ class RelativePointerManagerV1(Ptr):
 
 
 class RelativePointerV1(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A `struct wlr_relative_pointer_v1` instance."""
         self._ptr = ffi.cast("struct wlr_relative_pointer_v1 *", ptr)
 

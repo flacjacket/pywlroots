@@ -1,6 +1,8 @@
 # Copyright (c) Sean Vig 2019
 # Copyright (c) Matt Colligan 2021
 
+from __future__ import annotations
+
 from weakref import WeakKeyDictionary
 
 from pywayland.server import Display, Signal
@@ -9,7 +11,7 @@ from wlroots import Ptr, PtrHasData, ffi, lib
 
 from .compositor import Surface
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class DataDeviceManager(Ptr):
@@ -23,7 +25,7 @@ class DataDeviceManager(Ptr):
 
 
 class Drag(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_drag *", ptr)
 
         self.focus_event = Signal(ptr=ffi.addressof(self._ptr.events.focus))
@@ -38,7 +40,7 @@ class Drag(PtrHasData):
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property
-    def icon(self) -> "DragIcon | None":
+    def icon(self) -> DragIcon | None:
         icon_ptr = self._ptr.icon
         if icon_ptr == ffi.NULL:
             return None
@@ -46,14 +48,14 @@ class Drag(PtrHasData):
         return DragIcon(icon_ptr)
 
     @property
-    def source(self) -> "DataSource":
+    def source(self) -> DataSource:
         source_ptr = self._ptr.source
         _weakkeydict[source_ptr] = self._ptr
         return DataSource(source_ptr)
 
 
 class DragMotionEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_drag_motion_event *", ptr)
 
     @property
@@ -72,7 +74,7 @@ class DragMotionEvent(Ptr):
 
 
 class DragDropEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_drag_motion_event *", ptr)
 
     @property
@@ -83,7 +85,7 @@ class DragDropEvent(Ptr):
 
 
 class DragIcon(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_drag_icon *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
@@ -95,7 +97,7 @@ class DragIcon(PtrHasData):
         return Drag(drag_ptr)
 
     @property
-    def surface(self) -> "Surface":
+    def surface(self) -> Surface:
         surface_ptr = self._ptr.surface
         _weakkeydict[surface_ptr] = self._ptr
         return Surface(surface_ptr)
@@ -106,7 +108,7 @@ class DragIcon(PtrHasData):
 
 
 class DataSource(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_data_source *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))

@@ -16,7 +16,7 @@ from .compositor import Surface
 if TYPE_CHECKING:
     from pywayland.server import Display
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class PointerConstraintV1Type(enum.IntEnum):
@@ -45,7 +45,7 @@ class PointerConstraintsV1(Ptr):
 
 
 class PointerConstraintV1(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A `struct wlr_pointer_constraint_v1` instance."""
         self._ptr = ffi.cast("struct wlr_pointer_constraint_v1 *", ptr)
 
@@ -88,7 +88,7 @@ class PointerConstraintV1(Ptr):
 
 
 class PointerConstraintV1State(Ptr):
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @property

@@ -3,18 +3,21 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import Any
+
 from wlroots import ffi, lib
 
 
-def _int_getter(attr):
-    def getter(self):
+def _int_getter(attr: str) -> Callable[..., int]:
+    def getter(self: Any) -> int:
         return getattr(self._ptr, attr)
 
     return getter
 
 
-def _int_setter(attr):
-    def setter(self, value):
+def _int_setter(attr: str) -> Callable[..., None]:
+    def setter(self: Any, value: int) -> None:
         setattr(self._ptr, attr, value)
 
     return setter
@@ -27,7 +30,7 @@ class Box:
         y: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        ptr=None,
+        ptr: ffi.CData | None = None,
     ) -> None:
         """A simple box structure, represented by a coordinate and dimensions"""
         if ptr is None:

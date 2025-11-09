@@ -1,4 +1,5 @@
 # Copyright (c) Matt Colligan 2021
+
 from __future__ import annotations
 
 from collections.abc import Iterator
@@ -13,7 +14,7 @@ from .output import CustomMode, Output, OutputMode, OutputState
 
 
 class OutputHeadV1State(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """wlr_output_head_v1_state"""
         self._ptr = ptr
 
@@ -69,7 +70,7 @@ class OutputHeadV1State(Ptr):
         return CustomMode(width=mode.width, height=mode.height, refresh=mode.refresh)
 
     @custom_mode.setter
-    def custom_mode(self, mode: CustomMode):
+    def custom_mode(self, mode: CustomMode) -> None:
         self._ptr.custom_mode.width = mode.width
         self._ptr.custom_mode.height = mode.height
         self._ptr.custom_mode.refresh = mode.refresh
@@ -103,7 +104,7 @@ class OutputHeadV1State(Ptr):
 
 
 class OutputConfigurationV1(Ptr):
-    def __init__(self, ptr=None) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """wlr_output_configuration_v1
 
         If a pointer is not given, a new instance is created. Pointers are given when
@@ -144,7 +145,7 @@ class OutputConfigurationV1(Ptr):
 
 
 class OutputConfigurationHeadV1(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """An instance of wlr_output_configuration_head_v1"""
         self._ptr = ptr
 

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from types import TracebackType
 from typing import TYPE_CHECKING, NamedTuple
 
 from pywayland.protocol.wayland import WlOutput
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
 
 
 class Output(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A compositor output region
 
         This typically corresponds to a monitor that displays part of the
@@ -158,7 +159,12 @@ class Output(PtrHasData):
         """Start rendering frame"""
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         """Stop rendering frame, commit when exiting normally, otherwise rollback"""
         if exc_type is None:
             if not self.commit():
@@ -308,7 +314,7 @@ class Output(PtrHasData):
 
 
 class OutputMode(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @property
@@ -413,7 +419,7 @@ class OutputState(Ptr):
 
 
 class OutputEventRequestState(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_output_event_request_state *", ptr)
 
     @property
