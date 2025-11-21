@@ -63,7 +63,6 @@ class SessionLockSurfaceV1(PtrHasData):
 
     def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_session_lock_surface_v1 *", ptr)
-        self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
     @property

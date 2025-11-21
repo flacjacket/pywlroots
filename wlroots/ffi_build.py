@@ -2272,6 +2272,7 @@ struct wlr_session_lock_v1 {
     } events;
 
     void *data;
+    ...;
 };
 
 struct wlr_session_lock_surface_v1_state {
