@@ -16,7 +16,7 @@ from .output import Output
 if TYPE_CHECKING:
     from pywayland.server import Display
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class ForeignToplevelHandleV1State(enum.IntFlag):
@@ -27,7 +27,7 @@ class ForeignToplevelHandleV1State(enum.IntFlag):
 
 
 class ForeignToplevelManagerV1(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """An foreign toplevel manager: wlr_foreign_toplevel_manager_v1."""
         self._ptr = ffi.cast("struct wlr_foreign_toplevel_manager_v1 *", ptr)
 
@@ -46,7 +46,7 @@ class ForeignToplevelManagerV1(PtrHasData):
 
 
 class ForeignToplevelHandleV1(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """struct wlr_foreign_toplevel_handle_v1"""
         self._ptr = ffi.cast("struct wlr_foreign_toplevel_handle_v1 *", ptr)
 
@@ -138,7 +138,7 @@ class _EventBase(Ptr):
 
 
 class ForeignToplevelHandleV1MaximizedEvent(_EventBase):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Event emitted when a maximize state change is requested."""
         self._ptr = ffi.cast(
             "struct wlr_foreign_toplevel_handle_v1_maximized_event *", ptr
@@ -151,7 +151,7 @@ class ForeignToplevelHandleV1MaximizedEvent(_EventBase):
 
 
 class ForeignToplevelHandleV1MinimizedEvent(_EventBase):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Event emitted when a minimize state change is requested."""
         self._ptr = ffi.cast(
             "struct wlr_foreign_toplevel_handle_v1_minimized_event *", ptr
@@ -164,7 +164,7 @@ class ForeignToplevelHandleV1MinimizedEvent(_EventBase):
 
 
 class ForeignToplevelHandleV1ActivatedEvent(_EventBase):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Event emitted when activation of a toplevel is requested."""
         self._ptr = ffi.cast(
             "struct wlr_foreign_toplevel_handle_v1_activated_event *", ptr
@@ -172,7 +172,7 @@ class ForeignToplevelHandleV1ActivatedEvent(_EventBase):
 
 
 class ForeignToplevelHandleV1FullscreenEvent(_EventBase):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Event emitted when a fullscreen state change is requested."""
         self._ptr = ffi.cast(
             "struct wlr_foreign_toplevel_handle_v1_fullscreen_event *", ptr
@@ -190,7 +190,7 @@ class ForeignToplevelHandleV1FullscreenEvent(_EventBase):
 
 
 class ForeignToplevelHandleV1SetRectangleEvent(_EventBase):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Event emitted when new geometry for a toplevel is requested."""
         self._ptr = ffi.cast(
             "struct wlr_foreign_toplevel_handle_v1_set_rectangle_event *", ptr

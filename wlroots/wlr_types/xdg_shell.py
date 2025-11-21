@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import enum
-import weakref
-from typing import Callable, TypeVar
+from collections.abc import Callable
+from typing import TypeVar
+from weakref import WeakKeyDictionary
 
 from pywayland.server import Display, Signal
 
@@ -15,14 +16,16 @@ from wlroots.util.edges import Edges
 from .compositor import Surface
 from .output import Output
 
-_weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 T = TypeVar("T")
 SurfaceCallback = Callable[[Surface, int, int, T], None]
 
 
-@ffi.def_extern()
-def surface_iterator_callback(surface_ptr, sx, sy, data_ptr):
+@ffi.def_extern()  # type: ignore[misc]
+def surface_iterator_callback(
+    surface_ptr: ffi.CData, sx: int, sy: int, data_ptr: ffi.CData
+) -> None:
     """Callback used to invoke the for_each_surface method"""
     func, py_data = ffi.from_handle(data_ptr)
     surface = Surface(surface_ptr)
@@ -58,7 +61,7 @@ class XdgShell(PtrHasData):
 
 
 class XdgSurface(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A user interface element requiring management by the compositor
 
         An xdg-surface is a user interface element requiring management by the
@@ -112,13 +115,9 @@ class XdgSurface(PtrHasData):
         if self.role != XdgSurfaceRole.TOPLEVEL:
             raise ValueError(f"xdg surface must be top-level, got: {self.role.name}")
 
-        toplevel = XdgToplevel(self._ptr.toplevel)
-
-        # the toplevel does not own the ptr data, ensure the underlying cdata
-        # is kept alive
-        _weakkeydict[toplevel] = self
-
-        return toplevel
+        toplevel_ptr = self._ptr.toplevel
+        _weakkeydict[toplevel_ptr] = self
+        return XdgToplevel(self._ptr.toplevel)
 
     @property
     def popup(self) -> XdgPopup:
@@ -129,10 +128,9 @@ class XdgSurface(PtrHasData):
         if self.role != XdgSurfaceRole.POPUP:
             raise ValueError(f"xdg surface must be popup, got: {self.role}")
 
-        popup = XdgPopup(self._ptr.popup)
-        _weakkeydict[popup] = self
-
-        return popup
+        popup_ptr = self._ptr.popup
+        _weakkeydict[popup_ptr] = self
+        return XdgPopup(popup_ptr)
 
     def get_geometry(self) -> Box:
         """Get the surface geometry
@@ -223,7 +221,7 @@ class XdgSurface(PtrHasData):
 
 
 class XdgSurfaceConfigure(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_surface_configure *", ptr)
 
     @property
@@ -237,7 +235,7 @@ class XdgSurfaceConfigure(Ptr):
 
 
 class XdgToplevel(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A top level surface object
 
         :param ptr:
@@ -300,7 +298,7 @@ class XdgToplevel(Ptr):
 
 
 class XdgToplevelMoveEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_move_event *", ptr)
 
     @property
@@ -316,7 +314,7 @@ class XdgToplevelMoveEvent(Ptr):
 
 
 class XdgToplevelResizeEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_resize_event *", ptr)
 
     @property
@@ -336,7 +334,7 @@ class XdgToplevelResizeEvent(Ptr):
 
 
 class XdgToplevelShowWindowMenuEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_xdg_toplevel_show_window_menu_event *", ptr)
 
     @property
@@ -360,7 +358,7 @@ class XdgToplevelShowWindowMenuEvent(Ptr):
 
 
 class XdgPopup(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A wlr_xdg_popup
 
         :param ptr:
@@ -404,7 +402,7 @@ class XdgPopup(Ptr):
 
 
 class XdgPopupState(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A struct wlr_xdg_popup_state
 
         :param ptr:
@@ -426,7 +424,7 @@ class XdgPopupState(Ptr):
 
 
 class XdgToplevelRequested(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @property

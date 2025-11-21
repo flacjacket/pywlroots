@@ -9,7 +9,7 @@ from wlroots.util.box import Box
 
 
 class Matrix(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A matrix which encodes transformations used for rendering"""
         self._ptr = ptr
 
@@ -80,5 +80,5 @@ class Matrix(Ptr):
         )
 
     @staticmethod
-    def _build_matrix_ptr():
+    def _build_matrix_ptr() -> ffi.CData:
         return ffi.new("float [9]")

@@ -1,4 +1,5 @@
 # Copyright (c) Charbel Assaad 2023
+
 from pywayland.server import Display
 
 from wlroots import Ptr, lib

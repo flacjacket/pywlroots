@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 from cffi import FFI, VerificationError
 from pywayland.ffi_build import ffi_builder as pywayland_ffi
@@ -15,7 +16,7 @@ INCLUDE_PATH = (Path(__file__).parent / "include").resolve()
 assert INCLUDE_PATH.is_dir(), f"missing {INCLUDE_PATH}"
 
 
-def load_version():
+def load_version() -> str:
     """Load the current pywlroots version"""
     file_location = Path(__file__).parent / "version.py"
     spec = importlib.util.spec_from_file_location("wlroots.version", str(file_location))
@@ -26,7 +27,7 @@ def load_version():
     return version_module.version
 
 
-def load_wlroots_version():
+def load_wlroots_version() -> str | None:
     """Load the current wlroots version
 
     Load the version from the in-line cffi module.
@@ -36,15 +37,17 @@ def load_wlroots_version():
 
     if not os.getenv("PYTHON_CROSSENV"):
         try:
-            lib = ffi.verify("#include <wlr/version.h>")
+            lib: Any = ffi.verify("#include <wlr/version.h>")
         except (PermissionError, OSError, VerificationError):
             lib = importlib.import_module("wlroots").lib
-        return f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"  # type: ignore[attr-defined]
+        return (
+            f"{lib.WLR_VERSION_MAJOR}.{lib.WLR_VERSION_MINOR}.{lib.WLR_VERSION_MICRO}"
+        )
     else:
         return os.getenv("PYTHON_CROSSENV_WLROOTS_VERSION")
 
 
-def check_version():
+def check_version() -> None:
     """Check for wlroots version compatibility"""
     # When importing a system-level installed package, we may not be able to
     # create neighboring files, which is done by the `.verify` step.  If this
@@ -52,6 +55,8 @@ def check_version():
     version = load_version()
     wlroots_version = load_wlroots_version()
 
+    if wlroots_version is None:
+        return
     if version.split(".")[:2] != wlroots_version.split(".")[:2]:
         major, minor = list(map(int, version.split(".")[:2]))
         print(

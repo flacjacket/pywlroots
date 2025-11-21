@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class Presentation(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A presentation time manager: struct wlr_presentation."""
         self._ptr = ffi.cast("struct wlr_presentation *", ptr)
 

@@ -25,6 +25,7 @@ from wlroots.wlr_types import (
     OutputState,
     Scene,
     SceneBuffer,
+    SceneNode,
     SceneNodeType,
     SceneOutput,
     SceneOutputLayout,
@@ -39,12 +40,6 @@ from wlroots.wlr_types import (
 from wlroots.wlr_types.cursor import WarpMode
 from wlroots.wlr_types.input_device import ButtonState, InputDeviceType
 from wlroots.wlr_types.keyboard import KeyboardModifier
-from wlroots.wlr_types.pointer import (
-    PointerButtonEvent,
-    PointerMotionAbsoluteEvent,
-    PointerMotionEvent,
-)
-from wlroots.wlr_types.seat import RequestSetSelectionEvent
 from wlroots.wlr_types.xdg_shell import XdgSurface, XdgSurfaceRole
 
 from .cursor_mode import CursorMode
@@ -52,14 +47,26 @@ from .keyboard_handler import KeyboardHandler
 from .view import View
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from wlroots.wlr_types import InputDevice
     from wlroots.wlr_types.keyboard import KeyboardKeyEvent, KeyboardModifiers
     from wlroots.wlr_types.output import OutputEventRequestState
+    from wlroots.wlr_types.pointer import (
+        PointerAxisEvent,
+        PointerButtonEvent,
+        PointerMotionAbsoluteEvent,
+        PointerMotionEvent,
+    )
+    from wlroots.wlr_types.seat import (
+        PointerRequestSetCursorEvent,
+        RequestSetSelectionEvent,
+    )
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[View, SceneNode] = WeakKeyDictionary()
 
 
-def get_keysyms(xkb_state, keycode):
+def get_keysyms(xkb_state: ffi.CData, keycode: int) -> list[int]:
     syms_out = ffi.new("const xkb_keysym_t **")
     nsyms = lib.xkb_state_key_get_syms(xkb_state, keycode, syms_out)
     if nsyms > 0:
@@ -138,12 +145,12 @@ class TinywlServer:
 
         backend.new_input_event.add(Listener(self.server_new_input))
 
-    def _terminate_signal_callback(self, sig_num: int, display: Display):
+    def _terminate_signal_callback(self, sig_num: int, display: Display) -> None:
         logging.info("Terminating event loop.")
         display.terminate()
 
     def view_at(
-        self, layout_x, layout_y
+        self, layout_x: float, layout_y: float
     ) -> tuple[View | None, Surface | None, float, float]:
         maybe_node = self._scene.tree.node.node_at(
             layout_x,
@@ -205,7 +212,7 @@ class TinywlServer:
 
         self.grabbed_view.xdg_surface.set_size(new_width, new_height)
 
-    def process_cursor_motion(self, time) -> None:
+    def process_cursor_motion(self, time: int) -> None:
         self.idle_notify.notify_activity(self._seat)
         if self.cursor_mode == CursorMode.MOVE:
             self._process_cursor_move()
@@ -319,7 +326,9 @@ class TinywlServer:
     # #############################################################
     # surface handling callbacks
 
-    def server_new_xdg_surface(self, listener, xdg_surface: XdgSurface) -> None:
+    def server_new_xdg_surface(
+        self, listener: Listener, xdg_surface: XdgSurface
+    ) -> None:
         logger.info("new surface")
 
         if xdg_surface.role == XdgSurfaceRole.POPUP:
@@ -352,7 +361,7 @@ class TinywlServer:
     # #############################################################
     # output and frame handling callbacks
 
-    def server_new_output(self, listener, output: Output) -> None:
+    def server_new_output(self, listener: Listener, output: Output) -> None:
         output.init_render(self._allocator, self._renderer)
 
         state = OutputState()
@@ -376,7 +385,7 @@ class TinywlServer:
         if self._scene_layout:
             self._scene_layout.add_output(l_output, scene_output)
 
-    def output_frame(self, listener, data) -> None:
+    def output_frame(self, listener: Listener, data: Any) -> None:
         output = self.outputs[0]
         scene_output = self._scene.get_scene_output(output)
         scene_output.commit()
@@ -384,14 +393,16 @@ class TinywlServer:
         now = Timespec.get_monotonic_time()
         scene_output.send_frame_done(now)
 
-    def output_request_state(self, listener, request: OutputEventRequestState) -> None:
+    def output_request_state(
+        self, listener: Listener, request: OutputEventRequestState
+    ) -> None:
         output = self.outputs[0]
         output.commit(request.state)
 
     # #############################################################
     # input handling callbacks
 
-    def server_new_input(self, listener, input_device: InputDevice) -> None:
+    def server_new_input(self, listener: Listener, input_device: InputDevice) -> None:
         if input_device.type == InputDeviceType.POINTER:
             self._server_new_pointer(input_device)
         elif input_device.type == InputDeviceType.KEYBOARD:
@@ -426,7 +437,9 @@ class TinywlServer:
     # #############################################################
     # cursor motion callbacks
 
-    def server_cursor_motion(self, listener, event_motion: PointerMotionEvent) -> None:
+    def server_cursor_motion(
+        self, listener: Listener, event_motion: PointerMotionEvent
+    ) -> None:
         logging.debug("cursor motion")
         self._cursor.move(
             event_motion.delta_x,
@@ -436,7 +449,7 @@ class TinywlServer:
         self.process_cursor_motion(event_motion.time_msec)
 
     def server_cursor_motion_absolute(
-        self, listener, event_motion_absolute: PointerMotionAbsoluteEvent
+        self, listener: Listener, event_motion_absolute: PointerMotionAbsoluteEvent
     ) -> None:
         logging.debug("cursor abs motion")
         self._cursor.warp(
@@ -447,7 +460,9 @@ class TinywlServer:
         )
         self.process_cursor_motion(event_motion_absolute.time_msec)
 
-    def server_cursor_button(self, listener, event: PointerButtonEvent) -> None:
+    def server_cursor_button(
+        self, listener: Listener, event: PointerButtonEvent
+    ) -> None:
         logging.info("Got button click event %s", event.button_state)
         self._seat.pointer_notify_button(
             event.time_msec, event.button, event.button_state
@@ -460,7 +475,7 @@ class TinywlServer:
         elif view is not None:
             self.focus_view(view, surface)
 
-    def server_cursor_axis(self, listener, event) -> None:
+    def server_cursor_axis(self, listener: Listener, event: PointerAxisEvent) -> None:
         self._seat.pointer_notify_axis(
             event.time_msec,
             event.orientation,
@@ -469,19 +484,21 @@ class TinywlServer:
             event.source,
         )
 
-    def server_cursor_frame(self, listener, data) -> None:
+    def server_cursor_frame(self, listener: Listener, data: Any) -> None:
         self._seat.pointer_notify_frame()
 
     # #############################################################
     # seat callbacks
 
-    def seat_request_cursor(self, listener, event):
+    def seat_request_cursor(
+        self, listener: Listener, event: PointerRequestSetCursorEvent
+    ) -> None:
         # This event is rasied by the seat when a client provides a cursor image
         # TODO: check that seat client is correct
         self._cursor.set_surface(event.surface, event.hotspot)
 
     def seat_request_set_selection(
-        self, listener, event: RequestSetSelectionEvent
+        self, listener: Listener, event: RequestSetSelectionEvent
     ) -> None:
         print("request set selection")
         self._seat.set_selection(event._ptr.source, event.serial)

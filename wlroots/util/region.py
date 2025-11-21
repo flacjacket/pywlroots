@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from types import TracebackType
+
 from pywayland.protocol.wayland import WlOutput
 
 from wlroots import Ptr, ffi, lib
@@ -9,7 +11,7 @@ from wlroots.util.box import Box
 
 
 class PixmanRegion32(Ptr):
-    def __init__(self, ptr=None) -> None:
+    def __init__(self, ptr: ffi.CData | None = None) -> None:
         """This is a convenience wrapper around pixman_region32_t
 
         :param ptr:
@@ -34,7 +36,12 @@ class PixmanRegion32(Ptr):
         self.init()
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         """Finish up when exiting the context"""
         self.fini()
 

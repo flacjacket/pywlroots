@@ -13,7 +13,7 @@ from wlroots.wlr_types import Compositor, SubCompositor
 def build_compositor(
     display: Display,
     *,
-    backend_type=BackendType.AUTO,
+    backend_type: BackendType = BackendType.AUTO,
     compositor_version: int = 5,
 ) -> tuple[Compositor, Allocator, Renderer, Backend, SubCompositor]:
     """Build and run a compositor

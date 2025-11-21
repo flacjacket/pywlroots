@@ -8,7 +8,7 @@ from __future__ import annotations
 import enum
 from typing import TYPE_CHECKING
 
-from wlroots import PtrHasData, lib
+from wlroots import PtrHasData, ffi, lib
 
 if TYPE_CHECKING:
     from pywayland.server import Display
@@ -21,7 +21,7 @@ class ServerDecorationManagerMode(enum.IntEnum):
 
 
 class ServerDecorationManager(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """
         A decoration negotiation interface which implements the KDE protocol:
         wlr_server_decoration_manager.

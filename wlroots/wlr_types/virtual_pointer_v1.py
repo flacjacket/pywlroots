@@ -5,13 +5,13 @@ from __future__ import annotations
 from collections.abc import Iterable
 from weakref import WeakKeyDictionary
 
-from pywayland.protocol.wayland.wl_pointer import WlPointer
+from pywayland.protocol.wayland import WlPointer
 from pywayland.server import Display, Signal
 
 from wlroots import Ptr, ffi, lib
 from wlroots.wlr_types.pointer import Pointer, PointerAxisEvent
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class VirtualPointerManagerV1(Ptr):
@@ -27,7 +27,7 @@ class VirtualPointerManagerV1(Ptr):
 
 
 class VirtualPointerV1NewPointerEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A wlr_virtual_pointer_v1_new_pointer_event struct."""
         self._ptr = ffi.cast("struct wlr_virtual_pointer_v1_new_pointer_event *", ptr)
 
@@ -37,7 +37,7 @@ class VirtualPointerV1NewPointerEvent(Ptr):
 
 
 class VirtualPointerV1(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A wlr_virtual_pointer_v1 struct."""
         self._ptr = ffi.cast("struct wlr_virtual_pointer_v1 *", ptr)
 

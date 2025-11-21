@@ -11,7 +11,7 @@ from pywayland.server import Signal
 from wlroots import Ptr, PtrHasData, ffi, lib
 from wlroots.wlr_types.input_device import InputDevice
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 @enum.unique
@@ -53,7 +53,7 @@ class ModifiersMask:
 
 
 class KeyboardKeyEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Event that a key has been pressed or release
 
         This event is emitted before the xkb state of the keyboard has been
@@ -83,7 +83,7 @@ class KeyboardKeyEvent(Ptr):
 
 
 class Keyboard(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """The Keyboard wlroots object
 
         :param ptr:
@@ -113,11 +113,11 @@ class Keyboard(PtrHasData):
         ptr = lib.wlr_keyboard_from_input_device(input_device._ptr)
         return cls(ptr)
 
-    def set_keymap(self, keymap) -> None:
+    def set_keymap(self, keymap: ffi.CData) -> None:
         """Set the keymap associated with the keyboard"""
         lib.wlr_keyboard_set_keymap(self._ptr, keymap._keymap)
 
-    def set_repeat_info(self, rate, delay) -> None:
+    def set_repeat_info(self, rate: int, delay: int) -> None:
         """Sets the keyboard repeat info
 
         :param rate:
@@ -135,7 +135,7 @@ class Keyboard(PtrHasData):
         )
 
     @property
-    def keycodes(self):
+    def keycodes(self) -> int:
         """Keycodes associated with the keyboard"""
         return self._ptr.keycodes
 
@@ -161,7 +161,7 @@ class Keyboard(PtrHasData):
 
 
 class KeyboardModifiers(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Modifiers of a given keyboard
 
         :param ptr:

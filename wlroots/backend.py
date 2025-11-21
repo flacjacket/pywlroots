@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import enum
 import weakref
+from types import TracebackType
 
 from pywayland.server import Display, Signal
 
@@ -20,7 +21,9 @@ class BackendType(enum.Enum):
 
 
 class Backend(Ptr):
-    def __init__(self, display: Display, *, backend_type=BackendType.AUTO) -> None:
+    def __init__(
+        self, display: Display, *, backend_type: BackendType = BackendType.AUTO
+    ) -> None:
         """Create a backend to interact with a Wayland display
 
         :param display:
@@ -91,7 +94,12 @@ class Backend(Ptr):
             raise RuntimeError("Unable to start backend")
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         """Destroy the backend on context exit"""
         self.destroy()
 
@@ -116,7 +124,7 @@ class Backend(Ptr):
 
 
 class Session:
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """The running session"""
         self._ptr = ptr
 

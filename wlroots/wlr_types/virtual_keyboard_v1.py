@@ -7,7 +7,7 @@ from pywayland.server import Display, Signal
 from wlroots import Ptr, ffi, lib
 from wlroots.wlr_types.keyboard import Keyboard
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class VirtualKeyboardManagerV1(Ptr):
@@ -23,7 +23,7 @@ class VirtualKeyboardManagerV1(Ptr):
 
 
 class VirtualKeyboardV1(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A wlr_virtual_keyboard_v1 instance."""
         self._ptr = ffi.cast("struct wlr_virtual_keyboard_v1 *", ptr)
 

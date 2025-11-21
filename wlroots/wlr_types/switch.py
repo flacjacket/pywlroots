@@ -9,7 +9,7 @@ from wlroots import Ptr, PtrHasData, ffi, lib
 
 from .input_device import InputDevice
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 @enum.unique
@@ -34,7 +34,7 @@ class Switch(PtrHasData):
     See https://wayland.freedesktop.org/libinput/doc/latest/switches.html
     """
 
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
         self.toggle_event = Signal(
             ptr=ffi.addressof(self._ptr.events.toggle), data_wrapper=SwitchToggleEvent
@@ -57,7 +57,7 @@ class Switch(PtrHasData):
 
 
 class SwitchToggleEvent(Ptr):
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @property

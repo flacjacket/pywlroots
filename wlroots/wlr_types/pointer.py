@@ -10,7 +10,7 @@ from wlroots import Ptr, PtrHasData, ffi, lib, str_or_none
 
 from .input_device import ButtonState, InputDevice
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 @enum.unique
@@ -28,7 +28,7 @@ class AxisOrientation(enum.IntEnum):
 
 
 class Pointer(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @staticmethod
@@ -59,7 +59,7 @@ class _PointerEvent(Ptr):
 
 
 class PointerMotionEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A relative motion pointer event"""
         self._ptr = ffi.cast("struct wlr_pointer_motion_event *", ptr)
 
@@ -81,7 +81,7 @@ class PointerMotionEvent(_PointerEvent):
 
 
 class PointerMotionAbsoluteEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A absolute motion pointer event"""
         self._ptr = ffi.cast("struct wlr_pointer_motion_absolute_event *", ptr)
 
@@ -95,7 +95,7 @@ class PointerMotionAbsoluteEvent(_PointerEvent):
 
 
 class PointerButtonEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A pointer button event"""
         self._ptr = ffi.cast("struct wlr_pointer_button_event *", ptr)
 
@@ -109,7 +109,7 @@ class PointerButtonEvent(_PointerEvent):
 
 
 class PointerAxisEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A pointer axis event"""
         self._ptr = ffi.cast("struct wlr_pointer_axis_event *", ptr)
 
@@ -131,7 +131,7 @@ class PointerAxisEvent(_PointerEvent):
 
 
 class PointerSwipeBeginEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_swipe_begin_event *", ptr)
 
     @property
@@ -140,7 +140,7 @@ class PointerSwipeBeginEvent(_PointerEvent):
 
 
 class PointerSwipeUpdateEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_swipe_update_event *", ptr)
 
     @property
@@ -157,7 +157,7 @@ class PointerSwipeUpdateEvent(_PointerEvent):
 
 
 class PointerSwipeEndEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         ptr = ffi.cast("struct wlr_pointer_swipe_end_event *", ptr)
         self._ptr = ptr
 
@@ -167,7 +167,7 @@ class PointerSwipeEndEvent(_PointerEvent):
 
 
 class PointerPinchBeginEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_pinch_begin_event *", ptr)
 
     @property
@@ -188,7 +188,7 @@ class PointerPinchBeginEvent(_PointerEvent):
 
 
 class PointerPinchUpdateEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_pinch_update_event *", ptr)
 
     @property
@@ -221,7 +221,7 @@ class PointerPinchUpdateEvent(_PointerEvent):
 
 
 class PointerPinchEndEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         ptr = ffi.cast("struct wlr_pointer_pinch_end_event *", ptr)
         self._ptr = ptr
 
@@ -231,7 +231,7 @@ class PointerPinchEndEvent(_PointerEvent):
 
 
 class PointerHoldBeginEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_hold_begin_event *", ptr)
 
     @property
@@ -240,7 +240,7 @@ class PointerHoldBeginEvent(_PointerEvent):
 
 
 class PointerHoldEndEvent(_PointerEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_pointer_hold_end_event *", ptr)
 
     @property

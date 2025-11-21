@@ -6,7 +6,7 @@ from wlroots import Ptr, ffi, lib
 
 
 class Timespec(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """A wrapper aronud a timespec struct"""
         self._ptr = ptr
 

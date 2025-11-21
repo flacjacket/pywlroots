@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import weakref
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
+from weakref import WeakKeyDictionary
 
 from ._ffi import ffi, lib
 from .version import version as _version
@@ -14,7 +15,7 @@ __wlroots_version__ = (
 
 __version__ = _version
 
-_weakkeydict: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 T = TypeVar("T")
 
@@ -29,7 +30,7 @@ class Ptr:
 
     _ptr: ffi.CData
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Return true if the other object holds the same cdata"""
         return hasattr(other, "_ptr") and self._ptr == other._ptr
 

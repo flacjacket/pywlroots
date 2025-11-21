@@ -110,11 +110,11 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
+          - "3.14"
           - "pypy-3.11"
         wlroots-version: ["0.17.4"]
     steps:
@@ -179,32 +179,20 @@ jobs:
           WLR_LIBINPUT_NO_DEVICES: '1'
           WLR_RENDERER: pixman
           WLR_RENDERER_ALLOW_SOFTWARE: '1'
-  ruff-test:
-    name: ruff tests
-    runs-on: ubuntu-24.04
-    env:
-      python-version: "3.13"
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.python-version }}
-      - name: Run ruff check
-        uses: astral-sh/ruff-action@v3
-  mypy-test:
-    name: mypy tests
+  pre-commit-test:
+    name: pre-commit tests
     runs-on: ubuntu-24.04
     needs: build-wayland
     env:
-      python-version: "3.13"
+      python-version: "3.14"
       wlroots-version: "0.17.4"
     steps:
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
+            libinput-dev \
+            libpixman-1-dev \
             libxkbcommon-dev \
       - name: Download wayland libraries
         uses: actions/download-artifact@v4
@@ -220,36 +208,15 @@ jobs:
           python-version: ${{ env.python-version }}
       - name: Install Python dependencies
         run: |
-          pip install wheel
-          pip install -r requirements.txt
-          pip install mypy types-cffi types-dataclasses
-      - name: Run mypy test
-        run: |
-          mypy -p wlroots
-          mypy -p tiny
-  black-test:
-    name: black tests
-    runs-on: ubuntu-24.04
-    env:
-      python-version: "3.13"
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.python-version }}
-      - name: Install Python dependencies
-        run: |
-          pip install black
-      - name: Run black test
-        run: black --check wlroots tiny
+          pip install .
+      - name: Run pre-commit test
+        uses: pre-commit/action@v3.0.1
   packaging-test:
     name: packaging tests
     runs-on: ubuntu-24.04
     needs: build-wayland
     env:
-      python-version: "3.13"
+      python-version: "3.14"
       wlroots-version: "0.17.4"
     steps:
       - name: Download wayland libraries
@@ -262,6 +229,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install -y --no-install-recommends \
+            libinput-dev \
+            libpixman-1-dev \
             libxkbcommon-dev \
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -271,9 +240,7 @@ jobs:
           python-version: ${{ env.python-version }}
       - name: Install Python dependencies
         run: |
-          pip install wheel
-          pip install -r requirements.txt
-          pip install check-manifest twine
+          pip install .[packaging]
       - name: Run packaging test
         run: |
           check-manifest
@@ -285,7 +252,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build-wayland
     env:
-      python-version: "3.13"
+      python-version: "3.14"
       wlroots-version: "0.17.4"
     steps:
       - name: Download wayland libraries

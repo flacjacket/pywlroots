@@ -27,7 +27,7 @@ from wlroots.wlr_types.output import Output
 
 from .compositor import Surface
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class SessionLockManagerV1(PtrHasData):
@@ -40,7 +40,7 @@ class SessionLockManagerV1(PtrHasData):
 
 
 class SessionLockV1(PtrHasData):
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_session_lock_v1 *", ptr)
         self.new_surface_event = Signal(
             ptr=ffi.addressof(self._ptr.events.new_surface),
@@ -49,10 +49,10 @@ class SessionLockV1(PtrHasData):
         self.unlock_event = Signal(ptr=ffi.addressof(self._ptr.events.unlock))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
 
-    def send_locked(self):
+    def send_locked(self) -> None:
         lib.wlr_session_lock_v1_send_locked(self._ptr)
 
-    def destroy(self):
+    def destroy(self) -> None:
         lib.wlr_session_lock_v1_destroy(self._ptr)
 
 
@@ -61,7 +61,7 @@ class SessionLockSurfaceV1(PtrHasData):
     A surface displayed while the session is locked
     """
 
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_session_lock_surface_v1 *", ptr)
         self.map_event = Signal(ptr=ffi.addressof(self._ptr.events.map))
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))

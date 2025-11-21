@@ -1,4 +1,5 @@
 # Copyright (c) Antonin Riha 2022
+
 from pywayland.server import Display, Signal
 
 from wlroots import Ptr, PtrHasData, ffi, lib
@@ -18,7 +19,7 @@ class IdleInhibitorManagerV1(Ptr):
 
 
 class IdleInhibitorV1(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_idle_inhibitor_v1 *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))

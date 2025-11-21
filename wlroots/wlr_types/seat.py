@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from types import TracebackType
 from weakref import WeakKeyDictionary
 
 from pywayland.protocol.wayland import WlSeat
@@ -17,7 +18,7 @@ from .input_device import ButtonState
 from .keyboard import Keyboard, KeyboardKeyEvent, KeyboardModifiers
 from .pointer import AxisOrientation, AxisSource
 
-_weakkeydict: WeakKeyDictionary = WeakKeyDictionary()
+_weakkeydict: WeakKeyDictionary[ffi.CData, ffi.CData] = WeakKeyDictionary()
 
 
 class KeyboardGrab(Ptr):
@@ -31,7 +32,12 @@ class KeyboardGrab(Ptr):
         lib.wlr_seat_keyboard_start_grab(self._seat._ptr, self._ptr)
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         """End the grab of the keyboard of this seat"""
         lib.wlr_seat_keyboard_end_grab(self._seat._ptr)
 
@@ -388,7 +394,7 @@ class Seat(PtrHasData):
         """Clear the focused surface for the touch point given by `touch_id`."""
         lib.wlr_seat_touch_point_clear_focus(self._ptr, time_msec, touch_id)
 
-    def touch_notify_cancel(self, surface: Surface):
+    def touch_notify_cancel(self, surface: Surface) -> None:
         """Notify the seat that this is a global gesture and the client should
         cancel processing it. Defers to any grab of the touch device."""
         lib.wlr_seat_touch_notify_cancel(self._ptr, surface._ptr)
@@ -417,7 +423,7 @@ class Seat(PtrHasData):
         ptr = lib.wlr_seat_touch_get_point(self._ptr, touch_id)
         return instance_or_none(TouchPoint, ptr)
 
-    def set_selection(self, source, serial: int) -> None:
+    def set_selection(self, source: ffi.CData | None, serial: int) -> None:
         """Sets the current selection for the seat
 
         None can be provided to clear it.  This removes the previous one if
@@ -430,7 +436,7 @@ class Seat(PtrHasData):
             # TODO: wrap source in a data source
             lib.wlr_seat_set_selection(self._ptr, source, serial)
 
-    def set_primary_selection(self, source, serial: int) -> None:
+    def set_primary_selection(self, source: ffi.CData | None, serial: int) -> None:
         """Sets the current primary selection for the seat.
 
         None can be provided to clear it. This removes the previous one if
@@ -461,13 +467,18 @@ class Seat(PtrHasData):
         """Context manager to clean up the seat"""
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         """Clean up the seat when exiting the context"""
         self.destroy()
 
 
 class PointerRequestSetCursorEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_seat_pointer_request_set_cursor_event *", ptr)
 
     # TODO: seat client
@@ -487,7 +498,7 @@ class PointerRequestSetCursorEvent(Ptr):
 
 
 class RequestSetSelectionEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_seat_request_set_selection_event *", ptr)
 
     # TODO: source
@@ -498,7 +509,7 @@ class RequestSetSelectionEvent(Ptr):
 
 
 class RequestSetPrimarySelectionEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast(
             "struct wlr_seat_request_set_primary_selection_event *", ptr
         )
@@ -511,7 +522,7 @@ class RequestSetPrimarySelectionEvent(Ptr):
 
 
 class RequestStartDragEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_seat_request_start_drag_event *", ptr)
 
     @property
@@ -545,7 +556,7 @@ class _FocusChangeEvent(Ptr):
 
 
 class PointerFocusChangeEvent(_FocusChangeEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_seat_pointer_focus_change_event *", ptr)
 
     @property
@@ -558,12 +569,12 @@ class PointerFocusChangeEvent(_FocusChangeEvent):
 
 
 class KeyboardFocusChangeEvent(_FocusChangeEvent):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_seat_keyboard_focus_change_event *", ptr)
 
 
 class SeatPointerState(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """The current state of the pointer on the seat"""
         self._ptr = ptr
 
@@ -587,7 +598,7 @@ class SeatPointerState(Ptr):
 
 
 class SeatKeyboardState(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """The current state of the keyboard on the seat"""
         self._ptr = ptr
 
@@ -603,7 +614,7 @@ class SeatKeyboardState(Ptr):
 
 
 class SeatTouchState(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """The current state of touch on the seat"""
         self._ptr = ptr
 
@@ -626,7 +637,7 @@ class SeatTouchState(Ptr):
 
 
 class TouchPoint(Ptr):
-    def __init__(self, ptr):
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @property

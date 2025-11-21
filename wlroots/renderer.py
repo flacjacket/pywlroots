@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import contextlib
 from collections.abc import Iterator
-from typing import Union
 
 from pywayland.server import Display
 
@@ -13,11 +12,11 @@ from wlroots.backend import Backend
 from wlroots.util.box import Box
 from wlroots.wlr_types import Matrix, Texture
 
-ColorType = Union[list, tuple, ffi.CData]
+ColorType = type[list[float] | tuple[float] | ffi.CData]
 
 
 class Renderer(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         """Obtains the renderer this backend is using
 
         The renderer is automatically destroyed as the backend is destroyed.
@@ -55,7 +54,7 @@ class Renderer(Ptr):
         """Begin rendering with the given height and width"""
         return lib.wlr_renderer_begin(self._ptr, width, height)
 
-    def end(self):
+    def end(self) -> None:
         """Finish rendering"""
         lib.wlr_renderer_end(self._ptr)
 
@@ -99,7 +98,7 @@ class Renderer(Ptr):
 class DRMFormatSet(Ptr):
     """struct wlr_drm_format_set"""
 
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     def get(self, format: int) -> DRMFormat | None:
@@ -112,5 +111,5 @@ class DRMFormatSet(Ptr):
 class DRMFormat(Ptr):
     """struct wlr_drm_format"""
 
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr

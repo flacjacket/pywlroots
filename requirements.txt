@@ -1,2 +1,0 @@
-pywayland>=0.4.14
-xkbcommon>=0.2

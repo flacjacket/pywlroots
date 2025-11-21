@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class ServerOptions(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ptr
 
     @classmethod
@@ -154,7 +154,7 @@ class ICCCMInputModel(enum.IntEnum):
 
 
 class Surface(PtrHasData):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_xwayland_surface *", ptr)
 
         self.destroy_event = Signal(ptr=ffi.addressof(self._ptr.events.destroy))
@@ -380,7 +380,7 @@ class Surface(PtrHasData):
 
 
 class SurfaceConfigureEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_xwayland_surface_configure_event *", ptr)
 
     @property
@@ -409,7 +409,7 @@ class SurfaceConfigureEvent(Ptr):
 
 
 class ResizeEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_xwayland_resize_event *", ptr)
 
     @property
@@ -422,7 +422,7 @@ class ResizeEvent(Ptr):
 
 
 class MinimizeEvent(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("struct wlr_xwayland_minimize_event *", ptr)
 
     @property
@@ -435,7 +435,7 @@ class MinimizeEvent(Ptr):
 
 
 class Hints(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("xcb_icccm_wm_hints_t *", ptr)
 
     @property
@@ -476,7 +476,7 @@ class Hints(Ptr):
 
 
 class SizeHints(Ptr):
-    def __init__(self, ptr) -> None:
+    def __init__(self, ptr: ffi.CData) -> None:
         self._ptr = ffi.cast("xcb_size_hints_t *", ptr)
 
     @property

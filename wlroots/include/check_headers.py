@@ -5,6 +5,7 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+from collections.abc import Sequence
 
 INCLUDE_PATH = pathlib.Path(__file__).parent
 WAYLAND_PROCOTOLS = [
@@ -99,7 +100,7 @@ def generate(protocols: list[pathlib.Path]) -> None:
         generate_protocol_header(protocol_xml, INCLUDE_PATH)
 
 
-def parse_args(argv) -> tuple[list[pathlib.Path], bool]:
+def parse_args(argv: Sequence[str] | None) -> tuple[list[pathlib.Path], bool]:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--wayland-dir", default=get_wayland_protocols_dir(), type=pathlib.Path
